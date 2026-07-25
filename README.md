@@ -73,7 +73,7 @@ Host: **luxury.zervtek.com**
 
 ```bash
 # laptop → VPS
-./deploy/deploy.sh --host zervtek-vps --dir /opt/zervtek-luxury --repo git@github.com:<org>/luxury.git
+./deploy/deploy.sh --host zervtek-vps --dir /opt/zervtek-luxury --repo git@github.com:SpaceKap/zervtek-luxury.git
 
 # or on the server
 cd /opt/zervtek-luxury && ./deploy/deploy.sh --local
