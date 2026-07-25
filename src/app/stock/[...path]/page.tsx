@@ -100,27 +100,33 @@ export default async function VehicleDetailPage({
     ["Location", v.location],
   ];
 
+  const gradeLabel = (v.variant || v.model).trim();
+
+  const makeHref = `/stock?make=${encodeURIComponent(v.make)}`;
+  const modelHref = `/stock?make=${encodeURIComponent(v.make)}&q=${encodeURIComponent(v.model)}`;
+
+  const crumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Stock", href: "/stock" },
+    { label: v.make, href: makeHref },
+    { label: v.model, href: modelHref },
+    { label: gradeLabel },
+  ];
+
+  const jsonLdCrumbs = [
+    { name: "Home", url: SITE.url },
+    { name: "Stock", url: `${SITE.url}/stock` },
+    { name: v.make, url: `${SITE.url}${makeHref}` },
+    { name: v.model, url: `${SITE.url}${modelHref}` },
+    { name: gradeLabel, url: abs },
+  ];
+
   return (
     <main className="container" style={{ paddingBlock: 40 }}>
       <JsonLd data={productJsonLd(v)} />
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: SITE.url },
-          { name: "Stock", url: `${SITE.url}/stock` },
-          { name: v.make, url: `${SITE.url}/stock?make=${encodeURIComponent(v.make)}` },
-          { name: fullName, url: abs },
-        ])}
-      />
+      <JsonLd data={breadcrumbJsonLd(jsonLdCrumbs)} />
 
-      <Breadcrumbs
-        className="page-breadcrumbs"
-        items={[
-          { label: "Home", href: "/" },
-          { label: "Stock", href: "/stock" },
-          { label: v.make, href: `/stock?make=${encodeURIComponent(v.make)}` },
-          { label: fullName },
-        ]}
-      />
+      <Breadcrumbs className="page-breadcrumbs" items={crumbItems} />
 
       <div className="detail-grid">
         <div className="detail-gallery">

@@ -10,7 +10,7 @@ Internal integration for automated vehicle intake. **Do not use n8n.** Hermes ca
 | `HERMES_ALLOW_HTTP` | Set `1` only for local non-TLS testing |
 | `VEHICLE_UPLOAD_DIR` | Persistent image root (default `./storage/vehicle-images`) |
 | `VEHICLE_MEDIA_URL_PREFIX` | Public URL prefix (default `/media/vehicles`) |
-| `VEHICLE_MAX_IMAGES` | Max images per create (default `30`) |
+| `VEHICLE_MAX_IMAGES` | Max images per create (default `50`) |
 | `VEHICLE_MAX_IMAGE_SIZE_MB` | Max bytes per image (default `15`) |
 | `DATABASE_URL` | Postgres |
 | `NEXT_PUBLIC_SITE_URL` | Used in `reviewUrl` responses |

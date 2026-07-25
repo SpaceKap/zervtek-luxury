@@ -833,7 +833,7 @@ header.navbar .mobile-menu a[href*="wa.me"]:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: min(52ch, 70vw);
+  max-width: min(40ch, 55vw);
 }
 .page-breadcrumbs {
   margin-bottom: 20px;
