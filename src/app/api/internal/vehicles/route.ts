@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { buildVehicleSlug } from "@/lib/slug";
+import { allocateUniqueVehicleSlug } from "@/lib/vehicle-slug";
 import {
   auditHermes,
   clientIp,
@@ -250,7 +250,7 @@ export async function POST(req: NextRequest) {
       })
       .map((m) => mediaUrl(m.mediumPath));
 
-    const slug = buildVehicleSlug(created);
+    const slug = await allocateUniqueVehicleSlug(created);
     const updated = await prisma.vehicle.update({
       where: { id: created.id },
       data: { slug, images: urls },

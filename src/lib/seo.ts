@@ -2,6 +2,7 @@ import type { Vehicle } from "@prisma/client";
 import type { PublicVehicle } from "./vehicle-public";
 import { formatJPY, formatKm } from "./format";
 import { SITE } from "./site";
+import { vehicleStockPath } from "./slug";
 
 function absUrl(src: string): string {
   return src.startsWith("http") ? src : `${SITE.url}${src}`;
@@ -99,7 +100,7 @@ function offerAvailability(status: string): string {
 /** Product (+ Car) schema object without @context — safe to nest in ItemList. */
 export function productSchema(v: ProductVehicle | PublicVehicle) {
   const name = vehicleName(v);
-  const url = `${SITE.url}/stock/${v.slug}`;
+  const url = `${SITE.url}${vehicleStockPath(v.slug)}`;
   const images = v.images.map(absUrl);
 
   return {

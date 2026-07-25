@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getVehicleBySlug } from "@/lib/vehicles";
+import { notFound, redirect } from "next/navigation";
+import { getVehicleBySlug, getVehicleBySlugAdmin } from "@/lib/vehicles";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ProtectedCarousel } from "@/components/ProtectedCarousel";
 import { DetailQuickActions } from "@/components/DetailQuickActions";
@@ -10,6 +10,7 @@ import { breadcrumbJsonLd, productJsonLd, resolveVehicleMetaDescription, resolve
 import { VehiclePrice } from "@/components/Price";
 import { formatKm } from "@/lib/format";
 import { SITE, whatsappHref } from "@/lib/site";
+import { slugFromStockPath, vehicleStockPath } from "@/lib/slug";
 import {
   BODY_TYPE_LABELS,
   FUEL_LABELS,
@@ -23,27 +24,34 @@ function absUrl(src: string): string {
   return src.startsWith("http") ? src : `${SITE.url}${src}`;
 }
 
+async function resolveVehicle(path: string[]) {
+  const slug = slugFromStockPath(path);
+  if (!slug) return null;
+  return getVehicleBySlug(slug);
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ path: string[] }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const v = await getVehicleBySlug(slug);
+  const { path } = await params;
+  const v = await resolveVehicle(path);
   if (!v) return { title: "Vehicle not found" };
 
   const title = resolveVehicleMetaTitle(v);
   const description = resolveVehicleMetaDescription(v);
+  const href = vehicleStockPath(v.slug);
 
   return {
     title,
     description,
-    alternates: { canonical: `/stock/${v.slug}` },
+    alternates: { canonical: href },
     openGraph: {
       type: "website",
       title,
       description,
-      url: `${SITE.url}/stock/${v.slug}`,
+      url: `${SITE.url}${href}`,
       images: v.images[0] ? [absUrl(v.images[0])] : undefined,
     },
   };
@@ -52,19 +60,31 @@ export async function generateMetadata({
 export default async function VehicleDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ path: string[] }>;
 }) {
-  const { slug } = await params;
-  const v = await getVehicleBySlug(slug);
+  const { path } = await params;
+  const slug = slugFromStockPath(path);
+
+  // Legacy flat slug → redirect to new make/model/grade-for-sale path when stored that way
+  if (path.length === 1 && slug) {
+    const admin = await getVehicleBySlugAdmin(slug);
+    if (admin && admin.slug.includes("/")) {
+      redirect(vehicleStockPath(admin.slug));
+    }
+  }
+
+  const v = slug ? await getVehicleBySlug(slug) : null;
   if (!v) notFound();
 
+  const href = vehicleStockPath(v.slug);
+  const abs = `${SITE.url}${href}`;
   const fullName = `${v.year} ${v.make} ${v.model}${v.variant ? " " + v.variant : ""}`;
   const mailSubject = encodeURIComponent(`Enquiry: ${fullName}`);
   const mailBody = encodeURIComponent(
-    `Hi,\n\nI'm interested in the ${fullName}:\n${SITE.url}/stock/${v.slug}\n\n`,
+    `Hi,\n\nI'm interested in the ${fullName}:\n${abs}\n\n`,
   );
   const mailHref = `mailto:${SITE.email}?subject=${mailSubject}&body=${mailBody}`;
-  const waHref = whatsappHref(`Hi, I'm interested in the ${fullName} (${SITE.url}/stock/${v.slug}).`);
+  const waHref = whatsappHref(`Hi, I'm interested in the ${fullName} (${abs}).`);
 
   const specs: [string, string | null][] = [
     ["Year", String(v.year)],
@@ -87,7 +107,8 @@ export default async function VehicleDetailPage({
         data={breadcrumbJsonLd([
           { name: "Home", url: SITE.url },
           { name: "Stock", url: `${SITE.url}/stock` },
-          { name: fullName, url: `${SITE.url}/stock/${v.slug}` },
+          { name: v.make, url: `${SITE.url}/stock?make=${encodeURIComponent(v.make)}` },
+          { name: fullName, url: abs },
         ])}
       />
 
@@ -96,6 +117,7 @@ export default async function VehicleDetailPage({
         items={[
           { label: "Home", href: "/" },
           { label: "Stock", href: "/stock" },
+          { label: v.make, href: `/stock?make=${encodeURIComponent(v.make)}` },
           { label: fullName },
         ]}
       />
@@ -124,7 +146,7 @@ export default async function VehicleDetailPage({
                 <DetailQuickActions
                   waHref={waHref}
                   mailHref={mailHref}
-                  shareUrl={`${SITE.url}/stock/${v.slug}`}
+                  shareUrl={abs}
                   shareTitle={fullName}
                 />
               </div>
@@ -143,7 +165,6 @@ export default async function VehicleDetailPage({
         </div>
       </div>
 
-      {/* Specs */}
       <section className="section" style={{ paddingBottom: 40 }}>
         <h2 className="heading" style={{ fontSize: 26, marginBottom: 20 }}>
           Specifications
@@ -160,7 +181,6 @@ export default async function VehicleDetailPage({
         </dl>
       </section>
 
-      {/* Description */}
       <section style={{ paddingBottom: 40 }}>
         <h2 className="heading" style={{ fontSize: 26, marginBottom: 16 }}>
           About this {v.make} {v.model}
@@ -170,7 +190,6 @@ export default async function VehicleDetailPage({
         </p>
       </section>
 
-      {/* Features */}
       {v.features.length > 0 ? (
         <section style={{ paddingBottom: 40 }}>
           <h2 className="heading" style={{ fontSize: 26, marginBottom: 16 }}>

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllVehicleSlugs } from "@/lib/vehicles";
 import { SITE } from "@/lib/site";
+import { vehicleStockPath } from "@/lib/slug";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const vehicleRoutes: MetadataRoute.Sitemap = vehicles.map((v) => ({
-    url: `${SITE.url}/stock/${v.slug}`,
+    url: `${SITE.url}${vehicleStockPath(v.slug)}`,
     lastModified: v.updatedAt,
     changeFrequency: "weekly",
     priority: 0.8,

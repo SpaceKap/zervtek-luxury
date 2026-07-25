@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Price } from "@/components/Price";
 import { formatKm } from "@/lib/format";
+import { vehicleStockPath } from "@/lib/slug";
 import {
   BODY_TYPE_LABELS,
   TRANSMISSION_LABELS,
@@ -14,7 +15,7 @@ export function VehicleCard({ v }: { v: PublicVehicle }) {
   const body = displayEnum(v.bodyType, BODY_TYPE_LABELS);
   const transmission = displayEnum(v.transmission, TRANSMISSION_LABELS);
   return (
-    <Link href={`/stock/${v.slug}`} className="vcard">
+    <Link href={vehicleStockPath(v.slug)} className="vcard">
       <div className="vcard-media">
         {v.status === "SOLD" && <span className="vcard-badge sold">Sold</span>}
         {v.status === "RESERVED" && <span className="vcard-badge">Reserved</span>}

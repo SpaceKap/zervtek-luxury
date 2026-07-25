@@ -18,6 +18,7 @@ import {
   SOURCE_TYPES,
 } from "@/lib/vehicle-constants";
 import { digitsOnly, formatDigitsWithCommas } from "@/lib/format";
+import { vehicleStockPath } from "@/lib/slug";
 import {
   buildVehicleMetaDescription,
   buildVehicleMetaTitle,
@@ -185,6 +186,8 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [photoDragIndex, setPhotoDragIndex] = useState<number | null>(null);
+  const [photoDropTarget, setPhotoDropTarget] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -306,6 +309,18 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
 
   function removeImage(index: number) {
     setImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function reorderImage(from: number, to: number) {
+    setImages((prev) => {
+      if (from === to || from < 0 || to < 0 || from >= prev.length || to >= prev.length) {
+        return prev;
+      }
+      const next = [...prev];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
   }
 
   function resetForm() {
@@ -894,7 +909,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           Photos
         </h3>
         <div className="field">
-          <label>Photos (first image is the cover)</label>
+          <label>Photos (drag to reorder · first image is the cover)</label>
           <div
             className={`photo-dropzone${dragOver ? " is-dragover" : ""}${uploading ? " is-uploading" : ""}`}
             onDragOver={onDragOver}
@@ -936,57 +951,98 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
             </p>
           </div>
           {images.length > 0 ? (
-            <div className="carousel-thumbs" style={{ marginTop: 12, flexWrap: "wrap" }}>
+            <div className="admin-photo-grid" role="list" aria-label="Photo order">
               {images.map((src, i) => (
-                <div key={src} style={{ position: "relative" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt=""
-                    style={{ width: 108, aspectRatio: "16/10", objectFit: "cover", borderRadius: 0, border: "1px solid var(--line)" }}
-                  />
-                  {i === 0 ? <span className="photo-cover-badge">Cover</span> : null}
+                <div
+                  key={`${src}-${i}`}
+                  className={`admin-photo-item${i === 0 ? " is-cover" : ""}${photoDragIndex === i ? " is-dragging" : ""}${photoDropTarget === i ? " is-drop-target" : ""}`}
+                  role="listitem"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (photoDropTarget !== i) setPhotoDropTarget(i);
+                  }}
+                  onDragLeave={() => {
+                    if (photoDropTarget === i) setPhotoDropTarget(null);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const from = Number(e.dataTransfer.getData("text/plain"));
+                    if (Number.isFinite(from)) reorderImage(from, i);
+                    setPhotoDragIndex(null);
+                    setPhotoDropTarget(null);
+                  }}
+                >
                   <div
-                    style={{
-                      display: "flex",
-                      gap: 4,
-                      marginTop: 4,
-                      justifyContent: "center",
+                    className="admin-photo-frame"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", String(i));
+                      setPhotoDragIndex(i);
+                    }}
+                    onDragEnd={() => {
+                      setPhotoDragIndex(null);
+                      setPhotoDropTarget(null);
                     }}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="admin-photo-thumb" draggable={false} />
+                    {i === 0 ? <span className="photo-cover-badge">Cover</span> : null}
+                    <span className="admin-photo-order" aria-hidden>
+                      {i + 1}
+                    </span>
+                  </div>
+                  <div className="admin-photo-actions">
                     <button
                       type="button"
-                      onClick={() => moveImage(i, -1)}
+                      className="admin-photo-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveImage(i, -1);
+                      }}
                       disabled={i === 0}
                       title="Move left"
-                      style={{ border: "1px solid var(--line)", background: "#fff", cursor: i === 0 ? "default" : "pointer", width: 22, height: 22, fontSize: 11 }}
+                      aria-label="Move photo left"
                     >
                       ←
                     </button>
                     <button
                       type="button"
-                      onClick={() => setCover(i)}
+                      className="admin-photo-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCover(i);
+                      }}
                       disabled={i === 0}
                       title="Set as cover"
-                      style={{ border: "1px solid var(--line)", background: "#fff", cursor: i === 0 ? "default" : "pointer", width: 22, height: 22, fontSize: 11 }}
+                      aria-label="Set as cover photo"
                     >
                       ★
                     </button>
                     <button
                       type="button"
-                      onClick={() => moveImage(i, 1)}
+                      className="admin-photo-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        moveImage(i, 1);
+                      }}
                       disabled={i === images.length - 1}
                       title="Move right"
-                      style={{ border: "1px solid var(--line)", background: "#fff", cursor: i === images.length - 1 ? "default" : "pointer", width: 22, height: 22, fontSize: 11 }}
+                      aria-label="Move photo right"
                     >
                       →
                     </button>
                     <button
                       type="button"
-                      onClick={() => removeImage(i)}
+                      className="admin-photo-btn admin-photo-btn-danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage(i);
+                      }}
                       title="Remove image"
                       aria-label="Remove image"
-                      style={{ border: "1px solid var(--crimson)", background: "var(--crimson)", color: "#fff", cursor: "pointer", width: 22, height: 22, fontSize: 11 }}
                     >
                       ×
                     </button>
@@ -1093,7 +1149,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           {editingVehicle?.slug ? (
             <a
               className="btn btn-outline"
-              href={`/stock/${editingVehicle.slug}`}
+              href={vehicleStockPath(editingVehicle.slug)}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -1139,7 +1195,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
                   ) : null}
                 </div>
                 <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-                  /stock/{v.slug}
+                  {vehicleStockPath(v.slug)}
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1152,7 +1208,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
                 <button className="btn btn-outline" onClick={() => toggleFeatured(v)} style={{ padding: "8px 14px" }}>
                   {v.featured ? "★ Featured" : "☆ Feature"}
                 </button>
-                <a className="btn btn-outline" href={`/stock/${v.slug}`} target="_blank" rel="noreferrer" style={{ padding: "8px 14px" }}>
+                <a className="btn btn-outline" href={vehicleStockPath(v.slug)} target="_blank" rel="noreferrer" style={{ padding: "8px 14px" }}>
                   View
                 </a>
                 <button className="btn btn-outline" onClick={() => remove(v.id)} style={{ padding: "8px 14px", borderColor: "var(--crimson)", color: "var(--crimson)" }}>

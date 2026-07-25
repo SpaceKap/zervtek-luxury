@@ -50,6 +50,61 @@ export function getMediaUrlPrefix(): string {
   return process.env.VEHICLE_MEDIA_URL_PREFIX || "/media/vehicles";
 }
 
+export function mediaUrlFromPath(mediumPath: string): string {
+  const prefix = getMediaUrlPrefix().replace(/\/$/, "");
+  return `${prefix}/${mediumPath.replace(/\\/g, "/")}`;
+}
+
+/**
+ * Align VehicleImage.sortOrder / isCover with the public `images` URL list.
+ * Cover = first URL that matches a VehicleImage row.
+ */
+export async function syncVehicleMediaOrder(
+  vehicleId: string,
+  orderedUrls: string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prismaClient: { vehicleImage: any },
+) {
+  const rows: { id: string; mediumPath: string }[] =
+    await prismaClient.vehicleImage.findMany({ where: { vehicleId } });
+  if (rows.length === 0) return;
+
+  const byUrl = new Map(rows.map((r) => [mediaUrlFromPath(r.mediumPath), r]));
+  const placed = new Set<string>();
+  const updates: { id: string; sortOrder: number; isCover: boolean }[] = [];
+
+  for (const url of orderedUrls) {
+    const row = byUrl.get(url);
+    if (!row || placed.has(row.id)) continue;
+    placed.add(row.id);
+    updates.push({
+      id: row.id,
+      sortOrder: updates.length,
+      isCover: false,
+    });
+  }
+
+  for (const row of rows) {
+    if (placed.has(row.id)) continue;
+    updates.push({
+      id: row.id,
+      sortOrder: updates.length,
+      isCover: false,
+    });
+  }
+
+  if (updates.length > 0) updates[0].isCover = true;
+
+  await Promise.all(
+    updates.map((u) =>
+      prismaClient.vehicleImage.update({
+        where: { id: u.id },
+        data: { sortOrder: u.sortOrder, isCover: u.isCover },
+      }),
+    ),
+  );
+}
+
 export function maxImages(): number {
   const n = Number(process.env.VEHICLE_MAX_IMAGES || 30);
   return Number.isFinite(n) && n > 0 ? n : 30;

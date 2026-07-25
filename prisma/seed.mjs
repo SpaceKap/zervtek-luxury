@@ -13,11 +13,10 @@ function slugify(input) {
 }
 
 function buildSlug(v) {
-  return [String(v.year), v.make, v.model, v.variant || "", v.id.slice(-8)]
-    .filter(Boolean)
-    .map(slugify)
-    .filter(Boolean)
-    .join("-");
+  const make = slugify(v.make) || "make";
+  const model = slugify(v.model) || "model";
+  const gradeBase = slugify(v.variant || "") || slugify(v.model) || "stock";
+  return `${make}/${model}/${gradeBase}-for-sale`;
 }
 
 const u = (id) =>

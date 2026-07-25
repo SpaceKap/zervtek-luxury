@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
-import { buildVehicleSlug } from "@/lib/slug";
+import { allocateUniqueVehicleSlug } from "@/lib/vehicle-slug";
 import {
   BODY_TYPE_VALUES,
   DRIVETRAINS,
@@ -12,7 +12,7 @@ import {
   VEHICLE_STATUSES,
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
-import { deleteVehicleImageTree } from "@/lib/vehicle-images";
+import { deleteVehicleImageTree, syncVehicleMediaOrder } from "@/lib/vehicle-images";
 
 function toInt(v: unknown): number | null | undefined {
   if (v === undefined) return undefined;
@@ -180,14 +180,19 @@ export async function PATCH(
     body.model !== undefined ||
     body.variant !== undefined ||
     body.year !== undefined ||
-    body.registrationYear !== undefined;
+    body.registrationYear !== undefined ||
+    // Migrate legacy flat slugs to make/model/grade-for-sale on any edit
+    !existing.slug.includes("/");
 
   try {
     let updated = await prisma.vehicle.update({ where: { id }, data });
+    if (body.images !== undefined) {
+      await syncVehicleMediaOrder(id, updated.images, prisma);
+    }
     if (needsSlug) {
       updated = await prisma.vehicle.update({
         where: { id },
-        data: { slug: buildVehicleSlug(updated) },
+        data: { slug: await allocateUniqueVehicleSlug(updated) },
       });
     }
     return NextResponse.json({ vehicle: updated });

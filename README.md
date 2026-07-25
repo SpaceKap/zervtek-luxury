@@ -18,7 +18,7 @@ A dark-mode luxury vehicle showcase and export site, inspired by toprank.jp and 
 - **About** page including a FAQ accordion
 - **Inquiry form** on the homepage and every vehicle page; WhatsApp button in the navbar
 - **Admin backend** (`/admin`) to upload/manage vehicles with drag-free image upload
-- **SEO**: per-page metadata, canonical URLs, SEO-friendly slugs (`/stock/2023-mercedes-amg-c-class-c43-4matic-wagon-<id>`), JSON-LD schema (`AutoDealer`, `WebSite`, `Car`, `BreadcrumbList`, `FAQPage`, `ItemList`), `sitemap.xml`, `robots.txt`
+- **SEO**: per-page metadata, canonical URLs, SEO-friendly paths (`/stock/{make}/{model}/{grade}-for-sale`), JSON-LD schema (`AutoDealer`, `WebSite`, `Car`, `BreadcrumbList`, `FAQPage`, `ItemList`), `sitemap.xml`, `robots.txt`
 
 ## Getting started
 
@@ -94,7 +94,7 @@ Repo: `https://github.com/SpaceKap/zervtek-luxury`
 src/
   app/
     page.tsx              # landing (hero, featured, inquiry)
-    stock/                # list + [slug] detail
+    stock/                # list + [...path] detail (make/model/grade-for-sale)
     about/                # about + FAQ
     admin/                # login + dashboard (guarded)
     api/                  # vehicles, upload, inquiries, auth, hermes internal

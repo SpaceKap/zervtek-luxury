@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
-import { buildVehicleSlug } from "@/lib/slug";
+import { allocateUniqueVehicleSlug } from "@/lib/vehicle-slug";
 import {
   BODY_TYPE_VALUES,
   DRIVETRAINS,
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
         createdByName: "Admin",
       },
     });
-    const slug = buildVehicleSlug(created);
+    const slug = await allocateUniqueVehicleSlug(created);
     const updated = await prisma.vehicle.update({
       where: { id: created.id },
       data: { slug },

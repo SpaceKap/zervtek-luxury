@@ -2097,4 +2097,98 @@ header.navbar .mobile-menu a[href*="wa.me"]:hover {
   text-transform: uppercase;
   background: var(--ink);
   color: #fff;
+  z-index: 1;
+}
+
+.admin-photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.admin-photo-item {
+  position: relative;
+  width: 120px;
+  user-select: none;
+}
+
+.admin-photo-frame {
+  position: relative;
+  cursor: grab;
+}
+
+.admin-photo-frame:active {
+  cursor: grabbing;
+}
+
+.admin-photo-item.is-dragging {
+  opacity: 0.45;
+}
+
+.admin-photo-item.is-drop-target .admin-photo-thumb {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.admin-photo-item.is-cover .admin-photo-thumb {
+  border-color: var(--ink);
+}
+
+.admin-photo-thumb {
+  display: block;
+  width: 120px;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #f3f1ec;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+.admin-photo-order {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(20, 18, 15, 0.75);
+  color: #fff;
+  z-index: 1;
+}
+
+.admin-photo-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  justify-content: center;
+}
+
+.admin-photo-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-photo-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.admin-photo-btn-danger {
+  border-color: var(--crimson);
+  background: var(--crimson);
+  color: #fff;
 }
