@@ -52,7 +52,9 @@ fi
 
 remote "set -euo pipefail
   sudo mkdir -p /srv/zervtek-luxury/vehicle-images /srv/zervtek-luxury/uploads '$REMOTE_DIR'
-  sudo chown -R \"\$(id -u):\$(id -g)\" /srv/zervtek-luxury '$REMOTE_DIR' || true
+  # App container runs as nextjs uid/gid 1001 — bind mounts must match or writes fail.
+  sudo chown -R 1001:1001 /srv/zervtek-luxury/vehicle-images /srv/zervtek-luxury/uploads
+  sudo chown -R \"\$(id -u):\$(id -g)\" '$REMOTE_DIR' || true
   docker network inspect caddy_proxy >/dev/null 2>&1 || docker network create caddy_proxy
 
   if [[ ! -d '$REMOTE_DIR/.git' ]]; then

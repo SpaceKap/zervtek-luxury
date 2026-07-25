@@ -116,31 +116,41 @@ export async function processAndStoreVehicleImage(
   const mediumRel = path.join(vehicleId, "medium", base);
   const thumbRel = path.join(vehicleId, "thumbnail", base);
 
-  await fs.writeFile(path.join(getUploadRoot(), originalRel), bytes);
+  try {
+    await fs.writeFile(path.join(getUploadRoot(), originalRel), bytes);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`STORAGE_WRITE_FAILED: ${msg}`);
+  }
 
-  const pipeline = sharp(bytes).rotate(); // correct orientation, strip EXIF via re-encode
-  const meta = await pipeline.metadata();
-  const width = meta.width || 0;
-  const height = meta.height || 0;
+  let width = 0;
+  let height = 0;
+  try {
+    const meta = await sharp(bytes).rotate().metadata();
+    width = meta.width || 0;
+    height = meta.height || 0;
 
-  await sharp(bytes)
-    .rotate()
-    .resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true })
-    .jpeg({ quality: 85, mozjpeg: true })
-    .toFile(path.join(getUploadRoot(), largeRel));
+    await sharp(bytes)
+      .rotate()
+      .resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85, mozjpeg: true })
+      .toFile(path.join(getUploadRoot(), largeRel));
 
-  await sharp(bytes)
-    .rotate()
-    .resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })
-    .jpeg({ quality: 82, mozjpeg: true })
-    .toFile(path.join(getUploadRoot(), mediumRel));
+    await sharp(bytes)
+      .rotate()
+      .resize({ width: 1200, height: 1200, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 82, mozjpeg: true })
+      .toFile(path.join(getUploadRoot(), mediumRel));
 
-  await sharp(bytes)
-    .rotate()
-    .resize({ width: 400, height: 400, fit: "inside", withoutEnlargement: true })
-    .jpeg({ quality: 78, mozjpeg: true })
-    .toFile(path.join(getUploadRoot(), thumbRel));
-
+    await sharp(bytes)
+      .rotate()
+      .resize({ width: 400, height: 400, fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 78, mozjpeg: true })
+      .toFile(path.join(getUploadRoot(), thumbRel));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`SHARP_FAILED: ${msg}`);
+  }
   const prefix = getMediaUrlPrefix().replace(/\/$/, "");
   return {
     sha256,

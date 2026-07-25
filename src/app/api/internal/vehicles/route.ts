@@ -156,24 +156,38 @@ export async function POST(req: NextRequest) {
         processed = await processAndStoreVehicleImage(created.id, bytes);
       } catch (err) {
         const code = err instanceof Error ? err.message : "IMAGE_ERROR";
+        console.error("[hermes] image processing failed", { vehicleId: created.id, code });
         await prisma.vehicle.delete({ where: { id: created.id } }).catch(() => {});
         await deleteVehicleImageTree(created.id);
         await auditHermes({
           action: "vehicle.create.image_failed",
           ip,
           vehicleId: created.id,
-          detail: code,
+          detail: code.slice(0, 500),
         });
         const invalidFields: Record<string, string> = {};
         if (code === "IMAGE_TOO_LARGE") invalidFields.images = "File too large";
         else if (code === "INVALID_IMAGE") invalidFields.images = "Non-image or unsupported type";
-        else invalidFields.images = "Image processing failed";
+        else if (
+          code.includes("EACCES") ||
+          code.includes("EPERM") ||
+          code.includes("permission") ||
+          code.startsWith("STORAGE_WRITE_FAILED")
+        ) {
+          invalidFields.images = "Storage permission denied — check VEHICLE_UPLOAD_DIR ownership";
+        } else if (code.startsWith("SHARP_FAILED")) {
+          invalidFields.images = "Image processor failed (Sharp)";
+        } else {
+          invalidFields.images = "Image processing failed";
+        }
         return NextResponse.json(
           {
             success: false,
             error: "VALIDATION_FAILED",
             missingFields: [],
             invalidFields,
+            // Helps Hermes/ops without exposing paths in production clients that ignore it
+            detail: code.slice(0, 300),
           },
           { status: 400 },
         );

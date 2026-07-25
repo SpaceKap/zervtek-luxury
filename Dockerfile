@@ -21,7 +21,7 @@ RUN npx prisma generate
 RUN npm run build
 
 FROM node:20-alpine AS runner
-RUN apk add --no-cache libc6-compat openssl curl
+RUN apk add --no-cache libc6-compat openssl curl su-exec vips
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -44,7 +44,8 @@ RUN mkdir -p /var/lib/zervtek-luxury/vehicle-images /app/public/uploads \
   && chown -R nextjs:nodejs /app /var/lib/zervtek-luxury \
   && chmod +x /docker-entrypoint.sh
 
-USER nextjs
+# Entrypoint starts as root to chown bind mounts, then drops to nextjs.
+USER root
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
