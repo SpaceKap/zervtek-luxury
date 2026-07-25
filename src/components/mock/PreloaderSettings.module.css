@@ -1,0 +1,232 @@
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 10050;
+  width: min(360px, 100vw);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.96);
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.06);
+  color: #111;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  transform: translateX(0);
+  transition: transform 280ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.panel[data-collapsed="true"] {
+  transform: translateX(calc(100% - 44px));
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.toggle {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  flex: 1;
+  height: 34px;
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.actionBtnSecondary {
+  background: #fff;
+  color: #111;
+}
+
+.phase {
+  padding: 10px 16px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.45);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.phase strong {
+  color: #111;
+  font-weight: 500;
+}
+
+.body {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 0 28px;
+}
+
+.section {
+  padding: 14px 16px 8px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.label {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.value {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.textarea {
+  min-height: 64px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+.range {
+  width: 100%;
+  accent-color: #111;
+}
+
+.colorRow {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.color {
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: transparent;
+  cursor: pointer;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.check input {
+  accent-color: #111;
+}
+
+.export {
+  margin: 8px 16px 0;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fafafa;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: rgba(0, 0, 0, 0.7);
+  max-height: 180px;
+  overflow: auto;
+}
+
+.collapsedHint {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.45);
+  padding: 18px 10px;
+  position: absolute;
+  left: 0;
+  top: 56px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.panel[data-collapsed="true"] .collapsedHint {
+  opacity: 1;
+}
+
+.panel[data-collapsed="true"] .headerTitle,
+.panel[data-collapsed="true"] .actions,
+.panel[data-collapsed="true"] .phase,
+.panel[data-collapsed="true"] .body {
+  opacity: 0;
+  pointer-events: none;
+}

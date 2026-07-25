@@ -1,0 +1,190 @@
+.preloader {
+  --lp-bg: #ffffff;
+  --lp-text: #0a0a0a;
+  --lp-muted: rgba(10, 10, 10, 0.42);
+  --lp-muted-soft: rgba(10, 10, 10, 0.22);
+  --lp-track: rgba(10, 10, 10, 0.12);
+  --lp-fill: #0a0a0a;
+  --lp-button-bg: #0a0a0a;
+  --lp-button-text: #ffffff;
+  --lp-button-border: #0a0a0a;
+  --lp-frame: rgba(10, 10, 10, 0.08);
+  --lp-ambient: rgba(10, 10, 10, 0.04);
+  --lp-serif: var(--font-mock-serif), "Cormorant Garamond", "Bodoni 72", "Times New Roman", serif;
+  --lp-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --lp-leave-duration: 800ms;
+  --lp-leave-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  --lp-loader-shift-y: 105px;
+  --lp-loader-shift-duration: 1100ms;
+  --lp-loader-shift-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  --lp-welcome-opacity-duration: 700ms;
+  --lp-welcome-tracking-duration: 900ms;
+  --lp-welcome-tracking: 0.34em;
+  --lp-welcome-tracking-revealed: 0.4em;
+  --lp-flip-duration: 1000ms;
+  --lp-flip-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  --lp-perspective: 1000px;
+  --lp-bar-height: 1px;
+  --lp-face-height: 50px;
+  --lp-title-opacity-duration: 800ms;
+  --lp-title-opacity-delay: 400ms;
+  --lp-title-motion-duration: 1100ms;
+  --lp-title-motion-delay: 350ms;
+  --lp-title-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lp-title-y: 45px;
+  --lp-subtitle-opacity-duration: 900ms;
+  --lp-subtitle-opacity-delay: 900ms;
+  --lp-subtitle-motion-duration: 1000ms;
+  --lp-subtitle-motion-delay: 850ms;
+  --lp-subtitle-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --lp-subtitle-y: 18px;
+  --lp-corner-opacity-duration: 800ms;
+  --lp-corner-opacity-delay: 1200ms;
+  --lp-hero-offset-y: 85px;
+  --lp-button-hover-duration: 350ms;
+  --lp-arrow-shift: 5px;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(0, 0, 0, 0.03),
+      transparent 36%
+    ),
+    linear-gradient(160deg, #ffffff 0%, var(--lp-bg) 100%);
+
+  color: var(--lp-text);
+
+  opacity: 1;
+  visibility: visible;
+
+  transition:
+    opacity var(--lp-leave-duration) var(--lp-leave-ease),
+    visibility var(--lp-leave-duration);
+}
+
+.preloader[data-show-frame="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border: 1px solid var(--lp-frame);
+  pointer-events: none;
+}
+
+.preloader[data-show-grain="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 2px,
+      rgba(0, 0, 0, 0.008) 3px
+    );
+}
+
+.ambientLight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(700px, 80vw);
+  height: 320px;
+  border-radius: 50%;
+  background: var(--lp-ambient);
+  filter: blur(90px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.loaderGroup {
+  position: relative;
+  z-index: 2;
+  width: min(360px, calc(100vw - 64px));
+  text-align: center;
+}
+
+.welcome {
+  margin: 0 0 22px;
+  font-family: var(--lp-sans);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--lp-welcome-tracking);
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+.progressTrack {
+  position: relative;
+  width: 100%;
+  height: var(--lp-bar-height);
+  overflow: hidden;
+  background: var(--lp-track);
+}
+
+.progressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  background: var(--lp-fill);
+  transition: width 80ms linear;
+}
+
+.progressValueInline {
+  display: block;
+  margin-top: 14px;
+  font-family: var(--lp-sans);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: var(--lp-muted-soft);
+}
+
+.cornerText {
+  position: absolute;
+  right: 42px;
+  bottom: 35px;
+  left: 42px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--lp-sans);
+  font-size: 8px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--lp-muted-soft);
+  opacity: 1;
+}
+
+.leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (max-width: 700px) {
+  .preloader[data-show-frame="true"]::before {
+    inset: 12px;
+  }
+
+  .cornerText {
+    right: 25px;
+    bottom: 24px;
+    left: 25px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader {
+    transition-duration: 150ms;
+  }
+}

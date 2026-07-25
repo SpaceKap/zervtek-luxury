@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.example
+storage
+coverage
+tests
+vitest.config.ts
+.DS_Store
+*.tsbuildinfo
+public/uploads/*
+!public/uploads/.gitkeep

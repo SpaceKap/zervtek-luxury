@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vehicle {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  make        String
+  model       String
+  variant     String?
+  year        Int // registration year
+  registrationMonth Int?
+  price       Int // totalPriceJpy — integer JPY, no commas
+  mileage     Int // km
+  transmission String?
+  fuelType    String?
+  drivetrain  String?
+  steering    String?
+  bodyType    String?
+  engineCc    Int?
+  exteriorColor String?
+  interiorColor String?
+  location    String?
+  vin         String? // frame number
+  description String
+  features    String[]
+  /// Ordered public media URLs (cover first). Synced from VehicleImage.
+  images      String[]
+  status      String  @default("DRAFT")
+  /// Status before automated UNAVAILABLE transition (for admin restore).
+  statusBeforeUnavailable String?
+  featured    Boolean @default(false)
+  metaTitle   String?
+  metaDescription String?
+
+  createdByType String  @default("ADMIN") // ADMIN | AUTOMATION
+  createdByName String?
+
+  sourceType      String?
+  sourceListingId String?
+  sourceUrl       String?
+  idempotencyKey  String? @unique
+
+  lastAvailabilityCheckAt    DateTime?
+  lastAvailabilityResult     String? // AVAILABLE | UNAVAILABLE | UNKNOWN
+  consecutiveUnavailableChecks Int @default(0)
+  availabilityCheckLocked    Boolean @default(false)
+  availabilityEvidence       String?
+  availabilityHttpStatus     Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  inquiries          Inquiry[]
+  media              VehicleImage[]
+  availabilityChecks AvailabilityCheck[]
+
+  @@index([make])
+  @@index([bodyType])
+  @@index([status])
+  @@index([featured])
+  @@index([createdByType])
+  @@index([lastAvailabilityCheckAt])
+}
+
+model VehicleImage {
+  id           String   @id @default(cuid())
+  vehicleId    String
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  sortOrder    Int      @default(0)
+  isCover      Boolean  @default(false)
+  sha256       String
+  mimeType     String
+  byteSize     Int
+  width        Int
+  height       Int
+  originalPath String
+  largePath    String
+  mediumPath   String
+  thumbnailPath String
+  createdAt    DateTime @default(now())
+
+  @@unique([vehicleId, sha256])
+  @@index([vehicleId, sortOrder])
+}
+
+model AvailabilityCheck {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  vehicle     Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  checkedAt   DateTime @default(now())
+  result      String // AVAILABLE | UNAVAILABLE | UNKNOWN
+  httpStatus  Int?
+  evidence    String?
+  errorMessage String?
+  checkedBy   String // e.g. HERMES
+
+  @@index([vehicleId, checkedAt])
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  country   String?
+  message   String?
+  vehicleId String?
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model HermesAuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  vehicleId String?
+  ip        String?
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}

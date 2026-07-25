@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: luxury-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-luxury}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-luxury}
+    volumes:
+      - luxury_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-luxury} -d ${POSTGRES_DB:-luxury}"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+    networks:
+      - luxury_internal
+    # Not published publicly — app reaches db on the internal network.
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: luxury-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-luxury}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-luxury}?schema=public
+      VEHICLE_UPLOAD_DIR: /var/lib/zervtek-luxury/vehicle-images
+      VEHICLE_MEDIA_URL_PREFIX: /media/vehicles
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://luxury.zervtek.com}
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+    ports:
+      # Host Caddy → 127.0.0.1:3010 (avoids clash with CRM on :3000)
+      - "127.0.0.1:3010:3000"
+    volumes:
+      - /srv/zervtek-luxury/vehicle-images:/var/lib/zervtek-luxury/vehicle-images
+      - /srv/zervtek-luxury/uploads:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - luxury_internal
+      - caddy_proxy
+
+volumes:
+  luxury_pgdata:
+
+networks:
+  luxury_internal:
+    driver: bridge
+  caddy_proxy:
+    external: true

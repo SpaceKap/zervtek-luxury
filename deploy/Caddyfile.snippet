@@ -1,0 +1,22 @@
+# Drop into the VPS Caddyfile (same level as other site blocks).
+#
+# Docker Caddy on shared `caddy_proxy` network:
+#   reverse_proxy luxury-app:3000
+#
+# Host/systemd Caddy (this file's default):
+#   reverse_proxy 127.0.0.1:3010
+
+luxury.zervtek.com {
+	encode gzip zstd
+
+	# Hermes / portal vehicle media from persistent host disk (no directory listing)
+	handle_path /media/vehicles/* {
+		root * /srv/zervtek-luxury/vehicle-images
+		file_server
+		header Cache-Control "public, max-age=31536000, immutable"
+		header X-Robots-Tag "noimageindex"
+		header X-Content-Type-Options "nosniff"
+	}
+
+	reverse_proxy 127.0.0.1:3010
+}
