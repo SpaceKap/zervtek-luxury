@@ -34,19 +34,18 @@ From your laptop (after Tailscale/SSH works):
 ./deploy/deploy.sh --host zervtek-vps --dir /opt/zervtek-luxury --repo git@github.com:SpaceKap/zervtek-luxury.git
 ```
 
-## Caddy
+## Caddy (Dockerized on this VPS)
 
-Snippet: `deploy/Caddyfile.snippet`
+Snippet: `deploy/Caddyfile.snippet` — proxies `luxury.zervtek.com` → `luxury-app:3000` over the shared `caddy_proxy` network.
 
-- **Host Caddy** → `reverse_proxy 127.0.0.1:3010` (compose publishes this)
-- **Docker Caddy** on `caddy_proxy` → change to `reverse_proxy luxury-app:3000`
-
-Reload after edit:
+Add the block to the Caddyfile the `caddy` container mounts (the n8n stack, e.g. `/opt/n8n/Caddyfile`), then:
 
 ```bash
-sudo caddy validate --config /etc/caddy/Caddyfile
-sudo systemctl reload caddy
+docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
+
+Host/systemd Caddy instead: use `reverse_proxy 127.0.0.1:3010` (compose publishes that port on localhost).
 
 ## Updates
 
