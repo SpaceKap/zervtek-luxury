@@ -1040,18 +1040,25 @@ header.navbar .mobile-menu a[href*="wa.me"]:hover {
   user-select: none;
   background: #ece8e0;
 }
-.carousel-stage { position: relative; aspect-ratio: 1 / 1; }
+.carousel-stage {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  transition: aspect-ratio 0.35s ease;
+  background: #e6e1d8;
+}
 .carousel-slide {
   position: absolute;
   inset: 0;
   opacity: 0;
   transition: opacity 0.6s ease;
+  display: grid;
+  place-items: center;
 }
 .carousel-slide.active { opacity: 1; }
 .carousel-slide img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   -webkit-user-drag: none;
   user-select: none;
   pointer-events: none;

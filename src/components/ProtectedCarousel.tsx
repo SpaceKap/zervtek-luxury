@@ -7,8 +7,41 @@ type Props = {
   alt: string;
 };
 
+/** Common frame ratios — stage snaps to the nearest so layout stays tidy. */
+const FRAME_RATIOS: { css: string; value: number }[] = [
+  { css: "16 / 9", value: 16 / 9 },
+  { css: "3 / 2", value: 3 / 2 },
+  { css: "4 / 3", value: 4 / 3 },
+  { css: "5 / 4", value: 5 / 4 },
+  { css: "1 / 1", value: 1 },
+  { css: "4 / 5", value: 4 / 5 },
+  { css: "3 / 4", value: 3 / 4 },
+  { css: "2 / 3", value: 2 / 3 },
+  { css: "9 / 16", value: 9 / 16 },
+];
+
+const DEFAULT_RATIO = "3 / 2";
+
+function nearestFrameRatio(width: number, height: number): string {
+  if (!width || !height) return DEFAULT_RATIO;
+  const r = width / height;
+  let best = FRAME_RATIOS[0];
+  let bestDist = Infinity;
+  for (const candidate of FRAME_RATIOS) {
+    // log distance treats relative ratio error evenly (e.g. 3:2 vs 16:9)
+    const dist = Math.abs(Math.log(r / candidate.value));
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = candidate;
+    }
+  }
+  return best.css;
+}
+
 export function ProtectedCarousel({ images, alt }: Props) {
   const [index, setIndex] = useState(0);
+  const [frameRatio, setFrameRatio] = useState(DEFAULT_RATIO);
+  const [knownSizes, setKnownSizes] = useState<Record<number, { w: number; h: number }>>({});
   const count = images.length;
 
   const go = useCallback(
@@ -22,16 +55,35 @@ export function ProtectedCarousel({ images, alt }: Props) {
     return () => clearInterval(id);
   }, [count]);
 
+  // When active slide changes, snap frame to that photo's nearest ratio.
+  useEffect(() => {
+    const size = knownSizes[index];
+    if (size) setFrameRatio(nearestFrameRatio(size.w, size.h));
+  }, [index, knownSizes]);
+
+  function onImageLoad(i: number, e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget;
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    if (!w || !h) return;
+    setKnownSizes((prev) => {
+      const existing = prev[i];
+      if (existing && existing.w === w && existing.h === h) return prev;
+      return { ...prev, [i]: { w, h } };
+    });
+    if (i === index) setFrameRatio(nearestFrameRatio(w, h));
+  }
+
   const block = (e: React.SyntheticEvent) => e.preventDefault();
 
   if (count === 0) {
-    return <div className="carousel" style={{ aspectRatio: "1 / 1" }} />;
+    return <div className="carousel" style={{ aspectRatio: DEFAULT_RATIO }} />;
   }
 
   return (
     <div>
       <div className="carousel" onContextMenu={block} onDragStart={block}>
-        <div className="carousel-stage">
+        <div className="carousel-stage" style={{ aspectRatio: frameRatio }}>
           {images.map((src, i) => (
             <div key={i} className={`carousel-slide${i === index ? " active" : ""}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -41,10 +93,10 @@ export function ProtectedCarousel({ images, alt }: Props) {
                 draggable={false}
                 onDragStart={block}
                 onContextMenu={block}
+                onLoad={(e) => onImageLoad(i, e)}
               />
             </div>
           ))}
-          {/* Transparent guard layer discourages right-click / drag saving */}
           <div className="carousel-guard" onContextMenu={block} onDragStart={block} />
 
           {count > 1 && (
