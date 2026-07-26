@@ -7,8 +7,9 @@ import { CompanyProfile } from "@/components/CompanyProfile";
 import { BankDetails } from "@/components/BankDetails";
 import { ContactForm } from "@/components/ContactForm";
 import { HashScroll } from "@/components/HashScroll";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 import { breadcrumbJsonLd } from "@/lib/seo";
-import { FAQS, SITE, whatsappHref } from "@/lib/site";
+import { FAQS, SITE } from "@/lib/site";
 import { getCatalogMakeModels } from "@/lib/vehicles";
 
 export const dynamic = "force-dynamic";
@@ -134,9 +135,9 @@ export default async function AboutPage() {
             <Link className="btn btn-gold" href="/stock">
               Browse stock
             </Link>
-            <a className="btn btn-outline" href={whatsappHref()} target="_blank" rel="noopener noreferrer">
+            <WhatsAppLink className="btn btn-outline" location="about_cta">
               WhatsApp us
-            </a>
+            </WhatsAppLink>
           </div>
         </div>
       </section>

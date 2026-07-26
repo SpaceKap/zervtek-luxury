@@ -7,15 +7,24 @@ import {
   getPhoneDial,
   PHONE_COUNTRIES,
 } from "@/lib/phone-codes";
+import { trackGenerateLead } from "@/lib/analytics";
 
 type Props = {
   vehicleId?: string;
   vehicleName?: string;
+  /** Where this form lives — used as the `form_location` analytics property. */
+  formLocation?: string;
   compact?: boolean;
   embedded?: boolean;
 };
 
-export function InquiryForm({ vehicleId, vehicleName, compact, embedded }: Props) {
+export function InquiryForm({
+  vehicleId,
+  vehicleName,
+  formLocation = "site_general",
+  compact,
+  embedded,
+}: Props) {
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [error, setError] = useState<string>("");
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_PHONE_COUNTRY);
@@ -45,6 +54,13 @@ export function InquiryForm({ vehicleId, vehicleName, compact, embedded }: Props
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");
       setStatus("ok");
+      // Only a server-accepted inquiry counts as a lead.
+      trackGenerateLead({
+        formLocation,
+        vehicleId,
+        vehicleName,
+        destinationCountry: String(data.country || "") || undefined,
+      });
       form.reset();
       setPhoneCountry(DEFAULT_PHONE_COUNTRY);
     } catch (err) {

@@ -16,6 +16,7 @@ import {
   whatsappHref,
 } from "@/lib/site";
 import type { CatalogMake } from "@/lib/vehicles";
+import { trackContact, trackGenerateLead } from "@/lib/analytics";
 
 type Props = {
   catalog?: CatalogMake[];
@@ -78,6 +79,10 @@ export function ContactForm({ catalog = [] }: Props) {
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");
       setStatus("ok");
+      trackGenerateLead({
+        formLocation: "contact_page",
+        destinationCountry: String(data.country || "") || undefined,
+      });
       form.reset();
       setPhoneCountry(DEFAULT_PHONE_COUNTRY);
       setMake("");
@@ -273,7 +278,11 @@ export function ContactForm({ catalog = [] }: Props) {
       </form>
 
       <div className="contact-direct">
-        <a className="glass contact-direct-item" href={`mailto:${SITE.email}`}>
+        <a
+          className="glass contact-direct-item"
+          href={`mailto:${SITE.email}`}
+          onClick={() => trackContact({ method: "email", location: "contact_page" })}
+        >
           <span className="muted">Email</span>
           <strong>{SITE.email}</strong>
         </a>
@@ -282,11 +291,16 @@ export function ContactForm({ catalog = [] }: Props) {
           href={whatsappHref()}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackContact({ method: "whatsapp", location: "contact_page" })}
         >
           <span className="muted">WhatsApp</span>
           <strong>{SITE.phone}</strong>
         </a>
-        <a className="glass contact-direct-item" href={`tel:${SITE.phone.replace(/\s/g, "")}`}>
+        <a
+          className="glass contact-direct-item"
+          href={`tel:${SITE.phone.replace(/\s/g, "")}`}
+          onClick={() => trackContact({ method: "phone", location: "contact_page" })}
+        >
           <span className="muted">Phone</span>
           <strong>{SITE.phone}</strong>
         </a>

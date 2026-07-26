@@ -6,8 +6,9 @@ import { ShippingExportPorts } from "@/components/ShippingExportPorts";
 import { ShippingInfo } from "@/components/ShippingInfo";
 import { ShippingPartnersMarquee } from "@/components/ShippingPartnersMarquee";
 import { ShippingSchedule } from "@/components/ShippingSchedule";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 import { breadcrumbJsonLd } from "@/lib/seo";
-import { SITE, whatsappHref } from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Shipping Schedules from Japan",
@@ -61,9 +62,9 @@ export default function ShippingPage() {
             <Link className="btn btn-gold" href="/about#contact-form">
               Contact us
             </Link>
-            <a className="btn btn-outline" href={whatsappHref()} target="_blank" rel="noopener noreferrer">
+            <WhatsAppLink className="btn btn-outline" location="shipping_cta">
               WhatsApp us
-            </a>
+            </WhatsAppLink>
           </div>
         </div>
       </section>

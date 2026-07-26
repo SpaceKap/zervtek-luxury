@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ProtectedCarousel } from "@/components/ProtectedCarousel";
 import { DetailQuickActions } from "@/components/DetailQuickActions";
 import { InquiryForm } from "@/components/InquiryForm";
+import { ViewItemTracker } from "@/components/ViewItemTracker";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productJsonLd, resolveVehicleMetaDescription, resolveVehicleMetaTitle } from "@/lib/seo";
 import { VehiclePrice } from "@/components/Price";
@@ -125,6 +126,18 @@ export default async function VehicleDetailPage({
     <main className="container" style={{ paddingBlock: 40 }}>
       <JsonLd data={productJsonLd(v)} />
       <JsonLd data={breadcrumbJsonLd(jsonLdCrumbs)} />
+      <ViewItemTracker
+        vehicle={{
+          id: v.id,
+          make: v.make,
+          model: v.model,
+          variant: v.variant,
+          year: v.year,
+          price: v.price,
+          bodyType: v.bodyType,
+          slug: v.slug,
+        }}
+      />
 
       <Breadcrumbs className="page-breadcrumbs" items={crumbItems} />
 
@@ -154,6 +167,8 @@ export default async function VehicleDetailPage({
                   mailHref={mailHref}
                   shareUrl={abs}
                   shareTitle={fullName}
+                  vehicleId={v.id}
+                  vehicleName={fullName}
                 />
               </div>
             </div>
@@ -165,7 +180,13 @@ export default async function VehicleDetailPage({
                 <h2 className="heading">Send an enquiry</h2>
                 <p className="muted">A specialist will confirm availability and share the condition report.</p>
               </div>
-              <InquiryForm vehicleId={v.id} vehicleName={fullName} compact embedded />
+              <InquiryForm
+                vehicleId={v.id}
+                vehicleName={fullName}
+                formLocation="vehicle_detail"
+                compact
+                embedded
+              />
             </div>
           </div>
         </div>

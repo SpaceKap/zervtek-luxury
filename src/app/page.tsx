@@ -89,7 +89,7 @@ export default async function HomePage() {
             <JsonLd data={productListJsonLd(featured)} />
             <div className="vehicle-grid stock-grid">
               {featured.map((v) => (
-                <VehicleCard key={v.id} v={v} />
+                <VehicleCard key={v.id} v={v} listName="home_featured" />
               ))}
             </div>
           </>
@@ -133,7 +133,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="glass" style={{ padding: 28, borderRadius: 16 }}>
-            <InquiryForm compact />
+            <InquiryForm compact formLocation="home_inquiry" />
           </div>
         </div>
         <style>{`@media (max-width: 820px){ .inquire-grid{ grid-template-columns: 1fr !important; } }`}</style>

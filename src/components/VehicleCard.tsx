@@ -1,8 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Price } from "@/components/Price";
 import { formatKm } from "@/lib/format";
 import { vehicleStockPath } from "@/lib/slug";
+import { trackSelectItem } from "@/lib/analytics";
 import {
   BODY_TYPE_LABELS,
   TRANSMISSION_LABELS,
@@ -10,12 +13,22 @@ import {
 } from "@/lib/vehicle-constants";
 import type { PublicVehicle } from "@/lib/vehicle-public";
 
-export function VehicleCard({ v }: { v: PublicVehicle }) {
+export function VehicleCard({
+  v,
+  listName = "stock_grid",
+}: {
+  v: PublicVehicle;
+  listName?: string;
+}) {
   const img = v.images[0] || "/placeholder.svg";
   const body = displayEnum(v.bodyType, BODY_TYPE_LABELS);
   const transmission = displayEnum(v.transmission, TRANSMISSION_LABELS);
   return (
-    <Link href={vehicleStockPath(v.slug)} className="vcard">
+    <Link
+      href={vehicleStockPath(v.slug)}
+      className="vcard"
+      onClick={() => trackSelectItem(v, listName)}
+    >
       <div className="vcard-media">
         {v.status === "SOLD" && <span className="vcard-badge sold">Sold</span>}
         {v.status === "RESERVED" && <span className="vcard-badge">Reserved</span>}

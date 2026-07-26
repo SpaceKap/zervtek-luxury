@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { trackContact, trackShare } from "@/lib/analytics";
 
 type Props = {
   waHref: string;
   mailHref: string;
   shareUrl: string;
   shareTitle: string;
+  vehicleId?: string;
+  vehicleName?: string;
 };
 
 function WhatsAppIcon() {
@@ -35,16 +38,25 @@ function ShareIcon() {
   );
 }
 
-export function DetailQuickActions({ waHref, mailHref, shareUrl, shareTitle }: Props) {
+export function DetailQuickActions({
+  waHref,
+  mailHref,
+  shareUrl,
+  shareTitle,
+  vehicleId,
+  vehicleName,
+}: Props) {
   const [shareNote, setShareNote] = useState<string | null>(null);
 
   async function onShare() {
     try {
       if (navigator.share) {
         await navigator.share({ title: shareTitle, url: shareUrl });
+        trackShare({ method: "web_share", vehicleId, vehicleName });
         return;
       }
       await navigator.clipboard.writeText(shareUrl);
+      trackShare({ method: "copy_link", vehicleId, vehicleName });
       setShareNote("Link copied");
       window.setTimeout(() => setShareNote(null), 2000);
     } catch {
@@ -54,10 +66,26 @@ export function DetailQuickActions({ waHref, mailHref, shareUrl, shareTitle }: P
 
   return (
     <div className="detail-icon-actions">
-      <a className="icon-action" href={waHref} target="_blank" rel="noopener noreferrer" aria-label="Contact on WhatsApp">
+      <a
+        className="icon-action"
+        href={waHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Contact on WhatsApp"
+        onClick={() =>
+          trackContact({ method: "whatsapp", location: "vehicle_detail", vehicleId, vehicleName })
+        }
+      >
         <WhatsAppIcon />
       </a>
-      <a className="icon-action" href={mailHref} aria-label="Send email">
+      <a
+        className="icon-action"
+        href={mailHref}
+        aria-label="Send email"
+        onClick={() =>
+          trackContact({ method: "email", location: "vehicle_detail", vehicleId, vehicleName })
+        }
+      >
         <EmailIcon />
       </a>
       <button className="icon-action" type="button" onClick={onShare} aria-label="Share listing">

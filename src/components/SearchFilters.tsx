@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { MAKES, BODY_TYPES } from "@/lib/site";
+import { trackStockFilter } from "@/lib/analytics";
 import { BODY_TYPE_LABELS, BODY_TYPE_VALUES } from "@/lib/vehicle-constants";
 
 const SORTS = [
@@ -24,6 +25,12 @@ export function SearchFilters() {
         else next.delete(k);
       }
       next.delete("page");
+      trackStockFilter({
+        search_term: next.get("q") || undefined,
+        make: next.get("make") || undefined,
+        body_type: next.get("bodyType") || undefined,
+        sort: next.get("sort") || undefined,
+      });
       router.push(`/stock?${next.toString()}`);
     },
     [params, router],

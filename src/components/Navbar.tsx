@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Logo } from "@/components/Logo";
 import { CurrencyToggle } from "@/components/CurrencyToggle";
 import { NAV, SITE, whatsappHref } from "@/lib/site";
+import { trackContact } from "@/lib/analytics";
 
 function WhatsAppIcon() {
   return (
@@ -37,6 +38,7 @@ export function Navbar() {
             href={whatsappHref()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackContact({ method: "whatsapp", location: "navbar" })}
           >
             <WhatsAppIcon />
             <span className="whatsapp-label">WhatsApp</span>
@@ -65,7 +67,15 @@ export function Navbar() {
             {item.label}
           </Link>
         ))}
-        <a href={whatsappHref()} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
+        <a
+          href={whatsappHref()}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            trackContact({ method: "whatsapp", location: "mobile_menu" });
+            setOpen(false);
+          }}
+        >
           Contact on WhatsApp
         </a>
         <span className="muted" style={{ paddingTop: 12 }}>
