@@ -31,7 +31,9 @@ export function VehicleCard({
     >
       <div className="vcard-media">
         {v.status === "SOLD" && <span className="vcard-badge sold">Sold</span>}
-        {v.status === "RESERVED" && <span className="vcard-badge">Reserved</span>}
+        {v.status === "RESERVED" && (
+          <span className="vcard-badge">Reserved</span>
+        )}
         <Image
           src={img}
           alt={`${v.year} ${v.make} ${v.model}${v.variant ? " " + v.variant : ""} for sale`}

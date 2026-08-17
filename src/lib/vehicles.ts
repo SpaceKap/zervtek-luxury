@@ -2,8 +2,9 @@ import type { Prisma, Vehicle } from "@prisma/client";
 import { prisma } from "./prisma";
 import { PUBLIC_VEHICLE_STATUSES, isPublicVehicleStatus } from "./vehicle-constants";
 import { toPublicVehicle, type PublicVehicle } from "./vehicle-public";
+import { mergeCatalogWithStock, type CatalogMake } from "./vehicle-catalog";
 
-export type { Vehicle, PublicVehicle };
+export type { Vehicle, PublicVehicle, CatalogMake };
 
 export type VehicleFilters = {
   q?: string;
@@ -157,11 +158,6 @@ export async function getAllVehicleSlugs(): Promise<{ slug: string; updatedAt: D
   }
 }
 
-export type CatalogMake = {
-  make: string;
-  models: string[];
-};
-
 export async function getCatalogMakeModels(): Promise<CatalogMake[]> {
   try {
     const rows = await prisma.vehicle.findMany({
@@ -179,13 +175,14 @@ export async function getCatalogMakeModels(): Promise<CatalogMake[]> {
       map.get(make)!.add(model);
     }
 
-    return Array.from(map.entries())
-      .map(([make, models]) => ({
-        make,
-        models: Array.from(models).sort((a, b) => a.localeCompare(b)),
-      }))
-      .sort((a, b) => a.make.localeCompare(b.make));
+    const stock = Array.from(map.entries()).map(([make, models]) => ({
+      make,
+      country: "Other",
+      models: Array.from(models),
+    }));
+
+    return mergeCatalogWithStock(stock);
   } catch {
-    return [];
+    return mergeCatalogWithStock([]);
   }
 }

@@ -6,6 +6,7 @@ export function CompanyProfile() {
     { label: "Japanese Name", value: COMPANY_PROFILE.japaneseName },
     { label: "Address", value: COMPANY_PROFILE.address },
     { label: "Registration No.", value: COMPANY_PROFILE.registrationNo },
+    { label: "Used vehicle dealer license", value: COMPANY_PROFILE.dealerLicense },
     { label: "Phone", value: COMPANY_PROFILE.phone },
     { label: "Email", value: COMPANY_PROFILE.email },
     { label: "Hours", value: COMPANY_PROFILE.hours },

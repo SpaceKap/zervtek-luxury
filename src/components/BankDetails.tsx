@@ -11,8 +11,24 @@ export function BankDetails() {
         </div>
       </div>
 
+      <div className="bank-pair">
+        {BANK_ACCOUNTS.slice(0, 2).map((account) => (
+          <div className="glass info-card" key={account.title}>
+            <h3 className="heading info-card-title">{account.title}</h3>
+            <dl className="info-rows">
+              {account.rows.map((row) => (
+                <div className="info-row" key={row.label}>
+                  <dt>{row.label}</dt>
+                  <dd className="mono">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+
       <div className="bank-grid">
-        {BANK_ACCOUNTS.map((account) => (
+        {BANK_ACCOUNTS.slice(2).map((account) => (
           <div className="glass info-card" key={account.title}>
             <h3 className="heading info-card-title">{account.title}</h3>
             <dl className="info-rows">
@@ -26,26 +42,27 @@ export function BankDetails() {
           </div>
         ))}
 
-        <div className="glass info-card">
-          <h3 className="heading info-card-title">PayPal</h3>
-          <dl className="info-rows">
-            <div className="info-row">
-              <dt>PayPal Email</dt>
-              <dd className="mono">{PAYPAL.email}</dd>
-            </div>
-            <div className="info-row">
-              <dt>Transfer Fees</dt>
-              <dd>{PAYPAL.transferFees}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div className="security-notice">
-          <strong>Security Notice</strong>
-          <p>
-            Only send payments to the accounts listed on this page. Always confirm payment details
-            with your ZervTek representative before transferring funds.
-          </p>
+        <div className="bank-stack">
+          <div className="glass info-card">
+            <h3 className="heading info-card-title">PayPal</h3>
+            <dl className="info-rows">
+              <div className="info-row">
+                <dt>PayPal Email</dt>
+                <dd className="mono">{PAYPAL.email}</dd>
+              </div>
+              <div className="info-row">
+                <dt>Transfer Fees</dt>
+                <dd>{PAYPAL.transferFees}</dd>
+              </div>
+            </dl>
+          </div>
+          <aside className="security-notice">
+            <strong>Security Notice</strong>
+            <p>
+              Only send payments to the accounts listed on this page. Always confirm payment details
+              with your ZervTek representative before transferring funds.
+            </p>
+          </aside>
         </div>
       </div>
     </section>

@@ -5,7 +5,7 @@ export const SITE = {
   description:
     "ZervTek Luxury sources, inspects and exports the world's finest performance and luxury vehicles from Japan — Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://luxury.zervtek.com",
-  email: "performance@zervtek.com",
+  email: "info@zervtek.com",
   phone: "+81 80 6659 4632",
   address: {
     street: "2-465-14, Kemigawacho, Hanamigawa-ku",
@@ -33,7 +33,6 @@ export function whatsappHref(prefill?: string) {
 export const NAV = [
   { label: "Home", href: "/" },
   { label: "Stock", href: "/stock" },
-  { label: "Shipping", href: "/shipping" },
   { label: "About", href: "/about" },
 ];
 
@@ -223,7 +222,8 @@ export const COMPANY_PROFILE = {
   companyName: "ZervTek Co., Ltd.",
   japaneseName: "株式会社ザーブテック",
   address: `${SITE.address.street}, ${SITE.address.city}, ${SITE.address.region} ${SITE.address.postalCode}, Japan`,
-  registrationNo: "XXXX-XXXX-XXXX",
+  registrationNo: "0400-01-089801",
+  dealerLicense: "441340001639",
   phone: SITE.phone,
   email: SITE.email,
   hours: "9:00–18:00 JST",
@@ -231,43 +231,45 @@ export const COMPANY_PROFILE = {
 
 export const BANK_ACCOUNTS = [
   {
-    title: "Japanese Bank Account (JPY)",
+    title: "Sumitomo Mitsui",
+    rows: [
+      { label: "Bank Name", value: "Sumitomo Mitsui Banking Corporation" },
+      { label: "Branch", value: "Shin Kemigawa (856)" },
+      { label: "SWIFT/BIC", value: "SMBCJPJT" },
+      { label: "Account Number", value: "0998854" },
+      { label: "Account Name", value: "ZERVTEK CO., LTD" },
+      { label: "Bank Address", value: "2-6-1 Nakase, Mihama Ward, Chiba, 261-7102" },
+      { label: "Currency", value: "Any currency" },
+    ],
+  },
+  {
+    title: "MUFG Bank",
     rows: [
       { label: "Bank Name", value: "MUFG Bank (Mitsubishi UFJ)" },
-      { label: "Branch", value: "Shibuya Branch (Code: 225)" },
-      { label: "SWIFT/BIC", value: "BOTKJPJT" },
-      { label: "Account Name", value: "ZERVTEK CO LTD" },
-      { label: "Account Number", value: "XXXX-XXXX-XXXX" },
+      { label: "Branch", value: "Nihombashi Branch" },
+      { label: "SWIFT/BIC", value: "BOTKJPJTCLS" },
+      { label: "Account Number", value: "0420524" },
+      { label: "Account Name", value: "ZERVTEK CO., LTD" },
+      { label: "Bank Address", value: "1-7-17, Nihonbashi, Tokyo, 103-0027" },
+      { label: "Currency", value: "Any currency" },
+    ],
+  },
+  {
+    title: "Wise (JPY)",
+    rows: [
+      { label: "Business Name", value: "カ）ザーヴテック" },
+      { label: "Bank", value: "三井住友銀行 (ミツイスミトモ) [0009]" },
+      { label: "Branch", value: "新検見川 [856]" },
+      { label: "Account Type", value: "Ordinary (普通 / Futsuu)" },
+      { label: "Account Number", value: "0998854" },
       { label: "Currency", value: "JPY" },
-    ],
-  },
-  {
-    title: "USD Bank Account",
-    rows: [
-      { label: "Bank Name", value: "MUFG Bank (Mitsubishi UFJ)" },
-      { label: "Branch", value: "Tokyo Branch (Code: 001)" },
-      { label: "SWIFT/BIC", value: "BOTKJPJT" },
-      { label: "Account Name", value: "ZERVTEK CO LTD" },
-      { label: "Account Number", value: "XXXX-XXXX-XXXX" },
-      { label: "Currency", value: "USD" },
-    ],
-  },
-  {
-    title: "International Bank (Wise)",
-    rows: [
-      { label: "Bank Name", value: "Wise (TransferWise)" },
-      { label: "Branch", value: "N/A" },
-      { label: "SWIFT/BIC", value: "TRWIGB2L" },
-      { label: "Account Name", value: "ZERVTEK CO LTD" },
-      { label: "Account Number", value: "XXXX-XXXX-XXXX" },
-      { label: "Currency", value: "USD / EUR / GBP" },
     ],
   },
 ];
 
 export const PAYPAL = {
-  email: "payments@zervtek.com",
-  transferFees: "4%",
+  email: "sales@zervtek.com",
+  transferFees: "4.4%",
 };
 
 export const CONTACT_INTERESTS = [

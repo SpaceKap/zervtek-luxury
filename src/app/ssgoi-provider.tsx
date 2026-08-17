@@ -6,7 +6,7 @@ import { fade } from "@ssgoi/react/view-transitions";
 import { SsgoiTransitionBoundary } from "./ssgoi-transition-boundary";
 
 const config = {
-  transitions: [fade({ paths: ["/", "/about", "/stock", "/stock/*", "/shipping"] })],
+  transitions: [fade({ paths: ["/", "/about", "/stock", "/stock/*"] })],
 };
 
 export function SsgoiProvider({ children }: { children: ReactNode }) {

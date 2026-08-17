@@ -45,7 +45,6 @@ export default async function MockPreloaderPage() {
           <section className="hero-editorial">
             <div className="container hero-editorial-inner">
               <div className="hero-meta">
-                <span>luxury.zervtek.com</span>
                 <span className="hero-meta-right">
                   <span>Chiba, Japan</span>
                   <span>The Pride for Quality</span>

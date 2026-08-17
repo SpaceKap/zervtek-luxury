@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Cormorant_Garamond } from "next/font/google";
-import LuxuryPreloader, { type PreloaderPhase } from "@/components/mock/LuxuryPreloader";
+import LuxuryPreloader, {
+  type PreloaderPhase,
+} from "@/components/mock/LuxuryPreloader";
 import {
   DEFAULT_PRELOADER_SETTINGS,
   type PreloaderSettings,

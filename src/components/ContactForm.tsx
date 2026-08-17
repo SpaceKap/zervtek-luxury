@@ -11,11 +11,11 @@ import {
   CONTACT_BUDGETS,
   CONTACT_METHODS,
   CONTACT_TIMELINES,
-  MAKES,
   SITE,
   whatsappHref,
 } from "@/lib/site";
 import type { CatalogMake } from "@/lib/vehicles";
+import { groupCatalogByCountry } from "@/lib/vehicle-catalog";
 import { trackContact, trackGenerateLead } from "@/lib/analytics";
 
 type Props = {
@@ -29,12 +29,7 @@ export function ContactForm({ catalog = [] }: Props) {
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
 
-  const makeOptions = useMemo(() => {
-    const fromCatalog = catalog.map((entry) => entry.make);
-    return Array.from(new Set([...fromCatalog, ...MAKES])).sort((a, b) =>
-      a.localeCompare(b),
-    );
-  }, [catalog]);
+  const makeGroups = useMemo(() => groupCatalogByCountry(catalog), [catalog]);
 
   const modelOptions = useMemo(() => {
     if (!make) return [];
@@ -188,10 +183,14 @@ export function ContactForm({ catalog = [] }: Props) {
               }}
             >
               <option value="">Select make</option>
-              {makeOptions.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
+              {makeGroups.map((group) => (
+                <optgroup key={group.country} label={group.country}>
+                  {group.makes.map((item) => (
+                    <option key={item.make} value={item.make}>
+                      {item.make}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
@@ -206,17 +205,14 @@ export function ContactForm({ catalog = [] }: Props) {
               disabled={!make}
             >
               <option value="">
-                {!make
-                  ? "Select make first"
-                  : modelOptions.length === 0
-                    ? "No catalog models"
-                    : "Select model"}
+                {!make ? "Select make first" : "Select model"}
               </option>
               {modelOptions.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
               ))}
+              {make ? <option value="Other">Other</option> : null}
             </select>
           </div>
         </div>

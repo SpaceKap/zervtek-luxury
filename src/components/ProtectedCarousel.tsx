@@ -21,6 +21,10 @@ const FRAME_RATIOS: { css: string; value: number }[] = [
 ];
 
 const DEFAULT_RATIO = "3 / 2";
+/** Dots overflow the stage past this — switch to a compact counter. */
+const MAX_DOTS = 8;
+/** Enough thumbs to fill two rows and better match the enquiry panel height. */
+const THUMB_ROWS_MIN = 6;
 
 function nearestFrameRatio(width: number, height: number): string {
   if (!width || !height) return DEFAULT_RATIO;
@@ -119,26 +123,44 @@ export function ProtectedCarousel({ images, alt }: Props) {
                   <path d="M9 18l6-6-6-6" />
                 </svg>
               </button>
-              <div className="carousel-dots">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    className={i === index ? "active" : ""}
-                    aria-label={`Go to photo ${i + 1}`}
-                    onClick={() => setIndex(i)}
-                  />
-                ))}
-              </div>
+              {count <= MAX_DOTS ? (
+                <div className="carousel-dots" role="tablist" aria-label="Photo position">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className={i === index ? "active" : ""}
+                      aria-label={`Go to photo ${i + 1}`}
+                      aria-current={i === index ? "true" : undefined}
+                      onClick={() => setIndex(i)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="carousel-counter" aria-live="polite">
+                  {index + 1} / {count}
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
 
       {count > 1 && (
-        <div className="carousel-thumbs">
+        <div
+          className={`carousel-thumbs${count >= THUMB_ROWS_MIN ? " carousel-thumbs--rows" : ""}`}
+          style={
+            count >= THUMB_ROWS_MIN
+              ? {
+                  gridTemplateColumns: `repeat(${Math.ceil(count / 2)}, minmax(64px, 1fr))`,
+                }
+              : undefined
+          }
+        >
           {images.map((src, i) => (
             <button
               key={i}
+              type="button"
               className={i === index ? "active" : ""}
               onClick={() => setIndex(i)}
               aria-label={`View photo ${i + 1}`}
