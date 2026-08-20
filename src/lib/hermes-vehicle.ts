@@ -1,3 +1,4 @@
+import { parseFeatureList } from "@/lib/features";
 import {
   BODY_TYPE_VALUES,
   DRIVETRAINS,
@@ -48,13 +49,7 @@ function toInt(v: unknown): number | null {
 }
 
 function toFeatures(v: unknown): string[] {
-  if (Array.isArray(v)) return v.map((x) => String(x).trim()).filter(Boolean);
-  if (typeof v === "string")
-    return v
-      .split(/[\n,]/)
-      .map((x) => x.trim())
-      .filter(Boolean);
-  return [];
+  return parseFeatureList(v);
 }
 
 /** Explicit field mapping — never spread raw Hermes JSON into Prisma. */
@@ -78,7 +73,7 @@ export function mapHermesToDbFields(meta: HermesVehicleMetadata) {
     location: meta.location?.trim() || null,
     vin: meta.frameNumber?.trim() || null,
     description: meta.description.trim(),
-    features: meta.features,
+    features: parseFeatureList(meta.features),
     sourceType: meta.sourceType || null,
     sourceListingId: meta.sourceListingId?.trim() || null,
     sourceUrl: meta.sourceUrl?.trim() || null,

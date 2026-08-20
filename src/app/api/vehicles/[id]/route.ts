@@ -13,6 +13,7 @@ import {
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
 import { deleteVehicleImageTree, syncVehicleMediaOrder } from "@/lib/vehicle-images";
+import { parseFeatureList } from "@/lib/features";
 
 function toInt(v: unknown): number | null | undefined {
   if (v === undefined) return undefined;
@@ -158,7 +159,7 @@ export async function PATCH(
     if (val !== undefined) data.year = val;
   }
 
-  if (body.features !== undefined) data.features = toStrArray(body.features);
+  if (body.features !== undefined) data.features = parseFeatureList(body.features);
   if (body.images !== undefined) data.images = toStrArray(body.images);
   if (body.status !== undefined) {
     const s = String(body.status).toUpperCase();

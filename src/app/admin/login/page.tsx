@@ -12,7 +12,7 @@ export default async function AdminLoginPage() {
   if (await isAuthenticated()) redirect("/admin");
   return (
     <main className="container" style={{ maxWidth: 440, paddingBlock: 100 }}>
-      <span className="eyebrow">ZervTek Luxury</span>
+      <span className="eyebrow">ZervTek Performance</span>
       <h1 className="heading" style={{ fontSize: 34, margin: "10px 0 24px" }}>
         Admin sign in
       </h1>

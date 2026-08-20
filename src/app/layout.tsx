@@ -31,8 +31,10 @@ export const metadata: Metadata = {
   description: SITE.description,
   applicationName: SITE.name,
   keywords: [
+    "performance cars Japan",
+    "supercars Japan export",
     "luxury cars Japan",
-    "import luxury car from Japan",
+    "import performance car from Japan",
     "Mercedes-AMG Japan",
     "Porsche Japan export",
     "Ferrari Japan",

@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Luxury Car Stock — Browse & Search",
   description:
-    "Browse ZervTek Luxury's inventory of premium and performance vehicles from Japan. Search by make, body type and price — Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
+    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Search by make, body type and price — Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
   alternates: { canonical: "/stock" },
 };
 

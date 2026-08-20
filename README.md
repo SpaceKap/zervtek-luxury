@@ -1,4 +1,4 @@
-# ZervTek Luxury — luxury.zervtek.com
+# ZervTek Performance — performance.zervtek.com
 
 A dark-mode luxury vehicle showcase and export site, inspired by toprank.jp and built for the ZervTek brand.
 
@@ -69,7 +69,7 @@ Direct Hermes → Portal API (no n8n). See [docs/hermes-vehicle-api.md](docs/her
 
 ## Production (VPS + Caddy)
 
-Host: **luxury.zervtek.com**
+Host: **performance.zervtek.com** (old host `luxury.zervtek.com` redirects)
 
 ```bash
 # laptop → VPS

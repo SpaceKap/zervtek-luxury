@@ -6,6 +6,7 @@ import { InquiryForm } from "@/components/InquiryForm";
 import { JsonLd } from "@/components/JsonLd";
 import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
 import { productListJsonLd } from "@/lib/seo";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -102,7 +103,7 @@ export default async function HomePage() {
         <section className="section container" id="featured">
           <header className="stock-hero" style={{ paddingBlock: "0 44px" }}>
             <div className="stock-meta">
-              <span>luxury.zervtek.com</span>
+              <span>{new URL(SITE.url).hostname}</span>
               <span>The Pride for Quality</span>
             </div>
             <h2 className="stock-title">The collection</h2>

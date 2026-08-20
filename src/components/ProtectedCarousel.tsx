@@ -23,7 +23,8 @@ const FRAME_RATIOS: { css: string; value: number }[] = [
 const DEFAULT_RATIO = "3 / 2";
 /** Dots overflow the stage past this — switch to a compact counter. */
 const MAX_DOTS = 8;
-/** Enough thumbs to fill two rows and better match the enquiry panel height. */
+/** Enough thumbs to fill three rows and better match the enquiry panel height. */
+const THUMB_ROWS = 3;
 const THUMB_ROWS_MIN = 6;
 
 function nearestFrameRatio(width: number, height: number): string {
@@ -152,7 +153,7 @@ export function ProtectedCarousel({ images, alt }: Props) {
           style={
             count >= THUMB_ROWS_MIN
               ? {
-                  gridTemplateColumns: `repeat(${Math.ceil(count / 2)}, minmax(64px, 1fr))`,
+                  gridTemplateColumns: `repeat(${Math.ceil(count / THUMB_ROWS)}, minmax(64px, 1fr))`,
                 }
               : undefined
           }

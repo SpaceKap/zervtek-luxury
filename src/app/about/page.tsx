@@ -15,9 +15,9 @@ import { getCatalogMakeModels } from "@/lib/vehicles";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "About ZervTek Luxury — Premium Car Export from Japan",
+  title: "About ZervTek Performance — Car Export from Japan",
   description:
-    "ZervTek Luxury sources, inspects and exports the finest luxury and performance vehicles from Japan worldwide. Learn about our company, payment details, and get in touch.",
+    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan. Learn about our company, payment details, and get in touch.",
   alternates: { canonical: "/about" },
 };
 
@@ -50,8 +50,8 @@ export default async function AboutPage() {
           The pride for quality, from Japan to the world.
         </h1>
         <p className="muted" style={{ fontSize: 18, lineHeight: 1.7, maxWidth: 720 }}>
-          ZervTek Luxury is the premium division of ZervTek — dedicated to sourcing, preparing and
-          exporting the world&apos;s most desirable vehicles. We combine deep access to Japan&apos;s
+          {SITE.name} is the performance division of ZervTek — dedicated to sourcing, preparing and
+          exporting performance cars, supercars and luxury vehicles. We combine deep access to Japan&apos;s
           finest cars with meticulous inspection and a genuinely personal service.
         </p>
       </section>
@@ -62,7 +62,7 @@ export default async function AboutPage() {
             <h2 className="heading" style={{ fontSize: 28, marginTop: 0 }}>Who we are</h2>
             <div className="muted stack" style={{ gap: 16, lineHeight: 1.8 }}>
               <p style={{ margin: 0 }}>
-                Built on years of experience exporting Japanese vehicles worldwide, ZervTek Luxury was
+                Built on years of experience exporting Japanese vehicles worldwide, {SITE.name} was
                 created for buyers who want more than a car — they want the right car, in exceptional
                 condition, delivered without compromise.
               </p>
@@ -72,8 +72,8 @@ export default async function AboutPage() {
                 customs and shipping — to your destination port.
               </p>
               <p style={{ margin: 0 }}>
-                All operations remain unified under ZervTek Co., Ltd. This luxury site focuses on
-                performance and premium marques; our team, accounts and quality standards are the same.
+                All operations remain unified under ZervTek Co., Ltd. This site focuses on
+                performance, supercars and luxury marques; our team, accounts and quality standards are the same.
               </p>
             </div>
           </div>

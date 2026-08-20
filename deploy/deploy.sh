@@ -102,22 +102,24 @@ remote "set -euo pipefail
     docker compose exec -T app npm run db:seed || true
   fi
 
-  # Install / refresh Caddy site block if a host Caddyfile exists
-  if [[ -f /etc/caddy/Caddyfile ]]; then
+  # Caddy: Docker container wins (this VPS). Host CLI exists but has no admin API.
+  if docker ps --format '{{.Names}}' | grep -qx caddy; then
+    echo 'Reloading Docker Caddy…'
+    docker exec caddy caddy validate --config /etc/caddy/Caddyfile
+    docker exec caddy caddy reload --config /etc/caddy/Caddyfile
+  elif [[ -f /etc/caddy/Caddyfile ]] && command -v caddy >/dev/null 2>&1; then
     if ! grep -q 'luxury.zervtek.com' /etc/caddy/Caddyfile; then
       echo 'Appending luxury.zervtek.com block to /etc/caddy/Caddyfile'
       sudo tee -a /etc/caddy/Caddyfile >/dev/null < deploy/Caddyfile.snippet
     fi
-    if command -v caddy >/dev/null 2>&1; then
-      sudo caddy validate --config /etc/caddy/Caddyfile
-      sudo systemctl reload caddy || sudo caddy reload --config /etc/caddy/Caddyfile
-    elif docker ps --format '{{.Names}}' | grep -qx caddy; then
-      # Dockerized Caddy: copy snippet into its volume/config manually if needed
-      echo 'Caddy container detected — ensure luxury.zervtek.com is in its Caddyfile, then:'
-      echo '  docker exec caddy caddy reload --config /etc/caddy/Caddyfile'
+    sudo caddy validate --config /etc/caddy/Caddyfile
+    if systemctl is-active --quiet caddy; then
+      sudo systemctl reload caddy
+    else
+      echo 'Host caddy.service inactive — skip host reload.'
     fi
   else
-    echo 'No /etc/caddy/Caddyfile found. Add deploy/Caddyfile.snippet to your Caddy config.'
+    echo 'No Caddy (Docker or host) found. Add deploy/Caddyfile.snippet to your Caddy config.'
   fi
 
   echo 'Done. Check: curl -sI https://luxury.zervtek.com | head -1'

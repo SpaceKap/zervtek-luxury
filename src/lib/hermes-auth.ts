@@ -111,7 +111,7 @@ export function safeHermesError(err: unknown, fallback = "INTERNAL_ERROR") {
 }
 
 export function reviewUrl(vehicleId: string): string {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://luxury.zervtek.com").replace(
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://performance.zervtek.com").replace(
     /\/$/,
     "",
   );

@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  // Home-dir package-lock.json makes Next infer /Users/avishka as the
+  // workspace root, so Turbopack never registers src/app routes (all 404).
+  outputFileTracingRoot: projectRoot,
   turbopack: {
-    root: process.cwd(),
+    root: projectRoot,
   },
   images: {
     remotePatterns: [

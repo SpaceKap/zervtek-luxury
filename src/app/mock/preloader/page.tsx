@@ -4,6 +4,7 @@ import { getFeaturedVehicles } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { InquiryForm } from "@/components/InquiryForm";
 import { PreloaderLab } from "@/components/mock/PreloaderLab";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export default async function MockPreloaderPage() {
           <section className="section container" id="featured">
             <header className="stock-hero" style={{ paddingBlock: "0 44px" }}>
               <div className="stock-meta">
-                <span>luxury.zervtek.com</span>
+                <span>{new URL(SITE.url).hostname}</span>
                 <span>The Pride for Quality</span>
               </div>
               <h2 className="stock-title">The collection</h2>

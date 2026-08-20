@@ -25,12 +25,16 @@ const defaultMarkers: LiveMarker[] = [
   { id: "nyc", location: [40.71, -74.01], label: "New York" },
 ];
 
-const RING_GAP = 36;
-const TAG_PAD = 22;
+const TAU = Math.PI * 2;
+const RING_GAP = 40;
 const TAG_GAP = 10;
 
 function tagTransform(x: number, y: number) {
   return `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%)`;
+}
+
+function wrapAngle(a: number) {
+  return ((a % TAU) + TAU) % TAU;
 }
 
 export function GlobeLive({
@@ -94,88 +98,51 @@ export function GlobeLive({
 
     let lastFacingKey = "";
 
-    function placeOnRing(
-      els: HTMLElement[],
-      r: number,
-      cx: number,
-      cy: number,
-      startAngle: number,
-    ) {
-      const n = els.length;
-      if (n === 0) return [] as { el: HTMLElement; x: number; y: number; w: number; h: number }[];
-
-      const widths = els.map((el) => Math.max(el.offsetWidth, 48));
-      const heights = els.map((el) => Math.max(el.offsetHeight, 22));
-      const sumW = widths.reduce((a, b) => a + b, 0);
-      const pad = Math.max(TAG_PAD, (Math.PI * 2 * r - sumW) / n);
-      const placed: { el: HTMLElement; x: number; y: number; w: number; h: number }[] = [];
-
-      let angle = startAngle - widths[0] / 2 / r;
-      for (let i = 0; i < n; i++) {
-        angle += widths[i] / 2 / r;
-        const x = cx + Math.cos(angle) * r;
-        const y = cy + Math.sin(angle) * r;
-        placed.push({ el: els[i], x, y, w: widths[i], h: heights[i] });
-        angle += widths[i] / 2 / r + pad / r;
+    function markerAngle(id: string, cx: number, cy: number, fallback: number) {
+      if (!root || !canvas) return fallback;
+      const host = canvas.parentElement;
+      if (!host) return fallback;
+      const needle = `--cobe-${id}`;
+      for (const node of host.children) {
+        if (!(node instanceof HTMLElement) || node === canvas) continue;
+        if (!node.style.cssText.includes(needle)) continue;
+        const rect = node.getBoundingClientRect();
+        const rootRect = root.getBoundingClientRect();
+        const mx = rect.left - rootRect.left + rect.width / 2;
+        const my = rect.top - rootRect.top + rect.height / 2;
+        return Math.atan2(my - cy, mx - cx);
       }
-      return placed;
+      return fallback;
     }
 
-    function separate(
-      items: { el: HTMLElement; x: number; y: number; w: number; h: number }[],
-      cx: number,
-      cy: number,
-      minR: number,
-      rootW: number,
-      rootH: number,
+    function separateOnCircle(
+      items: { el: HTMLElement; angle: number; half: number }[],
     ) {
-      for (let iter = 0; iter < 14; iter++) {
+      if (items.length < 2) return;
+      let total = 0;
+      for (const it of items) total += it.half * 2;
+      if (total >= TAU) {
+        const scale = (TAU * 0.98) / total;
+        for (const it of items) it.half *= scale;
+      }
+
+      for (let iter = 0; iter < 18; iter++) {
+        items.sort((a, b) => a.angle - b.angle);
         for (let i = 0; i < items.length; i++) {
-          for (let j = i + 1; j < items.length; j++) {
-            const a = items[i];
-            const b = items[j];
-            const dx = b.x - a.x;
-            const dy = b.y - a.y;
-            const overlapX = (a.w + b.w) / 2 + TAG_GAP - Math.abs(dx);
-            const overlapY = (a.h + b.h) / 2 + TAG_GAP - Math.abs(dy);
-            if (overlapX <= 0 || overlapY <= 0) continue;
-
-            let nx = dx;
-            let ny = dy;
-            const len = Math.hypot(nx, ny);
-            if (len < 0.001) {
-              const ang = (i + j) * 1.7;
-              nx = Math.cos(ang);
-              ny = Math.sin(ang);
-            } else {
-              nx /= len;
-              ny /= len;
-            }
-            const push = Math.min(overlapX, overlapY) / 2 + 0.5;
-            a.x -= nx * push;
-            a.y -= ny * push;
-            b.x += nx * push;
-            b.y += ny * push;
-          }
-        }
-
-        for (const item of items) {
-          const vx = item.x - cx;
-          const vy = item.y - cy;
-          const dist = Math.hypot(vx, vy) || 1;
-          if (dist < minR) {
-            item.x = cx + (vx / dist) * minR;
-            item.y = cy + (vy / dist) * minR;
-          }
-          const hw = item.w / 2 + 4;
-          const hh = item.h / 2 + 4;
-          item.x = Math.min(rootW - hw, Math.max(hw, item.x));
-          item.y = Math.min(rootH - hh, Math.max(hh, item.y));
+          const a = items[i];
+          const b = items[(i + 1) % items.length];
+          let gap = b.angle - a.angle;
+          if (gap <= 0) gap += TAU;
+          const need = a.half + b.half;
+          if (gap >= need) continue;
+          const push = (need - gap) / 2;
+          a.angle = wrapAngle(a.angle - push);
+          b.angle = wrapAngle(b.angle + push);
         }
       }
     }
 
-    function placeEven(els: HTMLElement[]) {
+    function placeOnOuterCircle(els: HTMLElement[]) {
       const n = els.length;
       if (n === 0 || !root || !canvas) return;
 
@@ -183,34 +150,33 @@ export function GlobeLive({
       const canvasRect = canvas.getBoundingClientRect();
       const cx = canvasRect.left - rootRect.left + canvasRect.width / 2;
       const cy = canvasRect.top - rootRect.top + canvasRect.height / 2;
-      const widths = els.map((el) => Math.max(el.offsetWidth, 48));
-      const sumW = widths.reduce((a, b) => a + b, 0);
-      const maxW = Math.max(...widths);
-      const minR = canvasRect.width / 2 + RING_GAP;
+      const maxW = Math.max(...els.map((el) => Math.max(el.offsetWidth, 48)));
+      const globeR = canvasRect.width / 2;
       const maxR =
-        Math.min(rootRect.width, rootRect.height) / 2 - maxW / 2 - 8;
-      const neededR = (sumW + n * TAG_PAD) / (Math.PI * 2);
-      const twoRings = neededR > maxR && n >= 6;
+        Math.min(cx, cy, rootRect.width - cx, rootRect.height - cy) -
+        maxW / 2 -
+        8;
+      const r = Math.max(globeR + 24, Math.min(maxR, globeR + RING_GAP));
 
-      let placed: { el: HTMLElement; x: number; y: number; w: number; h: number }[];
+      const items = els.map((el, i) => {
+        const w = Math.max(el.offsetWidth, 48);
+        const id = el.dataset.portId ?? "";
+        return {
+          el,
+          angle: wrapAngle(markerAngle(id, cx, cy, -Math.PI / 2 + (i * TAU) / n)),
+          half: Math.atan2(w / 2 + TAG_GAP / 2, r),
+        };
+      });
 
-      if (twoRings) {
-        const inner = els.filter((_, i) => i % 2 === 0);
-        const outer = els.filter((_, i) => i % 2 === 1);
-        const innerR = minR;
-        const outerR = Math.max(minR + 28, Math.min(maxR, minR + 36));
-        placed = [
-          ...placeOnRing(inner, innerR, cx, cy, -Math.PI / 2),
-          ...placeOnRing(outer, outerR, cx, cy, -Math.PI / 2 + Math.PI / outer.length),
-        ];
-      } else {
-        const r = Math.min(Math.max(minR, neededR), Math.max(minR, maxR));
-        placed = placeOnRing(els, r, cx, cy, -Math.PI / 2);
-      }
+      separateOnCircle(items);
 
-      separate(placed, cx, cy, minR, rootRect.width, rootRect.height);
-      for (const item of placed) {
-        item.el.style.transform = tagTransform(item.x, item.y);
+      for (const item of items) {
+        const x = cx + Math.cos(item.angle) * r;
+        const y = cy + Math.sin(item.angle) * r;
+        const next = tagTransform(x, y);
+        if (item.el.style.transform !== next) {
+          item.el.style.transform = next;
+        }
       }
     }
 
@@ -224,30 +190,13 @@ export function GlobeLive({
         if (on) facing.push(el);
       }
 
+      placeOnOuterCircle(facing);
+
       const key = facing.map((el) => el.dataset.portId).join("|");
       if (key !== lastFacingKey) {
-        const appearing = facing.filter((el) => !el.classList.contains("is-on"));
-        for (const el of appearing) {
-          el.style.transition = "opacity 0.5s ease-in-out";
-        }
-        placeEven(facing);
         lastFacingKey = key;
-        for (const el of appearing) {
-          el.classList.add("is-on");
-        }
         for (const el of tagEls) {
-          if (!facing.includes(el)) el.classList.remove("is-on");
-        }
-        requestAnimationFrame(() => {
-          for (const el of appearing) el.style.transition = "";
-        });
-        return;
-      }
-
-      for (const el of tagEls) {
-        const on = facing.includes(el);
-        if (el.classList.contains("is-on") !== on) {
-          el.classList.toggle("is-on", on);
+          el.classList.toggle("is-on", facing.includes(el));
         }
       }
     }
@@ -283,7 +232,7 @@ export function GlobeLive({
         opacity: 0.85,
       });
 
-      placeEven(tagEls.filter((el) => el.classList.contains("is-on")));
+      placeOnOuterCircle(tagEls.filter((el) => el.classList.contains("is-on")));
 
       function animate() {
         if (!isPausedRef.current) phi += speed;

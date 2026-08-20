@@ -22,12 +22,12 @@ export function VehiclePrice({ price }: { price: number }) {
   const isConverted = currency !== "JPY";
 
   return (
-    <>
-      <div className="vcard-price detail-price">{formatPrice(price)}</div>
-      <div className="muted detail-price-note">
+    <div className="detail-price-block">
+      <div className="detail-price">{formatPrice(price)}</div>
+      <p className="muted detail-price-note">
         Plus shipping
         {isConverted ? " · approx. exchange rate" : null}
-      </div>
-    </>
+      </p>
+    </div>
   );
 }

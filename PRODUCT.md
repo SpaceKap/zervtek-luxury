@@ -17,7 +17,7 @@ Both audiences evaluate on: authenticity of Japan-sourced stock, clarity of pric
 
 ## Product Purpose
 
-ZervTek Luxury (ZervTek Co. Ltd, Chiba) sources, inspects, and exports premium and performance vehicles from Japan. The site is the public storefront and enquiry channel: browse curated stock, open a vehicle detail, and convert via enquiry form or WhatsApp — not a self-serve checkout cart.
+ZervTek Performance (ZervTek Co. Ltd, Chiba) sources, inspects, and exports performance cars, supercars, and luxury vehicles from Japan. The site is the public storefront and enquiry channel: browse curated stock, open a vehicle detail, and convert via enquiry form or WhatsApp — not a self-serve checkout cart.
 
 Success means qualified enquiries and contact intent (WhatsApp / email) on real vehicles, with inventory that has been reviewed before public publish.
 
@@ -39,8 +39,8 @@ Japan-based **export concierge** for **premium European marques and performance 
 - Prices shown in **JPY**; shipping is quoted separately (“plus shipping”).
 - Inventory workflow: Hermes intake → human review (`NEEDS_REVIEW`) → public statuses (`AVAILABLE` / `RESERVED` / `SOLD`).
 - Public site is **English-only** for now.
-- Brand name and parent: **ZervTek Luxury** / **ZervTek Co. Ltd**; tagline “The Pride for Quality”.
-- Stack (implementation fact): Next.js App Router, Prisma/Postgres, Docker deploy at luxury.zervtek.com.
+- Brand name and parent: **ZervTek Performance** / **ZervTek Co. Ltd**; tagline “The Pride for Quality”.
+- Stack (implementation fact): Next.js App Router, Prisma/Postgres, Docker deploy at performance.zervtek.com.
 
 Open / undecided (do not invent in design copy):
 
@@ -50,7 +50,7 @@ Open / undecided (do not invent in design copy):
 
 ## Brand Commitments
 
-- Name: ZervTek Luxury; legal: ZervTek Co. Ltd.
+- Name: ZervTek Performance; legal: ZervTek Co. Ltd.
 - Tagline: “The Pride for Quality”.
 - Contact: info@zervtek.com; WhatsApp / phone +81 80 6659 4632; Chiba address in site config.
 - Voice: specialist, personal, no call-centre / no-pressure (as used on the site).

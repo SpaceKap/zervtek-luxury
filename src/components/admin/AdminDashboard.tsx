@@ -18,6 +18,7 @@ import {
   SOURCE_TYPES,
 } from "@/lib/vehicle-constants";
 import { digitsOnly, formatDigitsWithCommas } from "@/lib/format";
+import { joinFeatures } from "@/lib/features";
 import { vehicleStockPath } from "@/lib/slug";
 import {
   buildVehicleMetaDescription,
@@ -165,7 +166,7 @@ function vehicleToForm(v: Vehicle): FormState {
     location: v.location || "",
     vin: v.vin || "",
     description: v.description,
-    features: v.features.join(", "),
+    features: joinFeatures(v.features),
     metaTitle: v.metaTitle || "",
     metaDescription: v.metaDescription || "",
     status: v.status,

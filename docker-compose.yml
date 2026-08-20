@@ -30,7 +30,7 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-luxury}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-luxury}?schema=public
       VEHICLE_UPLOAD_DIR: /var/lib/zervtek-luxury/vehicle-images
       VEHICLE_MEDIA_URL_PREFIX: /media/vehicles
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://luxury.zervtek.com}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://performance.zervtek.com}
       PORT: "3000"
       HOSTNAME: 0.0.0.0
     ports:

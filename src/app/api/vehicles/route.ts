@@ -14,6 +14,7 @@ import {
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
 import { buildVehicleMetaDescription, buildVehicleMetaTitle } from "@/lib/seo";
+import { parseFeatureList } from "@/lib/features";
 
 function toInt(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
@@ -103,7 +104,7 @@ function normalizeAdmin(body: Record<string, unknown>) {
     location: body.location ? String(body.location).trim() : null,
     vin: body.vin || body.frameNumber ? String(body.vin || body.frameNumber).trim() : null,
     description,
-    features: toStrArray(body.features),
+    features: parseFeatureList(body.features),
     images: toStrArray(body.images),
     status,
     featured: Boolean(body.featured),

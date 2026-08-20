@@ -176,7 +176,7 @@ export const DESTINATION_PORT_REGIONS: PortRegion[] = [
   },
 ];
 
-/** Markers on the globe — short labels on key hubs. Nearby tags are spaced at runtime. */
+/** Markers on the globe — short labels on key hubs. Tags sit on one outer ring. */
 export const GLOBE_PORT_MARKERS: GlobePortMarker[] = [
   // North America
   { id: "tacoma", location: [47.27, -122.42], label: "Tacoma" },

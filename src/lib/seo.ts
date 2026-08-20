@@ -55,7 +55,7 @@ function vehicleName(v: ProductVehicle | PublicVehicle): string {
 /** Meta title from vehicle title. */
 export function buildVehicleMetaTitle(v: VehicleSeoInput): string {
   const title = vehicleListingTitle(v);
-  if (!title) return `${SITE.name} | Luxury Cars from Japan`;
+  if (!title) return `${SITE.name} | Performance Cars from Japan`;
   return `${title} for Sale`;
 }
 

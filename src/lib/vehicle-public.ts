@@ -1,4 +1,5 @@
 import type { Vehicle } from "@prisma/client";
+import { parseFeatureList } from "@/lib/features";
 
 /** Keys stripped from any public-facing vehicle payload. */
 export const INTERNAL_VEHICLE_KEYS = [
@@ -26,6 +27,7 @@ export function toPublicVehicle(v: Vehicle): PublicVehicle {
   for (const key of INTERNAL_VEHICLE_KEYS) {
     delete out[key];
   }
+  out.features = parseFeatureList(v.features);
   return out as PublicVehicle;
 }
 

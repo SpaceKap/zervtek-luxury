@@ -19,7 +19,7 @@ export function Logo({ showLuxury = true, href = "/", className = "", onClick }:
         priority
         className="brand-img"
       />
-      {showLuxury ? <span className="brand-sub">Luxury</span> : null}
+      {showLuxury ? <span className="brand-sub">Performance</span> : null}
     </>
   );
 
@@ -29,7 +29,7 @@ export function Logo({ showLuxury = true, href = "/", className = "", onClick }:
         href={href}
         className={`brand-logo ${className}`.trim()}
         onClick={onClick}
-        aria-label="ZervTek Luxury home"
+        aria-label="ZervTek Performance home"
       >
         {inner}
       </Link>

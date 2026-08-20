@@ -1,4 +1,4 @@
-# Hermes → ZervTek Luxury Portal API
+# Hermes → ZervTek Performance Portal API
 
 Internal integration for automated vehicle intake. **Do not use n8n.** Hermes calls this API directly.
 
@@ -81,7 +81,7 @@ See `deploy/Caddyfile.example`. Prefer Caddy `file_server` for `/media/vehicles/
 ### Create vehicle (multipart)
 
 ```bash
-curl -sS -X POST "https://luxury.zervtek.com/api/internal/vehicles" \
+curl -sS -X POST "https://performance.zervtek.com/api/internal/vehicles" \
   -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
   -H "Idempotency-Key: dealer:dealer-983214" \
   -F 'metadata={"make":"Mercedes-AMG","model":"C-Class","variant":"C43 4MATIC Wagon","registrationYear":2025,"registrationMonth":3,"totalPriceJpy":9000000,"mileageKm":80000,"engineCc":3000,"transmission":"AUTOMATIC","fuel":"PETROL","drivetrain":"AWD","steering":"RHD","bodyType":"WAGON","exteriorColour":"Obsidian Black","interiorColour":"Black leather","location":"Osaka, Japan","frameNumber":"205264-123456","description":"Vehicle description","features":["Burmester sound system"],"sourceType":"DEALER","sourceListingId":"dealer-983214","sourceUrl":"https://dealer.example/vehicle/983214","coverImageIndex":0};type=application/json' \
@@ -94,14 +94,14 @@ Always starts as `NEEDS_REVIEW`. Fee breakdown fields are rejected; use `totalPr
 ### Check queue
 
 ```bash
-curl -sS "https://luxury.zervtek.com/api/internal/vehicles/check-queue?limit=50" \
+curl -sS "https://performance.zervtek.com/api/internal/vehicles/check-queue?limit=50" \
   -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN"
 ```
 
 ### Availability result
 
 ```bash
-curl -sS -X POST "https://luxury.zervtek.com/api/internal/vehicles/<vehicleId>/availability-check" \
+curl -sS -X POST "https://performance.zervtek.com/api/internal/vehicles/<vehicleId>/availability-check" \
   -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"result":"UNAVAILABLE","checkedAt":"2026-07-25T00:00:00.000Z","httpStatus":404,"evidence":"Listing returned 404"}'

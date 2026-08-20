@@ -1,10 +1,10 @@
 export const SITE = {
-  name: "ZervTek Luxury",
+  name: "ZervTek Performance",
   legalName: "ZervTek Co. Ltd",
   tagline: "The Pride for Quality",
   description:
-    "ZervTek Luxury sources, inspects and exports the world's finest performance and luxury vehicles from Japan — Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://luxury.zervtek.com",
+    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan — Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://performance.zervtek.com",
   email: "info@zervtek.com",
   phone: "+81 80 6659 4632",
   address: {
@@ -17,7 +17,7 @@ export const SITE = {
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "818066594632",
   whatsappMessage:
     process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ||
-    "Hello ZervTek Luxury, I'm interested in a vehicle.",
+    "Hello ZervTek Performance, I'm interested in a vehicle.",
   social: {
     instagram: "https://instagram.com/zervtek",
     facebook: "https://facebook.com/zervtek",
@@ -187,12 +187,12 @@ export const PREFECTURES = [
 
 export const FAQS = [
   {
-    q: "What does ZervTek Luxury do?",
-    a: "We source, inspect and export premium and performance vehicles from Japan to buyers worldwide. Every car is hand-selected, quality-checked at our PDI centre and delivered with transparent, all-inclusive pricing.",
+    q: "What does ZervTek Performance do?",
+    a: "We source, inspect and export performance cars, supercars and luxury vehicles from Japan to buyers worldwide. Every car is hand-selected, quality-checked at our PDI centre and delivered with transparent, all-inclusive pricing.",
   },
   {
-    q: "Why buy a luxury vehicle from Japan?",
-    a: "Japan's strict roadworthiness laws, low average mileage and meticulous ownership culture mean luxury vehicles are kept in exceptional condition. Combined with a transparent auction grading system, you get world-class cars at genuinely competitive prices.",
+    q: "Why buy a performance or luxury car from Japan?",
+    a: "Japan's strict roadworthiness laws, low average mileage and meticulous ownership culture mean these cars are kept in exceptional condition. Combined with a transparent auction grading system, you get world-class performance, supercars and luxury vehicles at genuinely competitive prices.",
   },
   {
     q: "Do the prices include everything?",
@@ -213,8 +213,8 @@ export const FAQS = [
 ];
 
 export const SHOWROOMS = [
-  { name: "ZervTek Luxury — Chiba Flagship", city: "Chiba" },
-  { name: "ZervTek Luxury — Central", city: "Tokyo" },
+  { name: "ZervTek Performance — Chiba Flagship", city: "Chiba" },
+  { name: "ZervTek Performance — Central", city: "Tokyo" },
   { name: "ZervTek Auto Technical Base", city: "Chiba" },
 ];
 

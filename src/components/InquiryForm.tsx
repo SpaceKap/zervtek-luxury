@@ -8,6 +8,7 @@ import {
   PHONE_COUNTRIES,
 } from "@/lib/phone-codes";
 import { trackGenerateLead } from "@/lib/analytics";
+import { SITE } from "@/lib/site";
 
 type Props = {
   vehicleId?: string;
@@ -76,7 +77,7 @@ export function InquiryForm({
           Thank you
         </h3>
         <p className="muted" style={{ margin: 0 }}>
-          Your inquiry has been received. A ZervTek Luxury specialist will contact you shortly.
+          Your inquiry has been received. A {SITE.name} specialist will contact you shortly.
         </p>
       </div>
     );

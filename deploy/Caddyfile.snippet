@@ -7,7 +7,7 @@
 #
 # Host/systemd Caddy instead: use `reverse_proxy 127.0.0.1:3010`.
 
-luxury.zervtek.com {
+performance.zervtek.com {
 	encode gzip zstd
 
 	# Optional: serve vehicle media directly from disk (needs volume mount
@@ -21,4 +21,8 @@ luxury.zervtek.com {
 	# }
 
 	reverse_proxy luxury-app:3000
+}
+
+luxury.zervtek.com {
+	redir https://performance.zervtek.com{uri} permanent
 }

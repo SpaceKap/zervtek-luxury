@@ -1,8 +1,8 @@
-# VPS deploy (luxury.zervtek.com)
+# VPS deploy (performance.zervtek.com)
 
 ## One-time server prep
 
-1. DNS: `luxury.zervtek.com` A/AAAA → VPS public IP
+1. DNS: `performance.zervtek.com` A/AAAA → VPS public IP (keep `luxury.zervtek.com` for redirect)
 2. Shared Docker network (if missing):
    ```bash
    docker network create caddy_proxy
@@ -36,7 +36,7 @@ From your laptop (after Tailscale/SSH works):
 
 ## Caddy (Dockerized on this VPS)
 
-Snippet: `deploy/Caddyfile.snippet` — proxies `luxury.zervtek.com` → `luxury-app:3000` over the shared `caddy_proxy` network.
+Snippet: `deploy/Caddyfile.snippet` — proxies `performance.zervtek.com` → `luxury-app:3000` over the shared `caddy_proxy` network. `luxury.zervtek.com` 301s to the new host.
 
 Add the block to the Caddyfile the `caddy` container mounts (the n8n stack, e.g. `/opt/n8n/Caddyfile`), then:
 
