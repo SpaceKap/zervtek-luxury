@@ -106,8 +106,8 @@ export async function syncVehicleMediaOrder(
 }
 
 export function maxImages(): number {
-  const n = Number(process.env.VEHICLE_MAX_IMAGES || 50);
-  return Number.isFinite(n) && n > 0 ? n : 50;
+  const n = Number(process.env.VEHICLE_MAX_IMAGES || 100);
+  return Number.isFinite(n) && n > 0 ? n : 100;
 }
 
 export function maxImageBytes(): number {

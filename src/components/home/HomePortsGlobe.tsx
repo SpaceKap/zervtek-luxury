@@ -17,6 +17,7 @@ export function HomePortsGlobe() {
 
   return (
     <section
+      id="destinations"
       className="section container home-ports"
       aria-labelledby="home-ports-title"
     >
@@ -29,7 +30,7 @@ export function HomePortsGlobe() {
             style={{ marginTop: 10, maxWidth: 520, lineHeight: 1.65 }}
           >
             From Japan&apos;s major departure ports to destinations across every
-            ocean — RoRo and container routes managed end to end. Drag the globe
+            ocean. RoRo and container routes managed end to end. Drag the globe
             to explore.
           </p>
         </div>
@@ -42,7 +43,7 @@ export function HomePortsGlobe() {
             className="home-ports-globe-canvas"
           />
           <p className="home-ports-globe-hint muted">
-            Gold markers are active shipping hubs — rotate to reveal labels.
+            Gold markers are active shipping hubs. Rotate to reveal labels.
           </p>
         </div>
 
@@ -67,7 +68,7 @@ export function HomePortsGlobe() {
                   }
                   onClick={() => setActiveRegion(r.region)}
                 >
-                  {r.region.replace(" — Departure", "")}
+                  {r.region.replace(", Departure", "").replace(" Departure", "")}
                 </button>
               );
             })}

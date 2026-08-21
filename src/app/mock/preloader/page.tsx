@@ -15,7 +15,7 @@ const STEPS = [
   { n: "01", t: "Talk to a specialist", d: "Share the car you want, your budget and destination. We advise on the best options available." },
   { n: "02", t: "Curated selection", d: "We hand-pick vehicles from our stock and Japan's finest sources, with full condition reports." },
   { n: "03", t: "Inspect & reserve", d: "Review detailed photography and inspection notes, then reserve your car with confidence." },
-  { n: "04", t: "We handle everything", d: "Servicing, documentation, customs and shipping to your destination port — all managed for you." },
+  { n: "04", t: "We handle everything", d: "Servicing, documentation, customs and shipping to your destination port, all managed for you." },
   { n: "05", t: "Take delivery", d: "Your vehicle arrives, ready to enjoy. Ongoing support is only a message away." },
 ];
 
@@ -42,7 +42,7 @@ export default async function MockPreloaderPage() {
             Mock · Preloader lab · Live home untouched
           </div>
 
-          {/* Hero — editorial layout (duplicate of home) */}
+          {/* Hero: editorial layout (duplicate of home) */}
           <section className="hero-editorial">
             <div className="container hero-editorial-inner">
               <div className="hero-meta">
@@ -87,7 +87,7 @@ export default async function MockPreloaderPage() {
               </div>
               <h2 className="stock-title">The collection</h2>
               <p className="stock-lead">
-                Hand-selected performance and luxury vehicles from Japan — inspected, documented and ready
+                Hand-selected performance and luxury vehicles from Japan, inspected, documented and ready
                 to ship worldwide.
               </p>
             </header>
@@ -138,7 +138,7 @@ export default async function MockPreloaderPage() {
                 </h2>
                 <p className="muted" style={{ lineHeight: 1.7, maxWidth: 460 }}>
                   Tell us what you&apos;re looking for and our team will source the perfect car for you.
-                  Every enquiry is handled personally — no call centres, no pressure.
+                  Every enquiry is handled personally, with no call centres and no pressure.
                 </p>
               </div>
               <div className="glass" style={{ padding: 28, borderRadius: 16 }}>

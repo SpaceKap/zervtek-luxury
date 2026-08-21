@@ -72,6 +72,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','${GTM_ID}');`}
           </Script>
         ) : null}
+        {/* Theme-aware favicon (browser uses prefers-color-scheme). */}
+        <link rel="icon" href="/favicon-light.png" />
+        <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
       </head>
       <body style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
         {GTM_ID ? (

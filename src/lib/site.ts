@@ -3,7 +3,7 @@ export const SITE = {
   legalName: "ZervTek Co. Ltd",
   tagline: "The Pride for Quality",
   description:
-    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan — Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
+    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan: Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://performance.zervtek.com",
   email: "info@zervtek.com",
   phone: "+81 80 6659 4632",
@@ -27,7 +27,24 @@ export const SITE = {
 
 export function whatsappHref(prefill?: string) {
   const text = encodeURIComponent(prefill || SITE.whatsappMessage);
-  return `https://wa.me/${SITE.whatsappNumber}?text=${text}`;
+  return `https://api.whatsapp.com/send/?phone=${SITE.whatsappNumber}&text=${text}`;
+}
+
+/** Full postal address used for maps and company profile. */
+export function siteAddressLine(): string {
+  const { street, city, region, postalCode, country } = SITE.address;
+  const countryLabel = country === "JP" ? "Japan" : country;
+  return `${street}, ${city}, ${region} ${postalCode}, ${countryLabel}`;
+}
+
+export function googleMapsEmbedUrl(): string {
+  const q = encodeURIComponent(siteAddressLine());
+  return `https://www.google.com/maps?q=${q}&z=16&output=embed`;
+}
+
+export function googleMapsPlaceUrl(): string {
+  const q = encodeURIComponent(siteAddressLine());
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
 export const NAV = [
@@ -188,45 +205,45 @@ export const PREFECTURES = [
 export const FAQS = [
   {
     q: "What does ZervTek Performance do?",
-    a: "We source, inspect and export performance cars, supercars and luxury vehicles from Japan to buyers worldwide. Every car is hand-selected, quality-checked at our PDI centre and delivered with transparent, all-inclusive pricing.",
+    a: "We source, inspect and export performance cars, supercars and luxury vehicles from Japan to buyers worldwide.",
   },
   {
     q: "Why buy a performance or luxury car from Japan?",
-    a: "Japan's strict roadworthiness laws, low average mileage and meticulous ownership culture mean these cars are kept in exceptional condition. Combined with a transparent auction grading system, you get world-class performance, supercars and luxury vehicles at genuinely competitive prices.",
+    a: "Japan's strict roadworthiness laws, low average mileage and meticulous ownership culture mean these cars are kept in exceptional condition. Combined with a transparent auction grading system and trusted dealer network, you get world-class performance, supercars and luxury vehicles at genuinely competitive prices.",
   },
   {
     q: "Do the prices include everything?",
-    a: "Yes. Each listing shows the total payment (支払総額) which bundles the vehicle price, inspection, pre-delivery servicing and applicable fees. Shipping and destination-country compliance are quoted upfront with no hidden costs.",
+    a: "Yes. Each listing shows the total FOB payment for Japan, which includes the vehicle price, inspections, documentation charges, inland transport, customs clearance, and applicable fees. Shipping is charged separately based on your destination port and shipping method (RoRo or container).",
   },
   {
     q: "Can you ship internationally?",
-    a: "We export worldwide — including the UK, USA, Canada, Australia, New Zealand, the Middle East and East Africa. Our team handles documentation, logistics and customs clearance to your destination port.",
+    a: "We export worldwide — including the UK, USA, Canada, Australia, New Zealand, the Middle East and East Africa. Our team handles documentation, logistics and customs clearance to your destination port. <a href=\"/#destinations\">See the full list of destinations</a>.",
   },
   {
     q: "How do I reserve a vehicle?",
-    a: "Send an inquiry through any vehicle page or the form on our homepage, or message us on WhatsApp. A specialist will confirm availability, walk you through the condition report and secure the car for you.",
+    a: "Send an inquiry through any vehicle page or the form on our homepage, or message us on WhatsApp. A specialist will confirm availability, walk you through the condition report, and secure the car for you. We can also arrange an in-person inspection anywhere across Japan before you commit.",
   },
   {
     q: "Is every vehicle inspected before delivery?",
-    a: "Absolutely. Each car passes a thorough multi-point inspection at our in-house facility, and we provide a detailed condition report plus photography before you commit.",
+    a: "Absolutely. We inspect every vehicle in person, capture detailed photos and videos, and provide a full condition report before you commit.",
   },
 ];
 
 export const SHOWROOMS = [
-  { name: "ZervTek Performance — Chiba Flagship", city: "Chiba" },
-  { name: "ZervTek Performance — Central", city: "Tokyo" },
+  { name: "ZervTek Performance, Chiba Flagship", city: "Chiba" },
+  { name: "ZervTek Performance, Central", city: "Tokyo" },
   { name: "ZervTek Auto Technical Base", city: "Chiba" },
 ];
 
 export const COMPANY_PROFILE = {
   companyName: "ZervTek Co., Ltd.",
   japaneseName: "株式会社ザーブテック",
-  address: `${SITE.address.street}, ${SITE.address.city}, ${SITE.address.region} ${SITE.address.postalCode}, Japan`,
+  address: siteAddressLine(),
   registrationNo: "0400-01-089801",
   dealerLicense: "441340001639",
   phone: SITE.phone,
   email: SITE.email,
-  hours: "9:00–18:00 JST",
+  hours: "Mon–Sat, 9am–6pm Japan Standard Time",
 };
 
 export const BANK_ACCOUNTS = [

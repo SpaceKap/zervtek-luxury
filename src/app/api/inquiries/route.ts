@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { notifyInquiry, type InquiryNotification } from "@/lib/inquiry-notify";
+import { SITE } from "@/lib/site";
+
+function trimOrNull(v: unknown): string | null {
+  if (v === null || v === undefined) return null;
+  const s = String(v).trim();
+  return s || null;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,16 +22,62 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
     }
 
-    await prisma.inquiry.create({
+    const vehicleId = trimOrNull(body.vehicleId);
+    const formLocation = trimOrNull(body.formLocation);
+    const make = trimOrNull(body.make);
+    const model = trimOrNull(body.model);
+    const budget = trimOrNull(body.budget);
+    const timeline = trimOrNull(body.timeline);
+    const preferredContact = trimOrNull(body.preferredContact);
+    const phone = trimOrNull(body.phone);
+    const country = trimOrNull(body.country);
+    const message = trimOrNull(body.message);
+
+    const inquiry = await prisma.inquiry.create({
       data: {
         name,
         email,
-        phone: body.phone ? String(body.phone).trim() : null,
-        country: body.country ? String(body.country).trim() : null,
-        message: body.message ? String(body.message).trim() : null,
-        vehicleId: body.vehicleId ? String(body.vehicleId) : null,
+        phone,
+        country,
+        message,
+        vehicleId,
       },
     });
+
+    const vehicle = vehicleId
+      ? await prisma.vehicle.findUnique({
+          where: { id: vehicleId },
+          select: {
+            make: true,
+            model: true,
+            variant: true,
+            year: true,
+            slug: true,
+            price: true,
+          },
+        })
+      : null;
+
+    const notification: InquiryNotification = {
+      id: inquiry.id,
+      name,
+      email,
+      phone,
+      country,
+      message,
+      vehicleId,
+      vehicle,
+      formLocation,
+      make,
+      model,
+      budget,
+      timeline,
+      preferredContact,
+      submittedAt: inquiry.createdAt.toISOString(),
+      siteUrl: SITE.url,
+    };
+
+    await notifyInquiry(notification);
 
     return NextResponse.json({ ok: true });
   } catch {

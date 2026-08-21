@@ -7,13 +7,14 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Luxury Car Stock — Browse & Search",
+  title: "Performance Car Stock | Browse & Search",
   description:
-    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Search by make, body type and price — Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
+    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Search by make, body type and price: Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
   alternates: { canonical: "/stock" },
 };
 
@@ -76,7 +77,7 @@ export default async function StockPage({
         </div>
         <h1 className="stock-title">The collection</h1>
         <p className="stock-lead">
-          Hand-selected performance and luxury vehicles from Japan — inspected, documented and ready
+          Hand-selected performance and luxury vehicles from Japan, inspected, documented and ready
           to ship worldwide.
         </p>
       </header>
@@ -128,16 +129,39 @@ export default async function StockPage({
           </>
         ) : (
           <div className="stock-empty glass">
-            <h2>No vehicles found</h2>
+            <h2>Can&apos;t find what you&apos;re looking for?</h2>
             <p className="muted">
-              Try adjusting your filters or{" "}
-              <Link href="/stock" className="gold-text">
-                view all stock
-              </Link>
-              .
+              Contact us and we will find exactly what you need from auctions and
+              dealerships across Japan.
             </p>
+            <div className="stock-source-actions">
+              <Link className="btn btn-gold" href="/about#contact-form">
+                Contact us
+              </Link>
+              <WhatsAppLink className="btn btn-outline" location="stock_empty">
+                WhatsApp us
+              </WhatsAppLink>
+            </div>
           </div>
         )}
+
+        {items.length > 0 ? (
+          <aside className="stock-source-cta glass">
+            <h2 className="heading">Can&apos;t find what you&apos;re looking for?</h2>
+            <p className="muted">
+              Contact us and we will find exactly what you&apos;re looking for from
+              Japanese auctions and dealerships across Japan.
+            </p>
+            <div className="stock-source-actions">
+              <Link className="btn btn-gold" href="/about#contact-form">
+                Contact us
+              </Link>
+              <WhatsAppLink className="btn btn-outline" location="stock_source_cta">
+                WhatsApp us
+              </WhatsAppLink>
+            </div>
+          </aside>
+        ) : null}
       </div>
     </main>
   );

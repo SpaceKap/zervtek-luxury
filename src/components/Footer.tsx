@@ -24,6 +24,7 @@ export function Footer() {
               </Link>
             ))}
             <Link href="/stock?status=AVAILABLE">Available Stock</Link>
+            <Link href="/about#visit">Come meet us</Link>
             <Link href="/about#bank-details">Bank Details</Link>
             <Link href="/about#contact-form">Contact</Link>
           </div>

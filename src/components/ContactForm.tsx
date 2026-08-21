@@ -49,17 +49,6 @@ export function ContactForm({ catalog = [] }: Props) {
     const dial = getPhoneDial(phoneCountry);
     const phone = phoneNumber ? `${dial} ${phoneNumber}`.trim() : undefined;
 
-    const extras = [
-      make ? `Make: ${make}` : null,
-      model ? `Model: ${model}` : null,
-      data.budget ? `Budget: ${data.budget}` : null,
-      data.timeline ? `Timeline: ${data.timeline}` : null,
-      data.preferredContact ? `Preferred contact: ${data.preferredContact}` : null,
-      data.message ? String(data.message).trim() : null,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
     try {
       const res = await fetch("/api/inquiries", {
         method: "POST",
@@ -69,7 +58,13 @@ export function ContactForm({ catalog = [] }: Props) {
           email: data.email,
           phone,
           country: data.country,
-          message: extras || null,
+          message: data.message || null,
+          formLocation: "contact_page",
+          make: make || null,
+          model: model || null,
+          budget: data.budget ? String(data.budget) : null,
+          timeline: data.timeline ? String(data.timeline) : null,
+          preferredContact: data.preferredContact ? String(data.preferredContact) : null,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");

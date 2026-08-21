@@ -63,7 +63,7 @@ const vehicles = [
     features: ["Cold Climate Pack", "Comfort & Convenience Pack", "Roof rack", "Electronic Air Suspension"],
     images: [u("1606664515524-ed2f786a0bd6"), u("1519641471654-76ce0107ad1b")],
     description:
-      "The flagship Defender 110 X in desirable Lantau Bronze with the Cold Climate and Comfort & Convenience packs. This is the definitive modern luxury off-roader — commanding presence, supreme capability and a beautifully appointed cabin. Fitted with a roof rack and electronic air suspension. A meticulously maintained example, fully inspected and ready to ship.",
+      "The flagship Defender 110 X in desirable Lantau Bronze with the Cold Climate and Comfort & Convenience packs. This is the definitive modern luxury off-roader: commanding presence, supreme capability and a beautifully appointed cabin. Fitted with a roof rack and electronic air suspension. A meticulously maintained example, fully inspected and ready to ship.",
   },
   {
     make: "BMW",
@@ -126,7 +126,7 @@ const vehicles = [
     features: ["Sport Chrono Package", "PASM", "BOSE Surround Sound", "Sport Exhaust"],
     images: [u("1503376780353-7e6692767b70"), u("1544636331-e26879cd4d9b")],
     description:
-      "An icon in its finest current form — the 992-generation Porsche 911 Carrera S in GT Silver Metallic. Twin-turbo flat-six, lightning-quick PDK and the Sport Chrono Package deliver breathtaking performance, while PASM and the sport exhaust sharpen the experience. A low-mileage, immaculate example with a desirable specification. Inspected and ready for worldwide export.",
+      "An icon in its finest current form: the 992-generation Porsche 911 Carrera S in GT Silver Metallic. Twin-turbo flat-six, lightning-quick PDK and the Sport Chrono Package deliver breathtaking performance, while PASM and the sport exhaust sharpen the experience. A low-mileage, immaculate example with a desirable specification. Inspected and ready for worldwide export.",
   },
   {
     make: "Ferrari",
@@ -147,7 +147,7 @@ const vehicles = [
     features: ["Carbon fibre package", "Daytona seats", "Front lift", "JBL Professional audio"],
     images: [u("1592198084033-aade902d1aae"), u("1583121274602-3e2820c69888")],
     description:
-      "The exhilarating Ferrari 488 Spider in the definitive Rosso Corsa over Nero. Its 3.9-litre twin-turbo V8 is one of the greatest engines of the modern era, and the retractable hardtop lets you savour every note. Specified with the carbon fibre package, Daytona seats and front lift. A pristine, low-mileage example with full history — a true collector's grade car.",
+      "The exhilarating Ferrari 488 Spider in the definitive Rosso Corsa over Nero. Its 3.9-litre twin-turbo V8 is one of the greatest engines of the modern era, and the retractable hardtop lets you savour every note. Specified with the carbon fibre package, Daytona seats and front lift. A pristine, low-mileage example with full history and true collector's grade condition.",
   },
 ];
 

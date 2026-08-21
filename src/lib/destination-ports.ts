@@ -22,11 +22,11 @@ export const DESTINATION_PORT_REGIONS: PortRegion[] = [
     region: "North America",
     countries: [
       {
-        name: "United States — West Coast",
+        name: "United States, West Coast",
         ports: ["Port of Tacoma", "Port of Long Beach"],
       },
       {
-        name: "United States — East Coast",
+        name: "United States, East Coast",
         ports: [
           "Port of Baltimore",
           "Port of Jacksonville",

@@ -94,7 +94,7 @@ export function ProtectedCarousel({ images, alt }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={src}
-                alt={`${alt} — photo ${i + 1}`}
+                alt={`${alt}, photo ${i + 1}`}
                 draggable={false}
                 onDragStart={block}
                 onContextMenu={block}

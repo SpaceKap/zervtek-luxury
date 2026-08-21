@@ -76,7 +76,7 @@ export function buildVehicleMetaDescription(v: VehicleSeoInput): string {
     Number.isFinite(mileage) ? formatKm(mileage as number) : null,
     Number.isFinite(price) ? `${formatJPY(price as number)} total` : null,
   ].filter(Boolean);
-  return `${bits.join(" — ")}. Inspected and exported worldwide by ${SITE.name}.`;
+  return `${bits.join(", ")}. Inspected and exported worldwide by ${SITE.name}.`;
 }
 
 export function resolveVehicleMetaTitle(v: VehicleSeoInput & { metaTitle?: string | null }): string {
@@ -203,13 +203,14 @@ export function breadcrumbJsonLd(items: { name: string; url: string }[]) {
 }
 
 export function faqJsonLd(faqs: { q: string; a: string }[]) {
+  const stripHtml = (html: string) => html.replace(/<[^>]+>/g, "");
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((f) => ({
       "@type": "Question",
       name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
+      acceptedAnswer: { "@type": "Answer", text: stripHtml(f.a) },
     })),
   };
 }

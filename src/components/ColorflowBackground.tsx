@@ -1,3 +1,5 @@
+"use client";
+
 const COLORFLOW_EMBED =
   "https://colorflow-embed.b-cdn.net/embed.html#e=Y4u_y_S-";
 

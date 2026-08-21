@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
           code.includes("permission") ||
           code.startsWith("STORAGE_WRITE_FAILED")
         ) {
-          invalidFields.images = "Storage permission denied — check VEHICLE_UPLOAD_DIR ownership";
+          invalidFields.images = "Storage permission denied. Check VEHICLE_UPLOAD_DIR ownership";
         } else if (code.startsWith("SHARP_FAILED")) {
           invalidFields.images = "Image processor failed (Sharp)";
         } else {

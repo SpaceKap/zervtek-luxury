@@ -51,6 +51,7 @@ export function InquiryForm({
           country: data.country,
           message: data.message,
           vehicleId,
+          formLocation,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");

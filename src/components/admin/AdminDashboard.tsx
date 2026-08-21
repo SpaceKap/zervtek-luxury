@@ -140,9 +140,9 @@ function statusColor(status: string): { bg: string; color: string } {
 }
 
 function formatDateTime(value: string | Date | null | undefined): string {
-  if (!value) return "—";
+  if (!value) return "-";
   const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleString();
 }
 
@@ -540,7 +540,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
               {editingId ? "Edit vehicle" : "Add a vehicle"}
             </h2>
             <p className="muted" style={{ margin: 0, lineHeight: 1.6, maxWidth: 640, fontSize: 14 }}>
-              Listings are sourced from across Japan — we do not hold stock on site. Enter where the
+              Listings are sourced from across Japan. We do not hold stock on site. Enter where the
               vehicle is located or being sourced from.
             </p>
           </div>
@@ -565,7 +565,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
               fontWeight: 600,
             }}
           >
-            Created by Hermes — review before publishing
+            Created by Hermes. Review before publishing
           </div>
         ) : null}
 
@@ -621,7 +621,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           <div className="field">
             <label>Registration month</label>
             <select {...inputProps("registrationMonth")}>
-              <option value="">—</option>
+              <option value="">-</option>
               {MONTH_OPTIONS.map((m) => (
                 <option key={m} value={m}>
                   {m}
@@ -688,7 +688,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           <div className="field">
             <label>Drivetrain</label>
             <select {...inputProps("drivetrain")}>
-              <option value="">—</option>
+              <option value="">-</option>
               {DRIVETRAINS.map((d) => (
                 <option key={d} value={d}>
                   {DRIVETRAIN_LABELS[d]}
@@ -711,7 +711,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
         <div className="field" style={{ marginTop: 16, maxWidth: 320 }}>
           <label>Body type</label>
           <select {...inputProps("bodyType")}>
-            <option value="">—</option>
+            <option value="">-</option>
             {BODY_TYPE_VALUES.map((b) => (
               <option key={b} value={b}>
                 {BODY_TYPE_LABELS[b]}
@@ -724,7 +724,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           <div className="field">
             <label>Exterior colour</label>
             <select {...inputProps("exteriorColor")}>
-              <option value="">—</option>
+              <option value="">-</option>
               {form.exteriorColor && !EXTERIOR_COLORS.includes(form.exteriorColor) ? (
                 <option value={form.exteriorColor}>{form.exteriorColor}</option>
               ) : null}
@@ -738,7 +738,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           <div className="field">
             <label>Interior colour</label>
             <select {...inputProps("interiorColor")}>
-              <option value="">—</option>
+              <option value="">-</option>
               {form.interiorColor && !INTERIOR_COLORS.includes(form.interiorColor) ? (
                 <option value={form.interiorColor}>{form.interiorColor}</option>
               ) : null}
@@ -755,7 +755,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           <div className="field">
             <label>Location (prefecture)</label>
             <select {...inputProps("location")}>
-              <option value="">—</option>
+              <option value="">-</option>
               {form.location && !PREFECTURES.includes(form.location) ? (
                 <option value={form.location}>{form.location}</option>
               ) : null}
@@ -777,7 +777,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           Condition and description
         </h3>
         <div className="field">
-          <label>Description * (used for SEO — be descriptive)</label>
+          <label>Description * (used for SEO; be descriptive)</label>
           <textarea
             className="textarea"
             value={form.description}
@@ -808,7 +808,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
             <div className="field">
               <label>Source type</label>
               <select {...inputProps("sourceType")}>
-                <option value="">—</option>
+                <option value="">-</option>
                 {SOURCE_TYPES.map((s) => (
                   <option key={s} value={s}>
                     {titleCaseEnum(s)}
@@ -853,7 +853,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
             </div>
             <div className="field">
               <label>Last availability result</label>
-              <input className="input mono" value={editingVehicle?.lastAvailabilityResult || "—"} readOnly disabled />
+              <input className="input mono" value={editingVehicle?.lastAvailabilityResult || "-"} readOnly disabled />
             </div>
           </div>
 
@@ -862,7 +862,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
               <label>Consecutive unavailable checks</label>
               <input
                 className="input mono"
-                value={editingVehicle ? String(editingVehicle.consecutiveUnavailableChecks) : "—"}
+                value={editingVehicle ? String(editingVehicle.consecutiveUnavailableChecks) : "-"}
                 readOnly
                 disabled
               />
@@ -883,7 +883,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
             <label>Availability evidence</label>
             <textarea
               className="textarea mono"
-              value={editingVehicle?.availabilityEvidence || "—"}
+              value={editingVehicle?.availabilityEvidence || "-"}
               readOnly
               disabled
               style={{ minHeight: 80, fontSize: 12 }}
@@ -948,7 +948,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
               {uploading ? "Uploading…" : dragOver ? "Drop photos here" : "Drag & drop photos here"}
             </p>
             <p className="photo-dropzone-hint muted">
-              {uploading ? "Please wait" : "or click to browse — JPEG, PNG, WebP, AVIF · max 8MB each"}
+              {uploading ? "Please wait" : "or click to browse: JPEG, PNG, WebP, AVIF · max 8MB each"}
             </p>
           </div>
           {images.length > 0 ? (

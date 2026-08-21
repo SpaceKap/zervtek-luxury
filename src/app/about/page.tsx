@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Faq } from "@/components/Faq";
 import { JsonLd } from "@/components/JsonLd";
 import { CompanyProfile } from "@/components/CompanyProfile";
+import { MeetUs } from "@/components/MeetUs";
 import { BankDetails } from "@/components/BankDetails";
 import { ContactForm } from "@/components/ContactForm";
 import { HashScroll } from "@/components/HashScroll";
@@ -15,7 +16,7 @@ import { getCatalogMakeModels } from "@/lib/vehicles";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "About ZervTek Performance — Car Export from Japan",
+  title: "About ZervTek Performance | Car Export from Japan",
   description:
     "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan. Learn about our company, payment details, and get in touch.",
   alternates: { canonical: "/about" },
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 
 const VALUES = [
   { t: "Quality first", d: "Every vehicle is hand-selected and passes a thorough multi-point inspection at our in-house facility before it is offered." },
-  { t: "Radical transparency", d: "Clear pricing and honest condition reporting. Shipping is quoted upfront — no surprises." },
+  { t: "Radical transparency", d: "Clear pricing and honest condition reporting. Shipping is quoted upfront, with no surprises." },
   { t: "Concierge service", d: "From first enquiry to delivery and beyond, a dedicated specialist looks after you personally." },
 ];
 
@@ -50,7 +51,9 @@ export default async function AboutPage() {
           The pride for quality, from Japan to the world.
         </h1>
         <p className="muted" style={{ fontSize: 18, lineHeight: 1.7, maxWidth: 720 }}>
-          {SITE.name} is the performance division of ZervTek — dedicated to sourcing, preparing and
+          {SITE.name}
+          {" "}
+          is the performance car division of ZervTek, dedicated to sourcing, preparing and
           exporting performance cars, supercars and luxury vehicles. We combine deep access to Japan&apos;s
           finest cars with meticulous inspection and a genuinely personal service.
         </p>
@@ -63,13 +66,13 @@ export default async function AboutPage() {
             <div className="muted stack" style={{ gap: 16, lineHeight: 1.8 }}>
               <p style={{ margin: 0 }}>
                 Built on years of experience exporting Japanese vehicles worldwide, {SITE.name} was
-                created for buyers who want more than a car — they want the right car, in exceptional
+                created for buyers who want more than a car. They want the right car, in exceptional
                 condition, delivered without compromise.
               </p>
               <p style={{ margin: 0 }}>
                 We source from across Japan&apos;s leading dealers and auctions, verify every condition
-                report, inspect and prepare each vehicle, and manage the full export — documentation,
-                customs and shipping — to your destination port.
+                report, inspect and prepare each vehicle, and manage the full export: documentation,
+                customs and shipping to your destination port.
               </p>
               <p style={{ margin: 0 }}>
                 All operations remain unified under ZervTek Co., Ltd. This site focuses on
@@ -80,6 +83,8 @@ export default async function AboutPage() {
           <CompanyProfile />
         </div>
       </section>
+
+      <MeetUs />
 
       <section className="section container" style={{ paddingTop: 0 }}>
         <div className="section-head">

@@ -4,6 +4,8 @@ import { getFeaturedVehicles } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { InquiryForm } from "@/components/InquiryForm";
 import { JsonLd } from "@/components/JsonLd";
+import { HashScroll } from "@/components/HashScroll";
+import { HeroWhatsAppMessage } from "@/components/HeroWhatsAppMessage";
 import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
 import { productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
@@ -32,7 +34,7 @@ const STEPS = [
   {
     n: "04",
     t: "We handle everything",
-    d: "Servicing, documentation, customs and shipping to your destination port — all managed for you.",
+    d: "Servicing, documentation, customs and shipping to your destination port, all managed for you.",
   },
   {
     n: "05",
@@ -46,7 +48,8 @@ export default async function HomePage() {
 
   return (
       <main>
-        {/* Hero — editorial layout */}
+        <HashScroll />
+        {/* Hero: editorial layout */}
         <section className="hero-editorial">
           <div className="container hero-editorial-inner">
             <div className="hero-meta">
@@ -73,6 +76,8 @@ export default async function HomePage() {
                 <span>performance,</span>
                 <span>sourced from Japan.</span>
               </h1>
+
+              <HeroWhatsAppMessage />
 
               <a
                 href="#featured"
@@ -108,7 +113,7 @@ export default async function HomePage() {
             </div>
             <h2 className="stock-title">The collection</h2>
             <p className="stock-lead">
-              Hand-selected performance and luxury vehicles from Japan —
+              Hand-selected performance and luxury vehicles from Japan,
               inspected, documented and ready to ship worldwide.
             </p>
           </header>
@@ -187,8 +192,8 @@ export default async function HomePage() {
               </h2>
               <p className="muted" style={{ lineHeight: 1.7, maxWidth: 460 }}>
                 Tell us what you&apos;re looking for and our team will source
-                the perfect car for you. Every enquiry is handled personally —
-                no call centres, no pressure.
+                the perfect car for you. Every enquiry is handled personally,
+                with no call centres and no pressure.
               </p>
             </div>
             <div className="glass" style={{ padding: 28, borderRadius: 16 }}>
