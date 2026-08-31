@@ -17,7 +17,7 @@ export const SITE = {
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "818066594632",
   whatsappMessage:
     process.env.NEXT_PUBLIC_WHATSAPP_MESSAGE ||
-    "Hello ZervTek Performance, I'm interested in a vehicle.",
+    "Hello, I'm interested in a vehicle.",
   social: {
     instagram: "https://instagram.com/zervtek",
     facebook: "https://facebook.com/zervtek",
@@ -243,7 +243,7 @@ export const COMPANY_PROFILE = {
   dealerLicense: "441340001639",
   phone: SITE.phone,
   email: SITE.email,
-  hours: "Mon–Sat, 9am–6pm Japan Standard Time",
+  hours: "Mon–Fri, 9am–6pm Japan Standard Time",
 };
 
 export const BANK_ACCOUNTS = [

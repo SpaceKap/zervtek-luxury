@@ -13,7 +13,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-5LCQKFHQ";
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-5L8XN9VF";
 
 const sans = Manrope({
   subsets: ["latin"],

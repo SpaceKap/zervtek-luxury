@@ -147,7 +147,7 @@ export async function sendInquiryEmail(payload: InquiryNotification): Promise<vo
   const to = process.env.INQUIRY_NOTIFY_TO?.trim() || SITE.email;
   const resend = new Resend(apiKey);
 
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from,
     to,
     replyTo: payload.email,
@@ -158,6 +158,12 @@ export async function sendInquiryEmail(payload: InquiryNotification): Promise<vo
   if (error) {
     throw new Error(error.message || "Resend send failed");
   }
+
+  console.info("[inquiry-notify] email sent", {
+    to,
+    id: payload.id,
+    resendId: data?.id ?? null,
+  });
 }
 
 export async function fireInquiryWebhook(payload: InquiryNotification): Promise<void> {
@@ -203,7 +209,10 @@ export async function notifyInquiry(payload: InquiryNotification): Promise<void>
 
   for (const result of results) {
     if (result.status === "rejected") {
-      console.error("[inquiry-notify]", result.reason);
+      const reason = result.reason;
+      const detail =
+        reason instanceof Error ? reason.message : String(reason);
+      console.error("[inquiry-notify] failed:", detail);
     }
   }
 }

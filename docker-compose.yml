@@ -31,6 +31,11 @@ services:
       VEHICLE_UPLOAD_DIR: /var/lib/zervtek-luxury/vehicle-images
       VEHICLE_MEDIA_URL_PREFIX: /media/vehicles
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://performance.zervtek.com}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      INQUIRY_NOTIFY_FROM: ${INQUIRY_NOTIFY_FROM:-}
+      INQUIRY_NOTIFY_TO: ${INQUIRY_NOTIFY_TO:-}
+      INQUIRY_WEBHOOK_URL: ${INQUIRY_WEBHOOK_URL:-}
+      INQUIRY_WEBHOOK_SECRET: ${INQUIRY_WEBHOOK_SECRET:-}
       PORT: "3000"
       HOSTNAME: 0.0.0.0
     ports:
