@@ -195,6 +195,35 @@ describe("Public visibility", () => {
   });
 });
 
+describe("Hermes vehicle mutations", () => {
+  it("allows delete for needs_review draft unavailable only", async () => {
+    const { canHermesDelete, canHermesPatch } = await import("@/lib/hermes-vehicle-mutations");
+    expect(canHermesDelete({ status: "NEEDS_REVIEW" })).toBe(true);
+    expect(canHermesDelete({ status: "DRAFT" })).toBe(true);
+    expect(canHermesDelete({ status: "UNAVAILABLE" })).toBe(true);
+    expect(canHermesDelete({ status: "AVAILABLE" })).toBe(false);
+    expect(canHermesPatch({ status: "NEEDS_REVIEW" })).toBe(true);
+    expect(canHermesPatch({ status: "AVAILABLE" })).toBe(false);
+  });
+
+  it("builds partial patch data and rejects banned fields", async () => {
+    const { buildHermesPatchData, applyPriceAdjustPercent } = await import(
+      "@/lib/hermes-vehicle-mutations"
+    );
+    const patch = buildHermesPatchData({ totalPriceJpy: 10800000, mileageKm: 12000 });
+    expect(patch.ok).toBe(true);
+    expect(patch.data?.price).toBe(10800000);
+    expect(patch.data?.mileage).toBe(12000);
+
+    const blocked = buildHermesPatchData({ status: "AVAILABLE" });
+    expect(blocked.ok).toBe(false);
+    expect(blocked.invalidFields.status).toBeTruthy();
+
+    expect(applyPriceAdjustPercent(1000000, 8)).toBe(1080000);
+    expect(applyPriceAdjustPercent(1000000, -8)).toBe(920000);
+  });
+});
+
 describe("Image magic detection", () => {
   it("accepts JPEG magic bytes", () => {
     const buf = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10]);

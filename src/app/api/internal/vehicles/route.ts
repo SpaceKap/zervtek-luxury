@@ -20,6 +20,88 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function serializeHermesVehicle(v: {
+  id: string;
+  make: string;
+  model: string;
+  variant: string | null;
+  year: number;
+  registrationMonth: number | null;
+  price: number;
+  mileage: number;
+  status: string;
+  sourceListingId: string | null;
+  sourceUrl: string | null;
+  idempotencyKey: string | null;
+  createdByType: string;
+  createdByName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
+  return {
+    vehicleId: v.id,
+    make: v.make,
+    model: v.model,
+    variant: v.variant,
+    registrationYear: v.year,
+    registrationMonth: v.registrationMonth,
+    totalPriceJpy: v.price,
+    mileageKm: v.mileage,
+    status: v.status,
+    sourceListingId: v.sourceListingId,
+    sourceUrl: v.sourceUrl,
+    idempotencyKey: v.idempotencyKey,
+    createdByType: v.createdByType,
+    createdByName: v.createdByName,
+    createdAt: v.createdAt.toISOString(),
+    updatedAt: v.updatedAt.toISOString(),
+    reviewUrl: reviewUrl(v.id),
+  };
+}
+
+/** List vehicles for Hermes automation (filter by status, source, creator). */
+export async function GET(req: NextRequest) {
+  const blocked = hermesGuard(req);
+  if (blocked) return blocked;
+
+  const ip = clientIp(req);
+  const { searchParams } = req.nextUrl;
+  const limit = Math.min(200, Math.max(1, Number(searchParams.get("limit") || 50) || 50));
+  const offset = Math.max(0, Number(searchParams.get("offset") || 0) || 0);
+  const status = searchParams.get("status")?.trim();
+  const createdByType = searchParams.get("createdByType")?.trim();
+  const sourceListingId = searchParams.get("sourceListingId")?.trim();
+
+  const where: Record<string, unknown> = {};
+  if (status) where.status = status;
+  if (createdByType) where.createdByType = createdByType;
+  if (sourceListingId) where.sourceListingId = sourceListingId;
+
+  const [vehicles, total] = await Promise.all([
+    prisma.vehicle.findMany({
+      where,
+      orderBy: [{ createdAt: "desc" }],
+      skip: offset,
+      take: limit,
+    }),
+    prisma.vehicle.count({ where }),
+  ]);
+
+  await auditHermes({
+    action: "vehicle.list",
+    ip,
+    detail: `count=${vehicles.length};total=${total}`,
+  });
+
+  return NextResponse.json({
+    success: true,
+    total,
+    limit,
+    offset,
+    vehicles: vehicles.map(serializeHermesVehicle),
+  });
+}
+
 function mediaUrl(mediumPath: string): string {
   const prefix = getMediaUrlPrefix().replace(/\/$/, "");
   return `${prefix}/${mediumPath.replace(/\\/g, "/")}`;
@@ -55,6 +137,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       duplicate: true,
+      reason: "idempotency_key",
       vehicleId: existing.id,
       status: existing.status,
       reviewUrl: reviewUrl(existing.id),
@@ -96,6 +179,29 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 },
     );
+  }
+
+  if (validation.data.sourceListingId) {
+    const bySource = await prisma.vehicle.findFirst({
+      where: { sourceListingId: validation.data.sourceListingId },
+      orderBy: { createdAt: "asc" },
+    });
+    if (bySource) {
+      await auditHermes({
+        action: "vehicle.create.duplicate",
+        ip,
+        vehicleId: bySource.id,
+        detail: "source_listing_id_hit",
+      });
+      return NextResponse.json({
+        success: true,
+        duplicate: true,
+        reason: "source_listing_id",
+        vehicleId: bySource.id,
+        status: bySource.status,
+        reviewUrl: reviewUrl(bySource.id),
+      });
+    }
   }
 
   const files = form.getAll("images").filter((f): f is File => f instanceof File);

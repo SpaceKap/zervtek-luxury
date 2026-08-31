@@ -12,7 +12,8 @@ import {
   VEHICLE_STATUSES,
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
-import { deleteVehicleImageTree, syncVehicleMediaOrder } from "@/lib/vehicle-images";
+import { syncVehicleMediaOrder } from "@/lib/vehicle-images";
+import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { parseFeatureList } from "@/lib/features";
 
 function toInt(v: unknown): number | null | undefined {
@@ -212,11 +213,7 @@ export async function DELETE(
   }
   const { id } = await params;
   try {
-    await prisma.inquiry.deleteMany({ where: { vehicleId: id } });
-    await prisma.availabilityCheck.deleteMany({ where: { vehicleId: id } });
-    await prisma.vehicleImage.deleteMany({ where: { vehicleId: id } });
-    await prisma.vehicle.delete({ where: { id } });
-    await deleteVehicleImageTree(id);
+    await deleteVehicleById(id);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
