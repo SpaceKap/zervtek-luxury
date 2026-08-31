@@ -1206,6 +1206,12 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   flex: 0 1 auto;
   min-width: 140px;
 }
+.stock-toolbar-year {
+  min-width: 108px;
+}
+.stock-toolbar-steering {
+  min-width: 100px;
+}
 .stock-toolbar-field label {
   display: block;
   font-size: 11px;

@@ -1,4 +1,5 @@
 import type { Prisma, Vehicle } from "@prisma/client";
+import { pickDailyItems } from "./daily-shuffle";
 import { prisma } from "./prisma";
 import { PUBLIC_VEHICLE_STATUSES, isPublicVehicleStatus } from "./vehicle-constants";
 import { toPublicVehicle, type PublicVehicle } from "./vehicle-public";
@@ -7,13 +8,16 @@ import { mergeCatalogWithStock, type CatalogMake } from "./vehicle-catalog";
 export type { Vehicle, PublicVehicle, CatalogMake };
 
 export type VehicleFilters = {
-  q?: string;
   make?: string;
+  model?: string;
   bodyType?: string;
   minPrice?: number;
   maxPrice?: number;
   minYear?: number;
   maxYear?: number;
+  minMileage?: number;
+  maxMileage?: number;
+  steering?: string;
   transmission?: string;
   sort?: "newest" | "price_asc" | "price_desc" | "year_desc";
   status?: string;
@@ -29,6 +33,8 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
   }
 
   if (f.make) and.push({ make: { equals: f.make, mode: "insensitive" } });
+
+  if (f.model) and.push({ model: { equals: f.model, mode: "insensitive" } });
 
   if (f.bodyType) {
     and.push({
@@ -57,15 +63,15 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
     and.push({ year });
   }
 
-  if (f.q) {
-    and.push({
-      OR: [
-        { make: { contains: f.q, mode: "insensitive" } },
-        { model: { contains: f.q, mode: "insensitive" } },
-        { variant: { contains: f.q, mode: "insensitive" } },
-        { description: { contains: f.q, mode: "insensitive" } },
-      ],
-    });
+  if (f.minMileage != null || f.maxMileage != null) {
+    const mileage: Prisma.IntFilter = {};
+    if (f.minMileage != null) mileage.gte = f.minMileage;
+    if (f.maxMileage != null) mileage.lte = f.maxMileage;
+    and.push({ mileage });
+  }
+
+  if (f.steering) {
+    and.push({ steering: { equals: f.steering, mode: "insensitive" } });
   }
 
   return and.length ? { AND: and } : {};
@@ -107,20 +113,14 @@ export async function searchVehicles(
   }
 }
 
+/** Homepage featured grid — daily random sample from available CMS stock. */
 export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicle[]> {
   try {
-    const featured = await prisma.vehicle.findMany({
-      where: { featured: true, status: "AVAILABLE" },
-      orderBy: { createdAt: "desc" },
-      take: limit,
-    });
-    if (featured.length > 0) return featured.map(toPublicVehicle);
-    const latest = await prisma.vehicle.findMany({
+    const pool = await prisma.vehicle.findMany({
       where: { status: "AVAILABLE" },
-      orderBy: { createdAt: "desc" },
-      take: limit,
+      orderBy: { id: "asc" },
     });
-    return latest.map(toPublicVehicle);
+    return pickDailyItems(pool, limit).map(toPublicVehicle);
   } catch {
     return [];
   }
@@ -153,6 +153,72 @@ export async function getAllVehicleSlugs(): Promise<{ slug: string; updatedAt: D
       select: { slug: true, updatedAt: true },
       orderBy: { createdAt: "desc" },
     });
+  } catch {
+    return [];
+  }
+}
+
+/** Min/max odometer (km) across publicly listable stock — for filter dropdowns. */
+export async function getStockMileageBounds(): Promise<{ min: number; max: number }> {
+  try {
+    const agg = await prisma.vehicle.aggregate({
+      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+      _min: { mileage: true },
+      _max: { mileage: true },
+    });
+    return {
+      min: agg._min.mileage ?? 0,
+      max: agg._max.mileage ?? 200_000,
+    };
+  } catch {
+    return { min: 0, max: 200_000 };
+  }
+}
+
+/** Min/max model year across publicly listable stock — for filter dropdowns. */
+export async function getStockYearBounds(): Promise<{ min: number; max: number }> {
+  try {
+    const agg = await prisma.vehicle.aggregate({
+      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+      _min: { year: true },
+      _max: { year: true },
+    });
+    const now = new Date().getFullYear();
+    return {
+      min: agg._min.year ?? now - 30,
+      max: agg._max.year ?? now,
+    };
+  } catch {
+    const now = new Date().getFullYear();
+    return { min: now - 30, max: now };
+  }
+}
+
+/** Make/model options from vehicles currently in public stock. */
+export async function getStockFilterCatalog(): Promise<CatalogMake[]> {
+  try {
+    const rows = await prisma.vehicle.findMany({
+      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+      select: { make: true, model: true },
+      orderBy: [{ make: "asc" }, { model: "asc" }],
+    });
+
+    const map = new Map<string, Set<string>>();
+    for (const row of rows) {
+      const make = row.make.trim();
+      const model = row.model.trim();
+      if (!make || !model) continue;
+      if (!map.has(make)) map.set(make, new Set());
+      map.get(make)!.add(model);
+    }
+
+    return Array.from(map.entries())
+      .map(([make, models]) => ({
+        make,
+        country: "Other",
+        models: Array.from(models).sort((a, b) => a.localeCompare(b)),
+      }))
+      .sort((a, b) => a.make.localeCompare(b.make));
   } catch {
     return [];
   }

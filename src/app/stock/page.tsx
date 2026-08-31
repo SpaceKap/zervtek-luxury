@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { searchVehicles, type VehicleFilters } from "@/lib/vehicles";
+import {
+  getStockFilterCatalog,
+  getStockMileageBounds,
+  getStockYearBounds,
+  searchVehicles,
+  type VehicleFilters,
+} from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -14,7 +20,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Performance Car Stock | Browse & Search",
   description:
-    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Search by make, body type and price: Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
+    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Filter by make, model, year and body type: Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
   alternates: { canonical: "/stock" },
 };
 
@@ -35,17 +41,27 @@ export default async function StockPage({
   const page = Math.max(1, parseInt(first(sp.page) ?? "1", 10) || 1);
 
   const filters: VehicleFilters = {
-    q: first(sp.q),
     make: first(sp.make),
+    model: first(sp.model),
     bodyType: first(sp.bodyType),
     transmission: first(sp.transmission),
+    minYear: first(sp.minYear) ? Number(first(sp.minYear)) : undefined,
+    maxYear: first(sp.maxYear) ? Number(first(sp.maxYear)) : undefined,
+    minMileage: first(sp.minMileage) ? Number(first(sp.minMileage)) : undefined,
+    maxMileage: first(sp.maxMileage) ? Number(first(sp.maxMileage)) : undefined,
+    steering: first(sp.steering),
     minPrice: first(sp.minPrice) ? Number(first(sp.minPrice)) : undefined,
     maxPrice: first(sp.maxPrice) ? Number(first(sp.maxPrice)) : undefined,
     sort: (first(sp.sort) as VehicleFilters["sort"]) ?? "newest",
     status: first(sp.status),
   };
 
-  const { items, total } = await searchVehicles(filters, page, PAGE_SIZE);
+  const [{ items, total }, catalog, yearBounds, mileageBounds] = await Promise.all([
+    searchVehicles(filters, page, PAGE_SIZE),
+    getStockFilterCatalog(),
+    getStockYearBounds(),
+    getStockMileageBounds(),
+  ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const showingFrom = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const showingTo = Math.min(page * PAGE_SIZE, total);
@@ -83,7 +99,7 @@ export default async function StockPage({
       </header>
 
       <div className="stock-body container">
-        <SearchFilters />
+        <SearchFilters catalog={catalog} yearBounds={yearBounds} mileageBounds={mileageBounds} />
 
         <div className="stock-results-bar">
           <p className="stock-results-count">
