@@ -113,6 +113,14 @@ const STEERING_LABELS: Record<string, string> = {
   LHD: "Left-hand drive (LHD)",
 };
 
+type AdminMessage = {
+  type: "ok" | "err";
+  text: string;
+  detail?: string;
+  href?: string;
+  hrefLabel?: string;
+};
+
 function titleCaseEnum(value: string): string {
   return value
     .split("_")
@@ -191,10 +199,12 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
   const [photoDropTarget, setPhotoDropTarget] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [restoring, setRestoring] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [message, setMessage] = useState<AdminMessage | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autosaveMsg, setAutosaveMsg] = useState<string | null>(null);
   const [list, setList] = useState<Vehicle[]>([]);
   const formSectionRef = useRef<HTMLFormElement>(null);
+  const actionBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const skipAutosaveRef = useRef(false);
 
@@ -214,18 +224,75 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
   }
 
-  function startEdit(v: Vehicle) {
+  function applyVehicleToForm(v: Vehicle, opts?: { scroll?: boolean }) {
     skipAutosaveRef.current = true;
     setEditingId(v.id);
     setEditingVehicle(v);
     setForm(vehicleToForm(v));
     setImages([...v.images]);
     setErrors({});
-    setMessage(null);
     setAutosaveMsg(null);
+    if (opts?.scroll) {
+      requestAnimationFrame(() => {
+        formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }
+
+  function startEdit(v: Vehicle) {
+    setMessage(null);
+    applyVehicleToForm(v, { scroll: true });
+  }
+
+  function showSaveFeedback(next: AdminMessage) {
+    setMessage(next);
+    setLastSavedAt(new Date());
     requestAnimationFrame(() => {
-      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      actionBarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
+  }
+
+  function saveMessageForVehicle(
+    vehicle: Vehicle,
+    explicitStatus?: string,
+    previousStatus?: string,
+  ): AdminMessage {
+    const label = STATUS_LABELS[vehicle.status] || vehicle.status;
+    const justPublished =
+      explicitStatus === "AVAILABLE" &&
+      vehicle.status === "AVAILABLE" &&
+      previousStatus !== "AVAILABLE";
+
+    if (justPublished) {
+      return {
+        type: "ok",
+        text: "Published successfully",
+        detail: `${vehicle.year} ${vehicle.make} ${vehicle.model} is now live on stock.`,
+        href: vehicleStockPath(vehicle.slug),
+        hrefLabel: "View live listing",
+      };
+    }
+    if (explicitStatus === "DRAFT" || vehicle.status === "DRAFT") {
+      return {
+        type: "ok",
+        text: "Draft saved",
+        detail: "Changes are saved but not visible on the public site.",
+      };
+    }
+    if (!editingId) {
+      return {
+        type: "ok",
+        text: "Vehicle created",
+        detail: `Status: ${label}. Continue editing or publish when ready.`,
+      };
+    }
+    return {
+      type: "ok",
+      text: "Changes saved",
+      detail: `Status: ${label}.`,
+      href: vehicle.status === "AVAILABLE" ? vehicleStockPath(vehicle.slug) : undefined,
+      hrefLabel: vehicle.status === "AVAILABLE" ? "View live listing" : undefined,
+    };
   }
 
   useEffect(() => {
@@ -332,6 +399,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     setImages([]);
     setErrors({});
     setAutosaveMsg(null);
+    setLastSavedAt(null);
   }
 
   function cancelEdit() {
@@ -361,11 +429,19 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
 
   async function save(explicitStatus?: string) {
     if (!validate()) {
-      setMessage({ type: "err", text: "Please fix the highlighted fields." });
+      setMessage({
+        type: "err",
+        text: "Could not save",
+        detail: "Please fix the highlighted fields.",
+      });
+      requestAnimationFrame(() => {
+        actionBarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
       return;
     }
     setSaving(true);
     setMessage(null);
+    const previousStatus = form.status;
     const url = editingId ? `/api/vehicles/${editingId}` : "/api/vehicles";
     const method = editingId ? "PATCH" : "POST";
     const res = await fetch(url, {
@@ -376,14 +452,19 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     setSaving(false);
     if (res.ok) {
       const { vehicle } = await res.json();
-      setMessage({
-        type: "ok",
-        text: explicitStatus === "AVAILABLE" ? "Vehicle published." : "Draft saved.",
-      });
-      startEdit(vehicle);
+      applyVehicleToForm(vehicle);
+      showSaveFeedback(saveMessageForVehicle(vehicle, explicitStatus, previousStatus));
       loadList();
     } else {
-      setMessage({ type: "err", text: (await res.json()).error || "Failed to save" });
+      const body = await res.json().catch(() => ({}));
+      setMessage({
+        type: "err",
+        text: "Save failed",
+        detail: body.error || "Something went wrong. Try again.",
+      });
+      requestAnimationFrame(() => {
+        actionBarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
     }
   }
 
@@ -403,11 +484,19 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     setRestoring(false);
     if (res.ok) {
       const { vehicle } = await res.json();
-      startEdit(vehicle);
+      applyVehicleToForm(vehicle);
       loadList();
-      setMessage({ type: "ok", text: "Vehicle restored from unavailable." });
+      showSaveFeedback({
+        type: "ok",
+        text: "Restored from unavailable",
+        detail: `Status is now ${STATUS_LABELS[vehicle.status] || vehicle.status}.`,
+      });
     } else {
-      setMessage({ type: "err", text: "Failed to restore." });
+      setMessage({
+        type: "err",
+        text: "Restore failed",
+        detail: "Could not restore this vehicle. Try again.",
+      });
     }
   }
 
@@ -461,6 +550,12 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, images, editingId]);
 
+  useEffect(() => {
+    if (!message || message.type !== "ok") return;
+    const timer = window.setTimeout(() => setMessage(null), 12000);
+    return () => window.clearTimeout(timer);
+  }, [message]);
+
   const inputProps = (key: keyof FormState) => ({
     className: "input",
     value: String(form[key]),
@@ -508,6 +603,35 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
 
   const isAutomation = editingVehicle?.createdByType === "AUTOMATION";
   const showRestore = editingVehicle?.status === "UNAVAILABLE";
+  const currentStatusColors = statusColor(form.status);
+
+  function renderAdminFeedback(banner: AdminMessage) {
+    return (
+      <div
+        className={`admin-feedback admin-feedback--${banner.type}`}
+        role={banner.type === "err" ? "alert" : "status"}
+        aria-live="polite"
+      >
+        <div className="admin-feedback-body">
+          <strong>{banner.text}</strong>
+          {banner.detail ? <span>{banner.detail}</span> : null}
+          {banner.href ? (
+            <a className="admin-feedback-link" href={banner.href} target="_blank" rel="noopener noreferrer">
+              {banner.hrefLabel || "Open"}
+            </a>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          className="admin-feedback-dismiss"
+          onClick={() => setMessage(null)}
+          aria-label="Dismiss message"
+        >
+          ×
+        </button>
+      </div>
+    );
+  }
 
   return (
     <main className="container" style={{ paddingBlock: 48 }}>
@@ -536,19 +660,45 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
       >
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <h2 className="heading" style={{ fontSize: 24, marginTop: 0, marginBottom: 4 }}>
-              {editingId ? "Edit vehicle" : "Add a vehicle"}
-            </h2>
-            <p className="muted" style={{ margin: 0, lineHeight: 1.6, maxWidth: 640, fontSize: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h2 className="heading" style={{ fontSize: 24, marginTop: 0, marginBottom: 0 }}>
+                {editingId ? "Edit vehicle" : "Add a vehicle"}
+              </h2>
+              {editingId ? (
+                <span
+                  className="pill admin-status-pill"
+                  style={{
+                    background: currentStatusColors.bg,
+                    color: currentStatusColors.color,
+                    borderColor: "transparent",
+                  }}
+                >
+                  {STATUS_LABELS[form.status] || form.status}
+                </span>
+              ) : null}
+            </div>
+            <p className="muted" style={{ margin: "6px 0 0", lineHeight: 1.6, maxWidth: 640, fontSize: 14 }}>
               Listings are sourced from across Japan. We do not hold stock on site. Enter where the
               vehicle is located or being sourced from.
             </p>
+            {lastSavedAt ? (
+              <p className="muted" style={{ margin: "6px 0 0", fontSize: 12 }}>
+                Last saved {lastSavedAt.toLocaleTimeString()}
+              </p>
+            ) : null}
           </div>
-          {autosaveMsg ? (
-            <span className="muted" style={{ fontSize: 12, whiteSpace: "nowrap" }}>
-              {autosaveMsg}
-            </span>
-          ) : null}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            {saving ? (
+              <span className="admin-saving-indicator" aria-live="polite">
+                Saving…
+              </span>
+            ) : null}
+            {autosaveMsg ? (
+              <span className="muted" style={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                {autosaveMsg}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {isAutomation ? (
@@ -1124,13 +1274,9 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           </div>
         </div>
 
-        {message ? (
-          <p style={{ color: message.type === "ok" ? "var(--gold)" : "var(--crimson)", marginTop: 16 }}>
-            {message.text}
-          </p>
-        ) : null}
-
-        <div style={{ display: "flex", gap: 12, marginTop: 20, flexWrap: "wrap", alignItems: "center" }}>
+        <div ref={actionBarRef} className="admin-publish-panel">
+          {message ? renderAdminFeedback(message) : null}
+          <div className="admin-action-bar admin-action-bar--sticky">
           <button
             className="btn btn-outline"
             type="button"
@@ -1145,7 +1291,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
             onClick={() => save("AVAILABLE")}
             disabled={saving}
           >
-            {saving ? "Saving…" : "Save & publish"}
+            {saving ? "Saving…" : form.status === "AVAILABLE" ? "Save changes" : "Save & publish"}
           </button>
           {editingVehicle?.slug ? (
             <a
@@ -1162,6 +1308,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
               Cancel edit
             </button>
           ) : null}
+          </div>
         </div>
       </form>
 
