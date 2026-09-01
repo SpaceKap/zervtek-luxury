@@ -221,22 +221,101 @@ export async function processAndStoreVehicleImage(
   };
 }
 
+export function relativePathFromMediaUrl(url: string): string | null {
+  const prefix = getMediaUrlPrefix().replace(/\/$/, "");
+  const normalized = url.split("?")[0]?.split("#")[0] ?? "";
+  if (!normalized.startsWith(`${prefix}/`)) return null;
+  const rel = normalized.slice(prefix.length + 1).replace(/^\//, "");
+  if (!rel || rel.includes("..")) return null;
+  return rel;
+}
+
+export function pathsForVehicleImageRow(row: {
+  originalPath: string;
+  largePath: string;
+  mediumPath: string;
+  thumbnailPath: string;
+}): string[] {
+  return [row.originalPath, row.largePath, row.mediumPath, row.thumbnailPath];
+}
+
+export function collectStoredImagePaths(
+  media: Array<{
+    originalPath: string;
+    largePath: string;
+    mediumPath: string;
+    thumbnailPath: string;
+  }>,
+  publicUrls: string[],
+): string[] {
+  const paths = new Set<string>();
+  for (const row of media) {
+    for (const rel of pathsForVehicleImageRow(row)) paths.add(rel);
+  }
+  for (const url of publicUrls) {
+    const rel = relativePathFromMediaUrl(url);
+    if (rel) paths.add(rel);
+  }
+  return [...paths];
+}
+
 export async function deleteVehicleImageFiles(paths: string[]) {
-  for (const rel of paths) {
+  const unique = [...new Set(paths.filter(Boolean))];
+  for (const rel of unique) {
     try {
       await fs.unlink(path.join(getUploadRoot(), rel));
-    } catch {
-      // ignore missing
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== "ENOENT") {
+        console.error("[vehicle-images] failed to delete file", { rel, err });
+      }
     }
   }
 }
 
 export async function deleteVehicleImageTree(vehicleId: string) {
+  const dir = path.join(getUploadRoot(), vehicleId);
   try {
-    await fs.rm(path.join(getUploadRoot(), vehicleId), { recursive: true, force: true });
-  } catch {
-    // ignore
+    await fs.rm(dir, { recursive: true, force: true });
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") return;
+    console.error("[vehicle-images] failed to remove image tree", { vehicleId, err });
+    throw err;
   }
+
+  try {
+    await fs.access(dir);
+    throw new Error(`Vehicle image directory was not removed: ${vehicleId}`);
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("was not removed")) throw err;
+    // ENOENT — directory removed
+  }
+}
+
+/** Delete VehicleImage rows (and files) no longer referenced in the public URL list. */
+export async function purgeVehicleImagesNotInUrls(
+  vehicleId: string,
+  keptUrls: string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prismaClient: { vehicleImage: any },
+) {
+  const rows: Array<{
+    id: string;
+    originalPath: string;
+    largePath: string;
+    mediumPath: string;
+    thumbnailPath: string;
+  }> = await prismaClient.vehicleImage.findMany({ where: { vehicleId } });
+  const kept = new Set(keptUrls);
+  const removed = rows.filter((row) => !kept.has(mediaUrlFromPath(row.mediumPath)));
+  if (removed.length === 0) return;
+
+  const paths = removed.flatMap(pathsForVehicleImageRow);
+  await prismaClient.vehicleImage.deleteMany({
+    where: { id: { in: removed.map((row) => row.id) } },
+  });
+  await deleteVehicleImageFiles(paths);
 }
 
 /** Resolve a relative storage path safely (no traversal). */

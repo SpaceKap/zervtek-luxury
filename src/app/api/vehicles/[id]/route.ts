@@ -12,7 +12,7 @@ import {
   VEHICLE_STATUSES,
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
-import { syncVehicleMediaOrder } from "@/lib/vehicle-images";
+import { syncVehicleMediaOrder, purgeVehicleImagesNotInUrls } from "@/lib/vehicle-images";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { parseFeatureList } from "@/lib/features";
 
@@ -161,7 +161,11 @@ export async function PATCH(
   }
 
   if (body.features !== undefined) data.features = parseFeatureList(body.features);
-  if (body.images !== undefined) data.images = toStrArray(body.images);
+  if (body.images !== undefined) {
+    const urls = toStrArray(body.images);
+    await purgeVehicleImagesNotInUrls(id, urls, prisma);
+    data.images = urls;
+  }
   if (body.status !== undefined) {
     const s = String(body.status).toUpperCase();
     if ((VEHICLE_STATUSES as readonly string[]).includes(s)) data.status = s;
