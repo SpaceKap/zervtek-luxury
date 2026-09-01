@@ -75,7 +75,7 @@ export default async function HomePage() {
                   alt="Luxury performance car"
                   fill
                   priority
-                  sizes="(max-width: 860px) 100vw, 520px"
+                  sizes="(max-width: 1024px) 100vw, 520px"
                   style={{ objectFit: "cover" }}
                 />
               </figure>
