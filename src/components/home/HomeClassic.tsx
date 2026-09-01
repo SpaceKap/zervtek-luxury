@@ -63,7 +63,7 @@ export function HomeClassic({ featured }: Props) {
                 alt="Luxury performance car"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 520px"
+                sizes="(max-width: 1023px) 100vw, 520px"
                 style={{ objectFit: "cover" }}
               />
             </figure>
