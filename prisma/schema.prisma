@@ -126,3 +126,22 @@ model HermesAuditLog {
   @@index([createdAt])
   @@index([action])
 }
+
+model BlogPost {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  excerpt         String   @default("")
+  coverImage      String?
+  /// Block-based article body (paragraph, heading, image, youtube, table, callout).
+  blocks          Json     @default("[]")
+  status          String   @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  metaTitle       String?
+  metaDescription String?
+  publishedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+}

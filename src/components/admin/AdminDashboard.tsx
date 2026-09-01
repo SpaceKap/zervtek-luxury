@@ -634,9 +634,17 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
   }
 
   return (
-    <main className="container" style={{ paddingBlock: 48 }}>
+    <main className="container admin-shell" style={{ paddingBlock: 48 }}>
       <div className="section-head" style={{ marginBottom: 24 }}>
         <div>
+          <nav className="admin-shell-nav" aria-label="Admin sections">
+            <Link href="/admin" className="admin-shell-nav-link">
+              Vehicles
+            </Link>
+            <Link href="/admin/blog" className="admin-shell-nav-link">
+              Blog
+            </Link>
+          </nav>
           <span className="eyebrow">Admin</span>
           <h1 className="heading" style={{ fontSize: 36, margin: "8px 0 0" }}>
             Vehicle manager

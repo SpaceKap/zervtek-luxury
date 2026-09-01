@@ -249,3 +249,53 @@ export function itemListJsonLd(
 ) {
   return productListJsonLd(vehicles);
 }
+
+export function blogArticleJsonLd(post: {
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImage?: string | null;
+  publishedAt?: Date | null;
+  updatedAt: Date;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+}) {
+  const headline = post.metaTitle?.trim() || post.title;
+  const description = post.metaDescription?.trim() || post.excerpt;
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline,
+    description,
+    url: `${SITE.url}/blog/${post.slug}`,
+    datePublished: post.publishedAt?.toISOString(),
+    dateModified: post.updatedAt.toISOString(),
+    author: {
+      "@type": "Organization",
+      name: SITE.name,
+      url: SITE.url,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.legalName,
+      url: SITE.url,
+    },
+    image: post.coverImage ? absUrl(post.coverImage) : undefined,
+    mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
+  };
+}
+
+export function blogListingJsonLd(posts: Array<{ title: string; slug: string; excerpt: string }>) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: `${SITE.name} Blog`,
+    url: `${SITE.url}/blog`,
+    blogPost: posts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      url: `${SITE.url}/blog/${p.slug}`,
+      description: p.excerpt,
+    })),
+  };
+}

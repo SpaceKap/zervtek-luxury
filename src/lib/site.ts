@@ -50,6 +50,7 @@ export function googleMapsPlaceUrl(): string {
 export const NAV = [
   { label: "Home", href: "/" },
   { label: "Stock", href: "/stock" },
+  { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
 ];
 
