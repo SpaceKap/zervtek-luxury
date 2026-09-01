@@ -17,6 +17,11 @@ describe("isWhatsAppDeskOnline", () => {
     expect(isWhatsAppDeskOnline(new Date("2026-08-20T23:30:00.000Z"))).toBe(false);
   });
 
+  it("is away Saturday", () => {
+    // 2026-08-22 Sat 12:00 JST = 2026-08-22T03:00:00.000Z
+    expect(isWhatsAppDeskOnline(new Date("2026-08-22T03:00:00.000Z"))).toBe(false);
+  });
+
   it("is away at/after 18 JST", () => {
     // 2026-08-21 Fri 18:00 JST = 2026-08-21T09:00:00.000Z
     expect(isWhatsAppDeskOnline(new Date("2026-08-21T09:00:00.000Z"))).toBe(false);

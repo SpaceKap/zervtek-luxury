@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { trackContact } from "@/lib/analytics";
 import { whatsappHref } from "@/lib/site";
 
-/** True Mon–Sat 09:00–18:00 Asia/Tokyo. */
+/** True Mon–Fri 09:00–18:00 Asia/Tokyo — status shown only while desk is open. */
 export function isWhatsAppDeskOnline(now = new Date()): boolean {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Tokyo",
@@ -16,7 +16,7 @@ export function isWhatsAppDeskOnline(now = new Date()): boolean {
   const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
   const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
 
-  if (weekday === "Sun") return false;
+  if (weekday === "Sat" || weekday === "Sun") return false;
   return hour >= 9 && hour < 18;
 }
 
@@ -46,19 +46,12 @@ export function HeroWhatsAppMessage({ className = "" }: Props) {
     <div className={`hero-wa ${className}`.trim()}>
       <div className="hero-wa-head">
         <p className="hero-wa-title">Message us on WhatsApp</p>
-        <span
-          className={online ? "hero-wa-status hero-wa-status--online" : "hero-wa-status"}
-          aria-live="polite"
-        >
-          <span className="hero-wa-status-dot" aria-hidden />
-          {online ? "Online" : "Away"}
-          {!online ? (
-            <span className="hero-wa-status-hours">
-              {" "}
-              · Mon–Sat, 9am–6pm Japan Standard Time
-            </span>
-          ) : null}
-        </span>
+        {online ? (
+          <span className="hero-wa-status hero-wa-status--online" aria-live="polite">
+            <span className="hero-wa-status-dot" aria-hidden />
+            Online
+          </span>
+        ) : null}
       </div>
 
       <form
