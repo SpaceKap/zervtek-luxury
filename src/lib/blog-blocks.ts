@@ -1,3 +1,5 @@
+import { stripHtml } from "./blog-html";
+
 export type BlogParagraphBlock = { type: "paragraph"; text: string };
 export type BlogHeadingBlock = { type: "heading"; level: 2 | 3; text: string };
 export type BlogImageBlock = {
@@ -19,6 +21,7 @@ export type BlogTableBlock = {
   rows: string[][];
 };
 export type BlogCalloutBlock = { type: "callout"; text: string };
+export type BlogDocumentBlock = { type: "document"; html: string };
 
 export type BlogBlock =
   | BlogParagraphBlock
@@ -26,11 +29,12 @@ export type BlogBlock =
   | BlogImageBlock
   | BlogYoutubeBlock
   | BlogTableBlock
-  | BlogCalloutBlock;
+  | BlogCalloutBlock
+  | BlogDocumentBlock;
 
 export type BlogBlockType = BlogBlock["type"];
 
-export const BLOG_BLOCK_LABELS: Record<BlogBlockType, string> = {
+export const BLOG_BLOCK_LABELS: Record<Exclude<BlogBlockType, "document">, string> = {
   paragraph: "Paragraph",
   heading: "Heading",
   image: "Image",
@@ -39,7 +43,7 @@ export const BLOG_BLOCK_LABELS: Record<BlogBlockType, string> = {
   callout: "Callout",
 };
 
-export function emptyBlock(type: BlogBlockType): BlogBlock {
+export function emptyBlock(type: Exclude<BlogBlockType, "document">): BlogBlock {
   switch (type) {
     case "paragraph":
       return { type: "paragraph", text: "" };
@@ -132,12 +136,20 @@ export function normalizeBlogBlocks(raw: unknown): BlogBlock[] {
       case "callout":
         out.push({ type: "callout", text: String(b.text || "").trim() });
         break;
+      case "document":
+        out.push({ type: "document", html: String(b.html || "") });
+        break;
     }
   }
   return out;
 }
 
 export function blogPlainText(blocks: BlogBlock[]): string {
+  const doc = blocks.find((b): b is BlogDocumentBlock => b.type === "document");
+  if (doc?.html.trim()) {
+    return stripHtml(doc.html);
+  }
+
   return blocks
     .map((b) => {
       switch (b.type) {

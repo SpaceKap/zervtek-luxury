@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BlogPost } from "@prisma/client";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { AdminBlogBlockEditor } from "@/components/admin/AdminBlogBlockEditor";
-import type { BlogBlock } from "@/lib/blog-blocks";
+import { AdminBlogEditor } from "@/components/admin/AdminBlogEditor";
+import { blocksToDocumentHtml, documentBlocksFromHtml } from "@/lib/blog-document";
 import { normalizeBlogBlocks } from "@/lib/blog-blocks";
 import {
   buildBlogMetaDescription,
@@ -45,7 +45,7 @@ export function AdminBlogDashboard({ initialPostId }: { initialPostId?: string }
   const router = useRouter();
   const [list, setList] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
-  const [blocks, setBlocks] = useState<BlogBlock[]>([]);
+  const [contentHtml, setContentHtml] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -73,13 +73,13 @@ export function AdminBlogDashboard({ initialPostId }: { initialPostId?: string }
       metaDescription: post.metaDescription || "",
       status: post.status,
     });
-    setBlocks(normalizeBlogBlocks(post.blocks));
+    setContentHtml(blocksToDocumentHtml(normalizeBlogBlocks(post.blocks)));
   }
 
   function startNew() {
     setEditingId(null);
     setForm(EMPTY_FORM);
-    setBlocks([]);
+    setContentHtml("");
     setMessage(null);
     setLastSavedAt(null);
   }
@@ -102,6 +102,8 @@ export function AdminBlogDashboard({ initialPostId }: { initialPostId?: string }
       }
     })();
   }, [initialPostId]);
+
+  const blocks = useMemo(() => documentBlocksFromHtml(contentHtml), [contentHtml]);
 
   const seoInput = useMemo(
     () => ({
@@ -308,11 +310,11 @@ export function AdminBlogDashboard({ initialPostId }: { initialPostId?: string }
           </div>
 
           <h3 className="heading" style={{ fontSize: 16, marginTop: 28, marginBottom: 12 }}>
-            Content blocks
+            Content
           </h3>
-          <AdminBlogBlockEditor
-            blocks={blocks}
-            onChange={setBlocks}
+          <AdminBlogEditor
+            content={contentHtml}
+            onChange={setContentHtml}
             onUploadImage={uploadImage}
             uploading={uploading}
           />

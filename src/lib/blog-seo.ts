@@ -1,5 +1,6 @@
 import type { BlogBlock } from "./blog-blocks";
 import { blogPlainText } from "./blog-blocks";
+import { htmlHeadingCount, htmlImagesMissingAlt } from "./blog-html";
 import { slugify } from "./slug";
 import { SITE } from "./site";
 
@@ -153,33 +154,57 @@ export function blogSeoSuggestions(input: BlogSeoInput): SeoSuggestion[] {
     });
   }
 
-  const images = input.blocks.filter((b) => b.type === "image");
-  const imagesMissingAlt = images.filter((b) => b.type === "image" && !b.alt.trim());
-  if (imagesMissingAlt.length) {
-    suggestions.push({
-      id: "alt-missing",
-      level: "error",
-      title: "Images missing alt text",
-      detail: `${imagesMissingAlt.length} image block(s) need descriptive alt text for accessibility and SEO.`,
-    });
-  } else if (images.length) {
-    suggestions.push({
-      id: "alt-ok",
-      level: "good",
-      title: "Image alt text",
-      detail: `${images.length} image(s) have alt descriptions.`,
-    });
-  }
+  const documentBlock = input.blocks.find(
+    (b): b is Extract<BlogBlock, { type: "document" }> => b.type === "document",
+  );
+  const documentHtml = documentBlock?.html.trim() ? documentBlock.html : null;
+  if (documentHtml) {
+    const missingAlt = htmlImagesMissingAlt(documentHtml);
+    const imageCount = (documentHtml.match(/<img\b/gi) || []).length;
+    if (missingAlt) {
+      suggestions.push({
+        id: "alt-missing",
+        level: "error",
+        title: "Images missing alt text",
+        detail: `${missingAlt} image(s) need descriptive alt text for accessibility and SEO.`,
+      });
+    } else if (imageCount) {
+      suggestions.push({
+        id: "alt-ok",
+        level: "good",
+        title: "Image alt text",
+        detail: `${imageCount} image(s) have alt descriptions.`,
+      });
+    }
+  } else {
+    const images = input.blocks.filter((b) => b.type === "image");
+    const imagesMissingAlt = images.filter((b) => b.type === "image" && !b.alt.trim());
+    if (imagesMissingAlt.length) {
+      suggestions.push({
+        id: "alt-missing",
+        level: "error",
+        title: "Images missing alt text",
+        detail: `${imagesMissingAlt.length} image block(s) need descriptive alt text for accessibility and SEO.`,
+      });
+    } else if (images.length) {
+      suggestions.push({
+        id: "alt-ok",
+        level: "good",
+        title: "Image alt text",
+        detail: `${images.length} image(s) have alt descriptions.`,
+      });
+    }
 
-  const videos = input.blocks.filter((b) => b.type === "youtube");
-  const videosMissingTitle = videos.filter((b) => b.type === "youtube" && !b.title?.trim());
-  if (videosMissingTitle.length) {
-    suggestions.push({
-      id: "youtube-title",
-      level: "warn",
-      title: "YouTube blocks missing titles",
-      detail: "Add a short title for each embed — helps accessibility and rich results.",
-    });
+    const videos = input.blocks.filter((b) => b.type === "youtube");
+    const videosMissingTitle = videos.filter((b) => b.type === "youtube" && !b.title?.trim());
+    if (videosMissingTitle.length) {
+      suggestions.push({
+        id: "youtube-title",
+        level: "warn",
+        title: "YouTube blocks missing titles",
+        detail: "Add a short title for each embed — helps accessibility and rich results.",
+      });
+    }
   }
 
   if (wordCount < 300) {
@@ -198,7 +223,9 @@ export function blogSeoSuggestions(input: BlogSeoInput): SeoSuggestion[] {
     });
   }
 
-  const h2Count = input.blocks.filter((b) => b.type === "heading" && b.level === 2).length;
+  const h2Count = documentHtml
+    ? htmlHeadingCount(documentHtml, 2)
+    : input.blocks.filter((b) => b.type === "heading" && b.level === 2).length;
   if (wordCount > 400 && h2Count === 0) {
     suggestions.push({
       id: "headings-missing",

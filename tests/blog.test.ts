@@ -4,6 +4,7 @@ import {
   parseYoutubeVideoId,
   blogPlainText,
 } from "@/lib/blog-blocks";
+import { blocksToDocumentHtml, documentBlocksFromHtml } from "@/lib/blog-document";
 import { blogSeoSuggestions, buildBlogMetaDescription } from "@/lib/blog-seo";
 
 describe("blog blocks", () => {
@@ -32,6 +33,20 @@ describe("blog blocks", () => {
     expect(text).toContain("Guide");
     expect(text).toContain("Import tips");
   });
+
+  it("converts legacy blocks to document html", () => {
+    const html = blocksToDocumentHtml([
+      { type: "heading", level: 2, text: "Guide" },
+      { type: "paragraph", text: "Import tips." },
+    ]);
+    expect(html).toContain("<h2>Guide</h2>");
+    expect(html).toContain("<p>Import tips.</p>");
+  });
+
+  it("stores editor content as a document block", () => {
+    const blocks = documentBlocksFromHtml("<p>One box editor.</p>");
+    expect(blocks).toEqual([{ type: "document", html: "<p>One box editor.</p>" }]);
+  });
 });
 
 describe("blog seo", () => {
@@ -53,5 +68,16 @@ describe("blog seo", () => {
       blocks: [],
     });
     expect(desc).toBe("Short excerpt for search.");
+  });
+
+  it("flags missing alt text in document html", () => {
+    const suggestions = blogSeoSuggestions({
+      title: "Importing Porsche 911 from Japan",
+      excerpt: "A practical guide to buying and shipping a Porsche from Japan with transparent pricing and inspection.",
+      slug: "importing-porsche-911-from-japan",
+      blocks: [{ type: "document", html: '<p>Text</p><img src="/uploads/a.jpg" />' }],
+      coverImage: null,
+    });
+    expect(suggestions.some((s) => s.id === "alt-missing")).toBe(true);
   });
 });

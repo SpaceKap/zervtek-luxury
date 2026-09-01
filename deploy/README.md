@@ -55,4 +55,23 @@ git pull
 ./deploy/deploy.sh --local
 ```
 
-Migrations run automatically on container start (`prisma migrate deploy`).
+Migrations run automatically on container start (`prisma migrate deploy` inside the `luxury-app` container).
+
+**Do not run `npx prisma` on the VPS host.** Ubuntu’s global `npx` may install Prisma 7, which rejects this repo’s Prisma 6 schema and fails with `P1012` (`url` in `schema.prisma`).
+
+If you need to run migrations manually:
+
+```bash
+cd /opt/zervtek-luxury
+docker compose exec app npx prisma migrate deploy
+# or
+docker compose exec app npm run db:migrate
+```
+
+Verify the blog table after deploy:
+
+```bash
+docker compose logs --tail=30 app | grep -i prisma
+docker compose exec db psql -U luxury -d luxury -c '\dt "BlogPost"'
+curl -sI https://performance.zervtek.com/blog | head -1
+```

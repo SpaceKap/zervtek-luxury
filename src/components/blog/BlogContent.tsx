@@ -1,4 +1,5 @@
 import type { BlogBlock } from "@/lib/blog-blocks";
+import { sanitizeBlogHtml } from "@/lib/blog-html";
 
 function BlogYoutubeEmbed({ videoId, title }: { videoId: string; title?: string }) {
   if (!videoId) return null;
@@ -18,6 +19,16 @@ function BlogYoutubeEmbed({ videoId, title }: { videoId: string; title?: string 
 }
 
 export function BlogContent({ blocks }: { blocks: BlogBlock[] }) {
+  const documentBlock = blocks.find((b): b is Extract<BlogBlock, { type: "document" }> => b.type === "document");
+  if (documentBlock?.html.trim()) {
+    return (
+      <div
+        className="blog-content blog-prose"
+        dangerouslySetInnerHTML={{ __html: sanitizeBlogHtml(documentBlock.html) }}
+      />
+    );
+  }
+
   return (
     <div className="blog-content">
       {blocks.map((block, index) => {
