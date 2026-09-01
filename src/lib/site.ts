@@ -243,7 +243,7 @@ export const COMPANY_PROFILE = {
   dealerLicense: "441340001639",
   phone: SITE.phone,
   email: SITE.email,
-  hours: "Mon–Fri, 9am–6pm Japan Standard Time",
+  hours: "Mon–Fri, 9:00–18:00 JST",
 };
 
 export const BANK_ACCOUNTS = [

@@ -8,7 +8,7 @@ import { HashScroll } from "@/components/HashScroll";
 import { HeroWhatsAppMessage } from "@/components/HeroWhatsAppMessage";
 import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
 import { productListJsonLd } from "@/lib/seo";
-import { SITE } from "@/lib/site";
+import { COMPANY_PROFILE, SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +55,16 @@ export default async function HomePage() {
             <div className="hero-meta">
               <span className="hero-meta-right">
                 <span>Chiba, Japan</span>
-                <span>The Pride for Quality</span>
+                <span>{COMPANY_PROFILE.hours}</span>
+                <a
+                  className="hero-meta-phone"
+                  href={`tel:${SITE.phone.replace(/\s/g, "")}`}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.25 1.01l-2.2 2.22z" />
+                  </svg>
+                  {SITE.phone}
+                </a>
               </span>
             </div>
 

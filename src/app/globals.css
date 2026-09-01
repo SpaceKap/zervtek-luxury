@@ -427,6 +427,17 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   align-items: center;
   gap: 28px;
 }
+.hero-meta-phone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.hero-meta-phone:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .hero-stage {
   position: relative;
   flex: 1;
