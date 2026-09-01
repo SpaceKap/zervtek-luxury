@@ -217,7 +217,7 @@ export const FAQS = [
   },
   {
     q: "Can you ship internationally?",
-    a: "We export worldwide — including the UK, USA, Canada, Australia, New Zealand, the Middle East and East Africa. Our team handles documentation, logistics and customs clearance to your destination port. <a href=\"/#destinations\">See the full list of destinations</a>.",
+    a: "We export worldwide — including North America, South America, Europe, Oceania, Asia, Middle East, and Africa. Our most popular destinations are United States, Canada, United Kingdom, Italy, Germany, Cyprus, Australia, New Zealand, UAE, Saudi Arabia, Hong Kong and Singapore. Our team handles documentation, logistics and customs clearance to your destination port. <a href=\"/#destinations\">See the full list of destinations</a>.",
   },
   {
     q: "How do I reserve a vehicle?",
