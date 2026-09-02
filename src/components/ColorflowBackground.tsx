@@ -10,7 +10,7 @@ export function ColorflowBackground() {
         src={COLORFLOW_EMBED}
         title=""
         tabIndex={-1}
-        loading="eager"
+        loading="lazy"
       />
     </div>
   );

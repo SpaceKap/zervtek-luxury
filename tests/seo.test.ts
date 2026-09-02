@@ -56,6 +56,14 @@ describe("seo schema", () => {
     expect(list.itemListElement).toHaveLength(1);
   });
 
+  it("uses lightweight product entries in item lists", () => {
+    const list = productListJsonLd([sampleVehicle]);
+    const item = list.itemListElement[0].item as Record<string, unknown>;
+    expect(item).not.toHaveProperty("description");
+    expect(item.image).toBe("https://performance.zervtek.com/media/vehicles/abc/medium/1.jpg");
+    expect(Array.isArray(item.image)).toBe(false);
+  });
+
   it("adds dealer logo and opening hours", () => {
     const org = organizationJsonLd();
     expect(org.logo?.url).toContain("/logo.png");

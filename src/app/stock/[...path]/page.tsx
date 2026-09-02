@@ -19,7 +19,7 @@ import {
   displayEnum,
 } from "@/lib/vehicle-constants";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 function absUrl(src: string): string {
   return src.startsWith("http") ? src : `${SITE.url}${src}`;

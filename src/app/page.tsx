@@ -10,10 +10,10 @@ import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
 import { productListJsonLd } from "@/lib/seo";
 import { COMPANY_PROFILE, SITE } from "@/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2400&q=80";
+  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=75";
 
 const STEPS = [
   {

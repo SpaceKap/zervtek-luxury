@@ -335,6 +335,25 @@ export function vehicleJsonLd(v: ProductVehicle | PublicVehicle, _absImage?: (sr
   return productJsonLd(v);
 }
 
+/** Lightweight list item — one cover image, no long description (stock / home grids). */
+function productListItemSchema(v: ProductVehicle | PublicVehicle) {
+  const name = vehicleName(v);
+  const url = `${SITE.url}${vehicleStockPath(v.slug)}`;
+  const cover = v.images[0] ? absUrl(v.images[0]) : `${SITE.url}/placeholder.svg`;
+
+  return compactJsonLd({
+    "@type": ["Product", "Car"] as const,
+    "@id": `${url}#product`,
+    name,
+    url,
+    image: cover,
+    brand: { "@type": "Brand", name: v.make },
+    model: v.model,
+    vehicleModelDate: String(v.year),
+    offers: vehicleOffers(v, url),
+  });
+}
+
 /** ItemList of Product schemas for stock / featured grids (excludes sold listings). */
 export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle>) {
   const listed = vehicles.filter((v) => v.status !== "SOLD");
@@ -345,7 +364,7 @@ export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle
     itemListElement: listed.map((v, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      item: productSchema(v),
+      item: productListItemSchema(v),
     })),
   });
 }

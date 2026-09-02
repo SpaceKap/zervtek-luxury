@@ -1,21 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  getStockFilterCatalog,
-  getStockMileageBounds,
-  getStockYearBounds,
+  getStockFilterMeta,
   searchVehicles,
   type VehicleFilters,
 } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { SearchFilters } from "@/components/SearchFilters";
+import { StockSort } from "@/components/StockSort";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import { WhatsAppLink } from "@/components/WhatsAppLink";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Performance Car Stock | Browse & Search",
@@ -57,11 +56,9 @@ export default async function StockPage({
     status: first(sp.status),
   };
 
-  const [{ items, total }, catalog, yearBounds, mileageBounds] = await Promise.all([
+  const [{ items, total }, { catalog, yearBounds, mileageBounds }] = await Promise.all([
     searchVehicles(filters, page, PAGE_SIZE),
-    getStockFilterCatalog(),
-    getStockYearBounds(),
-    getStockMileageBounds(),
+    getStockFilterMeta(),
   ]);
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const showingFrom = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -112,6 +109,7 @@ export default async function StockPage({
               "No matches"
             )}
           </p>
+          <StockSort />
         </div>
 
         {items.length > 0 ? (

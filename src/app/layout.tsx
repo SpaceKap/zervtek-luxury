@@ -17,7 +17,7 @@ const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-5L8XN9VF";
 
 const sans = Manrope({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -64,7 +64,7 @@ export default function RootLayout({
     <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
         {GTM_ID ? (
-          <Script id="gtm-base" strategy="beforeInteractive">
+          <Script id="gtm-base" strategy="afterInteractive">
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

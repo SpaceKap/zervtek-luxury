@@ -22,7 +22,9 @@ const SITE_PRELOADER: PreloaderSettings = {
   welcome: "Welcome to ZervTek",
   loaderShiftY: 0,
   showCornerText: true,
-  readyDelay: 200,
+  loadingDuration: 900,
+  readyDelay: 120,
+  leaveDuration: 450,
 };
 
 type Props = {

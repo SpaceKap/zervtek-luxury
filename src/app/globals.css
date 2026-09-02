@@ -1304,10 +1304,10 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   gap: 14px 16px;
 }
 .stock-filters-primary {
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(0, 1.2fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .stock-filters-secondary {
-  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   padding-top: 2px;
 }
 .stock-filters-field {
@@ -1338,8 +1338,22 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   padding: 0 2px;
   user-select: none;
 }
-.stock-filters-sort {
-  justify-self: end;
+.stock-results-sort {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.stock-results-sort-label {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.stock-results-sort-select {
+  min-width: 168px;
+  padding: 8px 12px;
+  font-size: 14px;
 }
 .stock-filter-chips {
   display: flex;
@@ -1458,10 +1472,6 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   .stock-filters-secondary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .stock-filters-sort {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-  }
 }
 
 @media (max-width: 720px) {
@@ -1489,6 +1499,18 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   .stock-filters-primary,
   .stock-filters-secondary {
     grid-template-columns: 1fr;
+  }
+  .stock-results-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .stock-results-sort {
+    justify-content: space-between;
+  }
+  .stock-results-sort-select {
+    flex: 1;
+    max-width: 220px;
   }
   .stock-filters-range {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

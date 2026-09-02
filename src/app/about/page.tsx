@@ -13,7 +13,7 @@ import { breadcrumbJsonLd } from "@/lib/seo";
 import { FAQS, SITE } from "@/lib/site";
 import { getCatalogMakeModels } from "@/lib/vehicles";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "About ZervTek Performance | Car Export from Japan",

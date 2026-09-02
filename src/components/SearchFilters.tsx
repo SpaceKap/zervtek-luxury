@@ -4,16 +4,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { CatalogMake } from "@/lib/vehicles";
 import { trackStockFilter } from "@/lib/analytics";
-import { BODY_TYPE_LABELS, BODY_TYPE_VALUES, STEERINGS } from "@/lib/vehicle-constants";
-import { BODY_TYPES } from "@/lib/site";
+import { STEERINGS } from "@/lib/vehicle-constants";
 import { formatKm } from "@/lib/format";
+import { SORTS } from "@/components/StockSort";
 
-const SORTS = [
-  { value: "newest", label: "Newest first" },
-  { value: "price_desc", label: "Price: high to low" },
-  { value: "price_asc", label: "Price: low to high" },
-  { value: "year_desc", label: "Year: newest" },
-];
+const SORTS_FOR_CHIPS = SORTS;
 
 type Props = {
   catalog: CatalogMake[];
@@ -87,7 +82,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
         min_mileage: next.get("minMileage") || undefined,
         max_mileage: next.get("maxMileage") || undefined,
         steering: next.get("steering") || undefined,
-        body_type: next.get("bodyType") || undefined,
         sort: next.get("sort") || undefined,
       });
       router.push(`/stock?${next.toString()}`);
@@ -124,7 +118,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
     const minMileage = params.get("minMileage");
     const maxMileage = params.get("maxMileage");
     const steering = params.get("steering");
-    const bodyType = params.get("bodyType");
     const sort = params.get("sort");
     const q = params.get("q");
 
@@ -158,11 +151,10 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
       });
     }
     if (steering) chips.push({ key: "steering", label: steering, clear: { steering: "" } });
-    if (bodyType) chips.push({ key: "bodyType", label: bodyType, clear: { bodyType: "" } });
     if (sort && sort !== "newest") {
       chips.push({
         key: "sort",
-        label: SORTS.find((s) => s.value === sort)?.label ?? sort,
+        label: SORTS_FOR_CHIPS.find((s) => s.value === sort)?.label ?? sort,
         clear: { sort: "newest" },
       });
     }
@@ -290,7 +282,9 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
               </select>
             </div>
           </FilterField>
+        </div>
 
+        <div className="stock-filters-secondary">
           <FilterField label="Mileage">
             <div className="stock-filters-range">
               <select
@@ -326,9 +320,7 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
               </select>
             </div>
           </FilterField>
-        </div>
 
-        <div className="stock-filters-secondary">
           <FilterField label="Steering" htmlFor="stock-steering">
             <select
               className="input"
@@ -340,44 +332,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
               {STEERINGS.map((value) => (
                 <option key={value} value={value}>
                   {value}
-                </option>
-              ))}
-            </select>
-          </FilterField>
-
-          <FilterField label="Body type" htmlFor="stock-body">
-            <select
-              className="input"
-              id="stock-body"
-              value={params.get("bodyType") ?? ""}
-              onChange={(e) => update({ bodyType: e.target.value })}
-            >
-              <option value="">All types</option>
-              {BODY_TYPE_VALUES.map((b) => (
-                <option key={b} value={b}>
-                  {BODY_TYPE_LABELS[b]}
-                </option>
-              ))}
-              {BODY_TYPES.filter(
-                (label) => !BODY_TYPE_VALUES.some((v) => BODY_TYPE_LABELS[v] === label),
-              ).map((b) => (
-                <option key={`legacy-${b}`} value={b}>
-                  {b}
-                </option>
-              ))}
-            </select>
-          </FilterField>
-
-          <FilterField label="Sort by" htmlFor="stock-sort" className="stock-filters-sort">
-            <select
-              className="input"
-              id="stock-sort"
-              value={params.get("sort") ?? "newest"}
-              onChange={(e) => update({ sort: e.target.value })}
-            >
-              {SORTS.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
                 </option>
               ))}
             </select>

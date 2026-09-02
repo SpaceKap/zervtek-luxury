@@ -1,4 +1,5 @@
 import type { Prisma, Vehicle } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 import { pickDailyItems } from "./daily-shuffle";
 import { prisma } from "./prisma";
 import { PUBLIC_VEHICLE_STATUSES, isPublicVehicleStatus } from "./vehicle-constants";
@@ -128,16 +129,24 @@ export async function searchVehicles(
 
 /** Homepage featured grid — daily random sample from available CMS stock. */
 export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicle[]> {
-  try {
-    const pool = await prisma.vehicle.findMany({
-      where: { status: "AVAILABLE" },
-      orderBy: { id: "asc" },
-    });
-    return pickDailyItems(pool, limit).map(toPublicVehicle);
-  } catch {
-    return [];
-  }
+  return getFeaturedVehiclesCached(limit);
 }
+
+const getFeaturedVehiclesCached = unstable_cache(
+  async (limit: number) => {
+    try {
+      const pool = await prisma.vehicle.findMany({
+        where: { status: "AVAILABLE" },
+        orderBy: { id: "asc" },
+      });
+      return pickDailyItems(pool, limit).map(toPublicVehicle);
+    } catch {
+      return [];
+    }
+  },
+  ["featured-vehicles"],
+  { revalidate: 60 },
+);
 
 /** Public detail — null when not publicly listable. */
 export async function getVehicleBySlug(slug: string): Promise<PublicVehicle | null> {
@@ -173,69 +182,86 @@ export async function getAllVehicleSlugs(): Promise<{ slug: string; updatedAt: D
 
 /** Min/max odometer (km) across publicly listable stock — for filter dropdowns. */
 export async function getStockMileageBounds(): Promise<{ min: number; max: number }> {
-  try {
-    const agg = await prisma.vehicle.aggregate({
-      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
-      _min: { mileage: true },
-      _max: { mileage: true },
-    });
-    return {
-      min: agg._min.mileage ?? 0,
-      max: agg._max.mileage ?? 200_000,
-    };
-  } catch {
-    return { min: 0, max: 200_000 };
-  }
+  const meta = await getStockFilterMeta();
+  return meta.mileageBounds;
 }
 
 /** Min/max model year across publicly listable stock — for filter dropdowns. */
 export async function getStockYearBounds(): Promise<{ min: number; max: number }> {
-  try {
-    const agg = await prisma.vehicle.aggregate({
-      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
-      _min: { year: true },
-      _max: { year: true },
-    });
-    const now = new Date().getFullYear();
-    return {
-      min: agg._min.year ?? now - 30,
-      max: agg._max.year ?? now,
-    };
-  } catch {
-    const now = new Date().getFullYear();
-    return { min: now - 30, max: now };
-  }
+  const meta = await getStockFilterMeta();
+  return meta.yearBounds;
 }
 
 /** Make/model options from vehicles currently in public stock. */
 export async function getStockFilterCatalog(): Promise<CatalogMake[]> {
-  try {
-    const rows = await prisma.vehicle.findMany({
-      where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
-      select: { make: true, model: true },
-      orderBy: [{ make: "asc" }, { model: "asc" }],
-    });
-
-    const map = new Map<string, Set<string>>();
-    for (const row of rows) {
-      const make = row.make.trim();
-      const model = row.model.trim();
-      if (!make || !model) continue;
-      if (!map.has(make)) map.set(make, new Set());
-      map.get(make)!.add(model);
-    }
-
-    return Array.from(map.entries())
-      .map(([make, models]) => ({
-        make,
-        country: "Other",
-        models: Array.from(models).sort((a, b) => a.localeCompare(b)),
-      }))
-      .sort((a, b) => a.make.localeCompare(b.make));
-  } catch {
-    return [];
-  }
+  const meta = await getStockFilterMeta();
+  return meta.catalog;
 }
+
+export type StockFilterMeta = {
+  catalog: CatalogMake[];
+  yearBounds: { min: number; max: number };
+  mileageBounds: { min: number; max: number };
+};
+
+/** Cached catalog + year/mileage bounds for the stock filter UI. */
+export const getStockFilterMeta = unstable_cache(
+  async (): Promise<StockFilterMeta> => {
+    try {
+      const [rows, agg] = await Promise.all([
+        prisma.vehicle.findMany({
+          where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+          select: { make: true, model: true },
+          orderBy: [{ make: "asc" }, { model: "asc" }],
+        }),
+        prisma.vehicle.aggregate({
+          where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+          _min: { mileage: true, year: true },
+          _max: { mileage: true, year: true },
+        }),
+      ]);
+
+      const map = new Map<string, Set<string>>();
+      for (const row of rows) {
+        const make = row.make.trim();
+        const model = row.model.trim();
+        if (!make || !model) continue;
+        if (!map.has(make)) map.set(make, new Set());
+        map.get(make)!.add(model);
+      }
+
+      const catalog = Array.from(map.entries())
+        .map(([make, models]) => ({
+          make,
+          country: "Other",
+          models: Array.from(models).sort((a, b) => a.localeCompare(b)),
+        }))
+        .sort((a, b) => a.make.localeCompare(b.make));
+
+      const now = new Date().getFullYear();
+      return {
+        catalog,
+        yearBounds: {
+          min: agg._min.year ?? now - 30,
+          max: agg._max.year ?? now,
+        },
+        mileageBounds: {
+          min: agg._min.mileage ?? 0,
+          max: agg._max.mileage ?? 200_000,
+        },
+      };
+    } catch {
+      const now = new Date().getFullYear();
+      return {
+        catalog: [],
+        yearBounds: { min: now - 30, max: now },
+        mileageBounds: { min: 0, max: 200_000 },
+      };
+    }
+  },
+  ["stock-filter-meta"],
+  { revalidate: 300 },
+);
 
 export async function getCatalogMakeModels(): Promise<CatalogMake[]> {
   try {

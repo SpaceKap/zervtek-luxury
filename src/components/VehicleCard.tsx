@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Price } from "@/components/Price";
 import { formatKm } from "@/lib/format";
@@ -34,13 +33,13 @@ export function VehicleCard({
         {v.status === "RESERVED" && (
           <span className="vcard-badge">Reserved</span>
         )}
-        <Image
+        {/* Pre-sized /medium/ assets — skip /_next/image optimizer on the grid. */}
+        <img
           src={img}
           alt={`${v.year} ${v.make} ${v.model}${v.variant ? " " + v.variant : ""} for sale`}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          loading="lazy"
+          decoding="async"
           draggable={false}
-          style={{ objectFit: "cover" }}
         />
       </div>
       <div className="vcard-body">
