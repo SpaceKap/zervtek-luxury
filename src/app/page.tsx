@@ -6,7 +6,7 @@ import { InquiryForm } from "@/components/InquiryForm";
 import { JsonLd } from "@/components/JsonLd";
 import { HashScroll } from "@/components/HashScroll";
 import { HeroWhatsAppMessage } from "@/components/HeroWhatsAppMessage";
-import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
+import { HomePortsGlobeLazy } from "@/components/home/HomePortsGlobeLazy";
 import { productListJsonLd } from "@/lib/seo";
 import { COMPANY_PROFILE, SITE } from "@/lib/site";
 
@@ -175,7 +175,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <HomePortsGlobe />
+        <HomePortsGlobeLazy />
 
         {/* Inquiry */}
         <section className="section container" id="inquire">

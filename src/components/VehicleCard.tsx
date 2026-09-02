@@ -5,6 +5,7 @@ import { Price } from "@/components/Price";
 import { formatKm } from "@/lib/format";
 import { vehicleStockPath } from "@/lib/slug";
 import { trackSelectItem } from "@/lib/analytics";
+import { vehicleGridImageUrl } from "@/lib/vehicle-media-url";
 import {
   BODY_TYPE_LABELS,
   TRANSMISSION_LABELS,
@@ -19,7 +20,7 @@ export function VehicleCard({
   v: PublicVehicle;
   listName?: string;
 }) {
-  const img = v.images[0] || "/placeholder.svg";
+  const img = vehicleGridImageUrl(v.images[0] || "/placeholder.svg");
   const body = displayEnum(v.bodyType, BODY_TYPE_LABELS);
   const transmission = displayEnum(v.transmission, TRANSMISSION_LABELS);
   return (
@@ -33,12 +34,12 @@ export function VehicleCard({
         {v.status === "RESERVED" && (
           <span className="vcard-badge">Reserved</span>
         )}
-        {/* Pre-sized /medium/ assets — skip /_next/image optimizer on the grid. */}
         <img
           src={img}
           alt={`${v.year} ${v.make} ${v.model}${v.variant ? " " + v.variant : ""} for sale`}
           loading="lazy"
           decoding="async"
+          fetchPriority="low"
           draggable={false}
         />
       </div>
