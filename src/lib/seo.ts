@@ -3,10 +3,53 @@ import type { PublicVehicle } from "./vehicle-public";
 import { formatJPY, formatKm } from "./format";
 import { SITE } from "./site";
 import { vehicleStockPath } from "./slug";
+import {
+  BODY_TYPE_LABELS,
+  type BodyTypeValue,
+  FUEL_LABELS,
+  TRANSMISSION_LABELS,
+  displayEnum,
+} from "./vehicle-constants";
 
 function absUrl(src: string): string {
   return src.startsWith("http") ? src : `${SITE.url}${src}`;
 }
+
+/** Drop undefined values so JSON-LD validates cleanly. */
+export function compactJsonLd<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => compactJsonLd(item)).filter((item) => item !== undefined) as T;
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (val === undefined) continue;
+      out[key] = compactJsonLd(val);
+    }
+    return out as T;
+  }
+  return value;
+}
+
+function siteLogoImageObject() {
+  return {
+    "@type": "ImageObject" as const,
+    url: absUrl("/logo.png"),
+  };
+}
+
+function offerPriceValidUntil(days = 90): string {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+const DRIVETRAIN_SCHEMA: Record<string, string> = {
+  FWD: "https://schema.org/FrontWheelDriveConfiguration",
+  RWD: "https://schema.org/RearWheelDriveConfiguration",
+  AWD: "https://schema.org/AllWheelDriveConfiguration",
+  FOUR_WD: "https://schema.org/FourWheelDriveConfiguration",
+};
 
 export type VehicleSeoInput = {
   year: number | string;
@@ -37,6 +80,8 @@ type ProductVehicle = Pick<
   | "transmission"
   | "engineCc"
   | "mileage"
+  | "steering"
+  | "drivetrain"
 >;
 
 /** Display / listing title: "2023 Mercedes-AMG C-Class C43 …" */
@@ -50,6 +95,30 @@ export function vehicleListingTitle(v: VehicleSeoInput): string {
 
 function vehicleName(v: ProductVehicle | PublicVehicle): string {
   return vehicleListingTitle(v);
+}
+
+function schemaBodyType(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  const key = value.toUpperCase() as BodyTypeValue;
+  return BODY_TYPE_LABELS[key] || value;
+}
+
+function schemaFuelType(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  return displayEnum(value, FUEL_LABELS as Record<string, string>) || value;
+}
+
+function schemaTransmission(value: string | null | undefined): string | undefined {
+  if (!value) return undefined;
+  return displayEnum(value, TRANSMISSION_LABELS as Record<string, string>) || value;
+}
+
+function vehicleConfiguration(v: ProductVehicle | PublicVehicle): string | undefined {
+  const parts: string[] = [];
+  if (v.variant?.trim()) parts.push(v.variant.trim());
+  if (v.steering === "RHD") parts.push("Right-hand drive");
+  if (v.steering === "LHD") parts.push("Left-hand drive");
+  return parts.length ? parts.join(", ") : undefined;
 }
 
 /** Meta title from vehicle title. */
@@ -97,13 +166,48 @@ function offerAvailability(status: string): string {
   return "https://schema.org/InStock";
 }
 
+function vehicleOffers(v: ProductVehicle | PublicVehicle, url: string) {
+  return {
+    "@type": "Offer" as const,
+    url,
+    price: String(v.price),
+    priceCurrency: "JPY",
+    priceValidUntil: offerPriceValidUntil(),
+    availability: offerAvailability(v.status),
+    itemCondition: "https://schema.org/UsedCondition",
+    description: "Vehicle price in JPY. Shipping to your destination port is quoted separately.",
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 4,
+          maxValue: 8,
+          unitCode: "WK",
+        },
+      },
+    },
+    seller: {
+      "@type": "AutoDealer",
+      name: SITE.name,
+      url: SITE.url,
+    },
+  };
+}
+
 /** Product (+ Car) schema object without @context — safe to nest in ItemList. */
 export function productSchema(v: ProductVehicle | PublicVehicle) {
   const name = vehicleName(v);
   const url = `${SITE.url}${vehicleStockPath(v.slug)}`;
   const images = v.images.map(absUrl);
+  const bodyType = schemaBodyType(v.bodyType);
+  const fuelType = schemaFuelType(v.fuelType);
+  const transmission = schemaTransmission(v.transmission);
+  const configuration = vehicleConfiguration(v);
+  const drivetrain = v.drivetrain ? DRIVETRAIN_SCHEMA[v.drivetrain] : undefined;
 
-  return {
+  return compactJsonLd({
     "@type": ["Product", "Car"] as const,
     "@id": `${url}#product`,
     name,
@@ -115,10 +219,12 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
     model: v.model,
     vehicleModelDate: String(v.year),
     ...(v.vin ? { vehicleIdentificationNumber: v.vin } : {}),
-    ...(v.bodyType ? { bodyType: v.bodyType } : {}),
+    ...(bodyType ? { bodyType } : {}),
+    ...(configuration ? { vehicleConfiguration: configuration } : {}),
     ...(v.exteriorColor ? { color: v.exteriorColor } : {}),
-    ...(v.fuelType ? { fuelType: v.fuelType } : {}),
-    ...(v.transmission ? { vehicleTransmission: v.transmission } : {}),
+    ...(fuelType ? { fuelType } : {}),
+    ...(transmission ? { vehicleTransmission: transmission } : {}),
+    ...(drivetrain ? { driveWheelConfiguration: drivetrain } : {}),
     ...(v.engineCc
       ? {
           vehicleEngine: {
@@ -137,29 +243,18 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
       unitCode: "KMT",
     },
     itemCondition: "https://schema.org/UsedCondition",
-    offers: {
-      "@type": "Offer",
-      url,
-      price: String(v.price),
-      priceCurrency: "JPY",
-      availability: offerAvailability(v.status),
-      itemCondition: "https://schema.org/UsedCondition",
-      seller: {
-        "@type": "AutoDealer",
-        name: SITE.name,
-        url: SITE.url,
-      },
-    },
-  };
+    offers: vehicleOffers(v, url),
+  });
 }
 
 export function organizationJsonLd() {
-  return {
+  return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "AutoDealer",
     name: SITE.name,
     legalName: SITE.legalName,
     url: SITE.url,
+    logo: siteLogoImageObject(),
     email: SITE.email,
     telephone: SITE.phone,
     description: SITE.description,
@@ -171,8 +266,20 @@ export function organizationJsonLd() {
       postalCode: SITE.address.postalCode,
       addressCountry: SITE.address.country,
     },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "18:00",
+      },
+    ],
+    areaServed: {
+      "@type": "Place",
+      name: "Worldwide",
+    },
     sameAs: [SITE.social.instagram, SITE.social.facebook, SITE.social.linkedin],
-  };
+  });
 }
 
 export function websiteJsonLd() {
@@ -217,10 +324,10 @@ export function faqJsonLd(faqs: { q: string; a: string }[]) {
 
 /** Product schema for a single vehicle detail page. */
 export function productJsonLd(v: ProductVehicle | PublicVehicle) {
-  return {
+  return compactJsonLd({
     "@context": "https://schema.org",
     ...productSchema(v),
-  };
+  });
 }
 
 /** @deprecated Prefer productJsonLd — kept as alias. */
@@ -228,18 +335,19 @@ export function vehicleJsonLd(v: ProductVehicle | PublicVehicle, _absImage?: (sr
   return productJsonLd(v);
 }
 
-/** ItemList of Product schemas for stock / featured grids. */
+/** ItemList of Product schemas for stock / featured grids (excludes sold listings). */
 export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle>) {
-  return {
+  const listed = vehicles.filter((v) => v.status !== "SOLD");
+  return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "ItemList",
-    numberOfItems: vehicles.length,
-    itemListElement: vehicles.map((v, i) => ({
+    numberOfItems: listed.length,
+    itemListElement: listed.map((v, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: productSchema(v),
     })),
-  };
+  });
 }
 
 /** @deprecated Prefer productListJsonLd. */
@@ -262,12 +370,14 @@ export function blogArticleJsonLd(post: {
 }) {
   const headline = post.metaTitle?.trim() || post.title;
   const description = post.metaDescription?.trim() || post.excerpt;
-  return {
+  const url = `${SITE.url}/blog/${post.slug}`;
+
+  return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline,
     description,
-    url: `${SITE.url}/blog/${post.slug}`,
+    url,
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
     author: {
@@ -279,14 +389,20 @@ export function blogArticleJsonLd(post: {
       "@type": "Organization",
       name: SITE.legalName,
       url: SITE.url,
+      logo: siteLogoImageObject(),
     },
     image: post.coverImage ? absUrl(post.coverImage) : undefined,
-    mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
-  };
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  });
 }
 
-export function blogListingJsonLd(posts: Array<{ title: string; slug: string; excerpt: string }>) {
-  return {
+export function blogListingJsonLd(
+  posts: Array<{ title: string; slug: string; excerpt: string; publishedAt?: Date | null }>,
+) {
+  return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "Blog",
     name: `${SITE.name} Blog`,
@@ -296,6 +412,7 @@ export function blogListingJsonLd(posts: Array<{ title: string; slug: string; ex
       headline: p.title,
       url: `${SITE.url}/blog/${p.slug}`,
       description: p.excerpt,
+      datePublished: p.publishedAt?.toISOString(),
     })),
-  };
+  });
 }

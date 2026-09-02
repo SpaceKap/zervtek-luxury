@@ -8,6 +8,7 @@ import { mergeCatalogWithStock, type CatalogMake } from "./vehicle-catalog";
 export type { Vehicle, PublicVehicle, CatalogMake };
 
 export type VehicleFilters = {
+  q?: string;
   make?: string;
   model?: string;
   bodyType?: string;
@@ -30,6 +31,18 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
     and.push({ status: { in: [...PUBLIC_VEHICLE_STATUSES] } });
   } else if (f.status) {
     and.push({ status: f.status });
+  }
+
+  if (f.q?.trim()) {
+    const q = f.q.trim();
+    and.push({
+      OR: [
+        { make: { contains: q, mode: "insensitive" } },
+        { model: { contains: q, mode: "insensitive" } },
+        { variant: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+      ],
+    });
   }
 
   if (f.make) and.push({ make: { equals: f.make, mode: "insensitive" } });

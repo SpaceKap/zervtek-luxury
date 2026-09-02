@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { CatalogMake } from "@/lib/vehicles";
 import { trackStockFilter } from "@/lib/analytics";
 import { BODY_TYPE_LABELS, BODY_TYPE_VALUES, STEERINGS } from "@/lib/vehicle-constants";
@@ -69,6 +69,7 @@ function FilterField({
 export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
   const router = useRouter();
   const params = useSearchParams();
+  const [query, setQuery] = useState(() => params.get("q") ?? "");
 
   const update = useCallback(
     (patch: Record<string, string>) => {
@@ -125,7 +126,9 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
     const steering = params.get("steering");
     const bodyType = params.get("bodyType");
     const sort = params.get("sort");
+    const q = params.get("q");
 
+    if (q) chips.push({ key: "q", label: `“${q}”`, clear: { q: "" } });
     if (make) chips.push({ key: "make", label: make, clear: { make: "", model: "" } });
     if (model) chips.push({ key: "model", label: model, clear: { model: "" } });
     if (minYear || maxYear) {
@@ -190,8 +193,25 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
         className="stock-filters-form"
         onSubmit={(e) => {
           e.preventDefault();
+          update({ q: query.trim() });
         }}
       >
+        <FilterField label="Search" htmlFor="stock-q" className="stock-filters-search">
+          <div className="stock-filters-search-row">
+            <input
+              className="input"
+              id="stock-q"
+              type="search"
+              value={query}
+              placeholder="Ferrari, 911, Turbo…"
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <button type="submit" className="btn btn-outline stock-filters-search-btn">
+              Search
+            </button>
+          </div>
+        </FilterField>
+
         <div className="stock-filters-primary">
           <FilterField label="Make" htmlFor="stock-make">
             <select

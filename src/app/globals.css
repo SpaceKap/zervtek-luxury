@@ -1290,6 +1290,14 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   flex-direction: column;
   gap: 14px;
 }
+.stock-filters-search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.stock-filters-search-btn {
+  white-space: nowrap;
+}
 .stock-filters-primary,
 .stock-filters-secondary {
   display: grid;

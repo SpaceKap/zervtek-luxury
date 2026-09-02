@@ -41,6 +41,7 @@ export default async function StockPage({
   const page = Math.max(1, parseInt(first(sp.page) ?? "1", 10) || 1);
 
   const filters: VehicleFilters = {
+    q: first(sp.q),
     make: first(sp.make),
     model: first(sp.model),
     bodyType: first(sp.bodyType),
