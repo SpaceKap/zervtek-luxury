@@ -5,9 +5,9 @@ import {
   searchVehicles,
   type VehicleFilters,
 } from "@/lib/vehicles";
-import { VehicleCard } from "@/components/VehicleCard";
 import { SearchFilters } from "@/components/SearchFilters";
 import { StockSort } from "@/components/StockSort";
+import { StockInfiniteGrid, STOCK_PAGE_SIZE } from "@/components/StockInfiniteGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
@@ -19,11 +19,9 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Performance Car Stock | Browse & Search",
   description:
-    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Filter by make, model, year and body type: Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
+    "Browse ZervTek Performance's inventory of performance cars, supercars and luxury vehicles from Japan. Filter by make, model and steering: Mercedes-AMG, Porsche, Ferrari, Land Rover and more.",
   alternates: { canonical: "/stock" },
 };
-
-const PAGE_SIZE = 12;
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -37,7 +35,6 @@ export default async function StockPage({
   searchParams: Promise<SP>;
 }) {
   const sp = await searchParams;
-  const page = Math.max(1, parseInt(first(sp.page) ?? "1", 10) || 1);
 
   const filters: VehicleFilters = {
     q: first(sp.q),
@@ -56,23 +53,10 @@ export default async function StockPage({
     status: first(sp.status),
   };
 
-  const [{ items, total }, { catalog, yearBounds, mileageBounds }] = await Promise.all([
-    searchVehicles(filters, page, PAGE_SIZE),
+  const [{ items, total }, { catalog }] = await Promise.all([
+    searchVehicles(filters, 1, STOCK_PAGE_SIZE),
     getStockFilterMeta(),
   ]);
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const showingFrom = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const showingTo = Math.min(page * PAGE_SIZE, total);
-
-  const buildPageHref = (p: number) => {
-    const next = new URLSearchParams();
-    Object.entries(sp).forEach(([k, v]) => {
-      const val = first(v);
-      if (val && k !== "page") next.set(k, val);
-    });
-    next.set("page", String(p));
-    return `/stock?${next.toString()}`;
-  };
 
   return (
     <main className="stock-page">
@@ -97,13 +81,13 @@ export default async function StockPage({
       </header>
 
       <div className="stock-body container">
-        <SearchFilters catalog={catalog} yearBounds={yearBounds} mileageBounds={mileageBounds} />
+        <SearchFilters catalog={catalog} />
 
         <div className="stock-results-bar">
           <p className="stock-results-count">
             {total > 0 ? (
               <>
-                Showing <strong>{showingFrom}–{showingTo}</strong> of <strong>{total}</strong>
+                <strong>{total}</strong> vehicle{total === 1 ? "" : "s"}
               </>
             ) : (
               "No matches"
@@ -113,35 +97,7 @@ export default async function StockPage({
         </div>
 
         {items.length > 0 ? (
-          <>
-            <div className="vehicle-grid stock-grid">
-              {items.map((v) => (
-                <VehicleCard key={v.id} v={v} />
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <nav className="stock-pagination" aria-label="Stock pagination">
-                {page > 1 ? (
-                  <Link className="btn btn-outline" href={buildPageHref(page - 1)}>
-                    Previous
-                  </Link>
-                ) : (
-                  <span className="stock-pagination-spacer" />
-                )}
-                <span className="stock-pagination-label">
-                  Page {page} of {totalPages}
-                </span>
-                {page < totalPages ? (
-                  <Link className="btn btn-outline" href={buildPageHref(page + 1)}>
-                    Next
-                  </Link>
-                ) : (
-                  <span className="stock-pagination-spacer" />
-                )}
-              </nav>
-            )}
-          </>
+          <StockInfiniteGrid initialItems={items} total={total} />
         ) : (
           <div className="stock-empty glass">
             <h2>Can&apos;t find what you&apos;re looking for?</h2>

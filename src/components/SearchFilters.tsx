@@ -5,36 +5,13 @@ import { useCallback, useMemo, useState, type ReactNode } from "react";
 import type { CatalogMake } from "@/lib/vehicles";
 import { trackStockFilter } from "@/lib/analytics";
 import { STEERINGS } from "@/lib/vehicle-constants";
-import { formatKm } from "@/lib/format";
 import { SORTS } from "@/components/StockSort";
 
 const SORTS_FOR_CHIPS = SORTS;
 
 type Props = {
   catalog: CatalogMake[];
-  yearBounds: { min: number; max: number };
-  mileageBounds: { min: number; max: number };
 };
-
-const MILEAGE_STEPS_KM = [
-  0, 5_000, 10_000, 15_000, 20_000, 30_000, 40_000, 50_000, 75_000, 100_000, 125_000, 150_000,
-  200_000,
-];
-
-function yearOptions(min: number, max: number): number[] {
-  const years: number[] = [];
-  for (let y = max; y >= min; y--) years.push(y);
-  return years;
-}
-
-function mileageOptions(bounds: { min: number; max: number }): number[] {
-  const cap = Math.max(bounds.max, ...MILEAGE_STEPS_KM);
-  const steps = MILEAGE_STEPS_KM.filter((km) => km <= cap);
-  if (bounds.max > steps[steps.length - 1]!) {
-    steps.push(bounds.max);
-  }
-  return steps.filter((km) => km >= bounds.min || km === 0);
-}
 
 function FilterField({
   label,
@@ -61,7 +38,7 @@ function FilterField({
   );
 }
 
-export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
+export function SearchFilters({ catalog }: Props) {
   const router = useRouter();
   const params = useSearchParams();
   const [query, setQuery] = useState(() => params.get("q") ?? "");
@@ -77,10 +54,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
       trackStockFilter({
         make: next.get("make") || undefined,
         model: next.get("model") || undefined,
-        min_year: next.get("minYear") || undefined,
-        max_year: next.get("maxYear") || undefined,
-        min_mileage: next.get("minMileage") || undefined,
-        max_mileage: next.get("maxMileage") || undefined,
         steering: next.get("steering") || undefined,
         sort: next.get("sort") || undefined,
       });
@@ -99,24 +72,10 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
     return catalog.find((entry) => entry.make === selectedMake)?.models ?? [];
   }, [catalog, selectedMake]);
 
-  const years = useMemo(
-    () => yearOptions(yearBounds.min, yearBounds.max),
-    [yearBounds.min, yearBounds.max],
-  );
-
-  const mileages = useMemo(
-    () => mileageOptions(mileageBounds),
-    [mileageBounds.min, mileageBounds.max],
-  );
-
   const activeFilters = useMemo(() => {
     const chips: { key: string; label: string; clear: Record<string, string> }[] = [];
     const make = params.get("make");
     const model = params.get("model");
-    const minYear = params.get("minYear");
-    const maxYear = params.get("maxYear");
-    const minMileage = params.get("minMileage");
-    const maxMileage = params.get("maxMileage");
     const steering = params.get("steering");
     const sort = params.get("sort");
     const q = params.get("q");
@@ -124,32 +83,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
     if (q) chips.push({ key: "q", label: `“${q}”`, clear: { q: "" } });
     if (make) chips.push({ key: "make", label: make, clear: { make: "", model: "" } });
     if (model) chips.push({ key: "model", label: model, clear: { model: "" } });
-    if (minYear || maxYear) {
-      const range =
-        minYear && maxYear
-          ? `${minYear}–${maxYear}`
-          : minYear
-            ? `from ${minYear}`
-            : `to ${maxYear}`;
-      chips.push({
-        key: "year",
-        label: `Year ${range}`,
-        clear: { minYear: "", maxYear: "" },
-      });
-    }
-    if (minMileage || maxMileage) {
-      const range =
-        minMileage && maxMileage
-          ? `${formatKm(Number(minMileage))}–${formatKm(Number(maxMileage))}`
-          : minMileage
-            ? `from ${formatKm(Number(minMileage))}`
-            : `to ${formatKm(Number(maxMileage))}`;
-      chips.push({
-        key: "mileage",
-        label: range,
-        clear: { minMileage: "", maxMileage: "" },
-      });
-    }
     if (steering) chips.push({ key: "steering", label: steering, clear: { steering: "" } });
     if (sort && sort !== "newest") {
       chips.push({
@@ -171,7 +104,7 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
           <p className="stock-filters-sub">
             {hasFilters
               ? `${activeFilters.length} filter${activeFilters.length === 1 ? "" : "s"} applied`
-              : "Filter by make, year, mileage and more"}
+              : "Filter by make, model and steering"}
           </p>
         </div>
         {hasFilters ? (
@@ -245,80 +178,6 @@ export function SearchFilters({ catalog, yearBounds, mileageBounds }: Props) {
                 Select a make to narrow models
               </span>
             ) : null}
-          </FilterField>
-
-          <FilterField label="Year">
-            <div className="stock-filters-range">
-              <select
-                className="input"
-                id="stock-min-year"
-                aria-label="Year from"
-                value={params.get("minYear") ?? ""}
-                onChange={(e) => update({ minYear: e.target.value })}
-              >
-                <option value="">Any</option>
-                {years.map((year) => (
-                  <option key={year} value={String(year)}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-              <span className="stock-filters-range-sep" aria-hidden="true">
-                to
-              </span>
-              <select
-                className="input"
-                id="stock-max-year"
-                aria-label="Year to"
-                value={params.get("maxYear") ?? ""}
-                onChange={(e) => update({ maxYear: e.target.value })}
-              >
-                <option value="">Any</option>
-                {years.map((year) => (
-                  <option key={year} value={String(year)}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </FilterField>
-        </div>
-
-        <div className="stock-filters-secondary">
-          <FilterField label="Mileage">
-            <div className="stock-filters-range">
-              <select
-                className="input"
-                id="stock-min-mileage"
-                aria-label="Mileage from"
-                value={params.get("minMileage") ?? ""}
-                onChange={(e) => update({ minMileage: e.target.value })}
-              >
-                <option value="">Any</option>
-                {mileages.map((km) => (
-                  <option key={km} value={String(km)}>
-                    {formatKm(km)}
-                  </option>
-                ))}
-              </select>
-              <span className="stock-filters-range-sep" aria-hidden="true">
-                to
-              </span>
-              <select
-                className="input"
-                id="stock-max-mileage"
-                aria-label="Mileage to"
-                value={params.get("maxMileage") ?? ""}
-                onChange={(e) => update({ maxMileage: e.target.value })}
-              >
-                <option value="">Any</option>
-                {mileages.map((km) => (
-                  <option key={km} value={String(km)}>
-                    {formatKm(km)}
-                  </option>
-                ))}
-              </select>
-            </div>
           </FilterField>
 
           <FilterField label="Steering" htmlFor="stock-steering">
