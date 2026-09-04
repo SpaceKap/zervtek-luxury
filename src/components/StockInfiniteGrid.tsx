@@ -4,8 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { VehicleCard } from "@/components/VehicleCard";
 import type { PublicVehicle } from "@/lib/vehicle-public";
-
-const PAGE_SIZE = 12;
+import { STOCK_PAGE_SIZE } from "@/lib/stock";
 
 type Props = {
   initialItems: PublicVehicle[];
@@ -48,7 +47,7 @@ export function StockInfiniteGrid({ initialItems, total }: Props) {
     const nextPage = pageRef.current + 1;
     const qs = new URLSearchParams(params.toString());
     qs.set("page", String(nextPage));
-    qs.set("pageSize", String(PAGE_SIZE));
+    qs.set("pageSize", String(STOCK_PAGE_SIZE));
 
     try {
       const res = await fetch(`/api/stock?${qs.toString()}`);
@@ -128,5 +127,3 @@ export function StockInfiniteGrid({ initialItems, total }: Props) {
     </>
   );
 }
-
-export { PAGE_SIZE as STOCK_PAGE_SIZE };

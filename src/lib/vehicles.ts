@@ -122,7 +122,8 @@ export async function searchVehicles(
       prisma.vehicle.count({ where }),
     ]);
     return { items: items.map(toPublicVehicle), total };
-  } catch {
+  } catch (err) {
+    console.error("[searchVehicles]", err);
     return { items: [], total: 0 };
   }
 }

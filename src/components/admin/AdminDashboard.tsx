@@ -20,6 +20,7 @@ import {
 import { digitsOnly, formatDigitsWithCommas } from "@/lib/format";
 import { joinFeatures } from "@/lib/features";
 import { vehicleStockPath } from "@/lib/slug";
+import { vehicleGridImageUrl } from "@/lib/vehicle-media-url";
 import {
   buildVehicleMetaDescription,
   buildVehicleMetaTitle,
@@ -1327,34 +1328,48 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
       <div className="stack" style={{ gap: 10, marginTop: 16 }}>
         {list.map((v) => {
           const colors = statusColor(v.status);
+          const cover = v.images?.[0]
+            ? vehicleGridImageUrl(v.images[0])
+            : "/placeholder.svg";
           return (
             <div
               key={v.id}
-              className="glass"
-              style={{ padding: "14px 18px", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}
+              className="glass admin-listing-row"
             >
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <strong>
-                    {v.year} {v.make} {v.model} {v.variant}
-                  </strong>
-                  <span className="pill" style={{ background: colors.bg, color: colors.color, borderColor: "transparent", padding: "3px 10px", fontSize: 11 }}>
-                    {STATUS_LABELS[v.status] || v.status}
-                  </span>
-                  {v.createdByType === "AUTOMATION" ? (
-                    <span
-                      className="pill"
-                      style={{ background: "rgba(168,132,26,0.14)", color: "var(--gold-soft)", borderColor: "transparent", padding: "3px 10px", fontSize: 11 }}
-                    >
-                      Hermes
-                    </span>
-                  ) : null}
+              <div className="admin-listing-main">
+                <div className="admin-listing-thumb">
+                  <img
+                    src={cover}
+                    alt=""
+                    width={96}
+                    height={72}
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
-                <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-                  {vehicleStockPath(v.slug)}
+                <div className="admin-listing-copy">
+                  <div className="admin-listing-title-row">
+                    <strong>
+                      {v.year} {v.make} {v.model} {v.variant}
+                    </strong>
+                    <span className="pill" style={{ background: colors.bg, color: colors.color, borderColor: "transparent", padding: "3px 10px", fontSize: 11 }}>
+                      {STATUS_LABELS[v.status] || v.status}
+                    </span>
+                    {v.createdByType === "AUTOMATION" ? (
+                      <span
+                        className="pill"
+                        style={{ background: "rgba(168,132,26,0.14)", color: "var(--gold-soft)", borderColor: "transparent", padding: "3px 10px", fontSize: 11 }}
+                      >
+                        Hermes
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="muted admin-listing-slug">
+                    {vehicleStockPath(v.slug)}
+                  </div>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div className="admin-listing-actions">
                 <button className="btn btn-outline" onClick={() => startEdit(v)} style={{ padding: "8px 14px" }}>
                   Edit
                 </button>

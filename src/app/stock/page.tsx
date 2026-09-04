@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   getStockFilterMeta,
   searchVehicles,
@@ -7,14 +8,15 @@ import {
 } from "@/lib/vehicles";
 import { SearchFilters } from "@/components/SearchFilters";
 import { StockSort } from "@/components/StockSort";
-import { StockInfiniteGrid, STOCK_PAGE_SIZE } from "@/components/StockInfiniteGrid";
+import { StockInfiniteGrid } from "@/components/StockInfiniteGrid";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import { WhatsAppLink } from "@/components/WhatsAppLink";
+import { STOCK_PAGE_SIZE } from "@/lib/stock";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Performance Car Stock | Browse & Search",
@@ -81,7 +83,9 @@ export default async function StockPage({
       </header>
 
       <div className="stock-body container">
-        <SearchFilters catalog={catalog} />
+        <Suspense fallback={null}>
+          <SearchFilters catalog={catalog} />
+        </Suspense>
 
         <div className="stock-results-bar">
           <p className="stock-results-count">
@@ -93,11 +97,23 @@ export default async function StockPage({
               "No matches"
             )}
           </p>
-          <StockSort />
+          <Suspense fallback={null}>
+            <StockSort />
+          </Suspense>
         </div>
 
         {items.length > 0 ? (
-          <StockInfiniteGrid initialItems={items} total={total} />
+          <Suspense
+            fallback={
+              <div className="vehicle-grid stock-grid">
+                {items.map((v) => (
+                  <div key={v.id} className="vcard" aria-hidden />
+                ))}
+              </div>
+            }
+          >
+            <StockInfiniteGrid initialItems={items} total={total} />
+          </Suspense>
         ) : (
           <div className="stock-empty glass">
             <h2>Can&apos;t find what you&apos;re looking for?</h2>
