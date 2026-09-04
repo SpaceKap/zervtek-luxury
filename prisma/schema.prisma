@@ -145,3 +145,12 @@ model BlogPost {
   @@index([status])
   @@index([publishedAt])
 }
+
+/// Server-side admin sessions (cookie is sid.exp.hmac; row enables revoke on logout).
+model AdminSession {
+  id        String   @id
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
