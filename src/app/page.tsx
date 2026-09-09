@@ -75,6 +75,8 @@ export default async function HomePage() {
                   alt="Luxury performance car"
                   fill
                   priority
+                  fetchPriority="high"
+                  quality={70}
                   sizes="(max-width: 1023px) 100vw, 520px"
                   style={{ objectFit: "cover" }}
                 />
@@ -168,7 +170,7 @@ export default async function HomePage() {
             {STEPS.map((s) => (
               <div className="step glass" key={s.n}>
                 <div className="step-num">{s.n}</div>
-                <h4>{s.t}</h4>
+                <h3>{s.t}</h3>
                 <p>{s.d}</p>
               </div>
             ))}

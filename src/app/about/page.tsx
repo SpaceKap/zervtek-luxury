@@ -96,7 +96,7 @@ export default async function AboutPage() {
         <div className="steps">
           {VALUES.map((v) => (
             <div className="step glass" key={v.t}>
-              <h4 style={{ marginTop: 0 }}>{v.t}</h4>
+              <h3 style={{ marginTop: 0 }}>{v.t}</h3>
               <p>{v.d}</p>
             </div>
           ))}

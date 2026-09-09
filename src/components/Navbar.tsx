@@ -38,6 +38,7 @@ export function Navbar() {
             href={whatsappHref()}
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="WhatsApp"
             onClick={() => trackContact({ method: "whatsapp", location: "navbar" })}
           >
             <WhatsAppIcon />

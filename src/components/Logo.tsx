@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 type Props = {
@@ -10,7 +11,15 @@ type Props = {
 export function Logo({ showLuxury = true, href = "/", className = "", onClick }: Props) {
   const inner = (
     <>
-      <img src="/logo.png" alt="ZervTek" width={938} height={281} className="brand-img" />
+      <Image
+        src="/logo.png"
+        alt="ZervTek"
+        width={120}
+        height={36}
+        className="brand-img"
+        priority
+        sizes="120px"
+      />
       {showLuxury ? <span className="brand-sub">Performance</span> : null}
     </>
   );

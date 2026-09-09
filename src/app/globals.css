@@ -1,7 +1,7 @@
 :root {
   --bg-base: #f7f5f0;
   --gold: #a8841a;
-  --gold-soft: #8f6f12;
+  --gold-soft: #6e560e;
   --crimson: #b0203a;
   --ink: #14120f;
   --muted: #5c574f;
@@ -46,12 +46,6 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-/* Let the animated gradient show through Radix Theme's own background */
-.radix-themes {
-  --color-background: transparent;
-  background-color: transparent !important;
 }
 
 /* ---- Colorflow animated mesh background ---- */
@@ -1910,6 +1904,7 @@ select.input optgroup {
   font-size: 28px;
   color: var(--gold);
 }
+.step h3,
 .step h4 { margin: 12px 0 8px; font-size: 18px; font-weight: 700; }
 .step p { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; }
 
@@ -1947,7 +1942,8 @@ select.input optgroup {
     gap: 8px;
   }
 }
-.footer h5 { color: var(--gold-soft); letter-spacing: 0.1em; text-transform: uppercase; font-size: 12px; margin: 0 0 16px; }
+.footer h3.footer-heading,
+.footer h5 { color: var(--gold-soft); letter-spacing: 0.1em; text-transform: uppercase; font-size: 12px; margin: 0 0 16px; font-weight: 600; }
 .footer a { color: var(--muted); text-decoration: none; display: block; padding: 5px 0; font-size: 14px; }
 .footer a:hover { color: var(--ink); }
 .footer-bottom { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; display:flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }

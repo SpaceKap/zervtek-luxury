@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import Script from "next/script";
-import { Theme } from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -63,15 +61,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
-        {GTM_ID ? (
-          <Script id="gtm-base" strategy="afterInteractive">
-            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`}
-          </Script>
-        ) : null}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://colorflow-embed.b-cdn.net" />
         {/* Theme-aware favicon (browser uses prefers-color-scheme). */}
         <link rel="icon" href="/favicon-light.png" />
         <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
@@ -89,24 +81,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </noscript>
         ) : null}
         <ColorflowBackground />
-        <Theme
-          appearance="light"
-          accentColor="amber"
-          grayColor="mauve"
-          radius="none"
-          panelBackground="translucent"
-          scaling="100%"
-        >
-          <CurrencyProvider>
-            <div className="app-shell">
-              <Navbar />
-              <SsgoiProvider>{children}</SsgoiProvider>
-              <Footer />
-            </div>
-          </CurrencyProvider>
-        </Theme>
+        <CurrencyProvider>
+          <div className="app-shell">
+            <Navbar />
+            <SsgoiProvider>{children}</SsgoiProvider>
+            <Footer />
+          </div>
+        </CurrencyProvider>
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
+        {GTM_ID ? (
+          <Script id="gtm-base" strategy="lazyOnload">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        ) : null}
       </body>
     </html>
   );

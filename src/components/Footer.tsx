@@ -17,7 +17,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h5>Explore</h5>
+            <h3 className="footer-heading">Explore</h3>
             {NAV.map((item) => (
               <Link key={item.href} href={item.href}>
                 {item.label}
@@ -30,7 +30,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h5>Get in Touch</h5>
+            <h3 className="footer-heading">Get in Touch</h3>
             <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
             <a href={`tel:${SITE.phone.replace(/\s/g, "")}`}>{SITE.phone}</a>
             <a href={SITE.social.instagram} target="_blank" rel="noopener noreferrer">
