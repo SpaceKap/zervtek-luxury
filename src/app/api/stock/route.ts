@@ -26,7 +26,7 @@ function filtersFromSearchParams(sp: URLSearchParams): VehicleFilters {
   };
 }
 
-/** Public stock search — used by infinite scroll on /stock. */
+/** Public stock search API — optional client use; crawlable pages use server pagination. */
 export async function GET(req: NextRequest) {
   try {
     const sp = req.nextUrl.searchParams;

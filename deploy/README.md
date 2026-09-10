@@ -75,3 +75,13 @@ docker compose logs --tail=30 app | grep -i prisma
 docker compose exec db psql -U luxury -d luxury -c '\dt "BlogPost"'
 curl -sI https://performance.zervtek.com/blog | head -1
 ```
+
+## Enquiry notification retries
+
+Failed staff email/webhook deliveries retry with backoff. Drain also runs on each new enquiry, plus a scheduled worker:
+
+```cron
+*/5 * * * * curl -fsS -X POST \
+  -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
+  https://performance.zervtek.com/api/internal/inquiries/notify-retry
+```

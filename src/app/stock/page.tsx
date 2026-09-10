@@ -1,23 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
 import { notFound, permanentRedirect } from "next/navigation";
+import { getStockFilterMeta, searchVehicles, type VehicleFilters } from "@/lib/vehicles";
 import {
-  getStockFilterMeta,
-  searchVehicles,
-  type VehicleFilters,
-} from "@/lib/vehicles";
-import { SearchFilters } from "@/components/SearchFilters";
-import { StockSort } from "@/components/StockSort";
-import { StockInfiniteGrid } from "@/components/StockInfiniteGrid";
-import { StockPagination } from "@/components/StockPagination";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { JsonLd } from "@/components/JsonLd";
-import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
-import { SITE } from "@/lib/site";
-import { WhatsAppLink } from "@/components/WhatsAppLink";
+  StockBrowseView,
+  stockBrowseCopy,
+  stockBrowseCrumbs,
+} from "@/components/StockBrowseView";
 import {
   STOCK_PAGE_SIZE,
+  buildStockHref,
   parseStockPage,
   stockCanonicalPath,
   stockShouldNoIndex,
@@ -31,11 +22,11 @@ function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
 }
 
-function filtersFromSp(sp: SP): VehicleFilters {
+function filtersFromSp(sp: SP, make?: string, model?: string): VehicleFilters {
   return {
     q: first(sp.q),
-    make: first(sp.make),
-    model: first(sp.model),
+    make: make || first(sp.make),
+    model: model || first(sp.model),
     bodyType: first(sp.bodyType),
     transmission: first(sp.transmission),
     minYear: first(sp.minYear) ? Number(first(sp.minYear)) : undefined,
@@ -81,9 +72,14 @@ export async function generateMetadata({
     return { title: "Stock not found", robots: { index: false, follow: false } };
   }
 
+  // Query make/model redirect to path URLs — metadata here is for clean /stock only.
+  if (first(sp.make) || first(sp.model)) {
+    return { title: "Performance Car Stock | Browse & Search" };
+  }
+
   const qs = queryStrings(sp);
   const noindex = stockShouldNoIndex(qs);
-  const canonical = stockCanonicalPath(page, noindex);
+  const canonical = stockCanonicalPath(page, { hasExtraFilters: noindex });
   const title =
     page > 1
       ? `Performance Car Stock | Page ${page}`
@@ -108,21 +104,24 @@ export default async function StockPage({
   const page = parseStockPage(pageRaw);
   if (page === null) notFound();
 
+  const qs = queryStrings(sp);
+
+  // Canonicalize make/model query → /stock/{make}/{model}
+  if (qs.make || qs.model) {
+    permanentRedirect(
+      buildStockHref({
+        ...qs,
+        page: page > 1 ? String(page) : undefined,
+      }),
+    );
+  }
+
   // Normalize ?page=1 to clean /stock (preserve other params).
   if (pageRaw === "1") {
-    const next = new URLSearchParams();
-    for (const [k, v] of Object.entries(sp)) {
-      const val = first(v);
-      if (!val || k === "page") continue;
-      next.set(k, val);
-    }
-    const qs = next.toString();
-    permanentRedirect(qs ? `/stock?${qs}` : "/stock");
+    permanentRedirect(buildStockHref({ ...qs, page: undefined }));
   }
 
   const filters = filtersFromSp(sp);
-  const qs = queryStrings(sp);
-
   const [{ items, total }, { catalog }] = await Promise.all([
     searchVehicles(filters, page, STOCK_PAGE_SIZE),
     getStockFilterMeta(),
@@ -131,122 +130,21 @@ export default async function StockPage({
   const totalPages = Math.max(1, Math.ceil(total / STOCK_PAGE_SIZE));
   if (page > totalPages) notFound();
 
-  const paginationQuery = {
-    q: qs.q,
-    make: qs.make,
-    model: qs.model,
-    bodyType: qs.bodyType,
-    transmission: qs.transmission,
-    minYear: qs.minYear,
-    maxYear: qs.maxYear,
-    minMileage: qs.minMileage,
-    maxMileage: qs.maxMileage,
-    steering: qs.steering,
-    minPrice: qs.minPrice,
-    maxPrice: qs.maxPrice,
-    sort: qs.sort && qs.sort !== "newest" ? qs.sort : undefined,
-    status: qs.status,
-  };
+  const copy = stockBrowseCopy();
+  const { crumbs, jsonLdCrumbs } = stockBrowseCrumbs();
 
   return (
-    <main className="stock-page">
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: SITE.url },
-          { name: "Stock", url: `${SITE.url}/stock` },
-        ])}
-      />
-      {items.length > 0 && <JsonLd data={productListJsonLd(items)} />}
-
-      <header className="stock-hero container">
-        <div className="stock-meta">
-          <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Stock" }]} />
-          <span>{total} vehicles</span>
-        </div>
-        <h1 className="stock-title">The collection</h1>
-        <p className="stock-lead">
-          Hand-selected performance and luxury vehicles from Japan, documented and ready to ship
-          worldwide. Inspection support is available on request before you commit.
-        </p>
-      </header>
-
-      <div className="stock-body container">
-        <Suspense fallback={null}>
-          <SearchFilters catalog={catalog} />
-        </Suspense>
-
-        <div className="stock-results-bar">
-          <p className="stock-results-count">
-            {total > 0 ? (
-              <>
-                <strong>{total}</strong> vehicle{total === 1 ? "" : "s"}
-                {totalPages > 1 ? (
-                  <>
-                    {" "}
-                    · page <strong>{page}</strong> of <strong>{totalPages}</strong>
-                  </>
-                ) : null}
-              </>
-            ) : (
-              "No matches"
-            )}
-          </p>
-          <Suspense fallback={null}>
-            <StockSort />
-          </Suspense>
-        </div>
-
-        {items.length > 0 ? (
-          <>
-            <Suspense
-              fallback={
-                <div className="vehicle-grid stock-grid">
-                  {items.map((v) => (
-                    <div key={v.id} className="vcard" aria-hidden />
-                  ))}
-                </div>
-              }
-            >
-              <StockInfiniteGrid initialItems={items} total={total} initialPage={page} />
-            </Suspense>
-            <StockPagination page={page} totalPages={totalPages} query={paginationQuery} />
-          </>
-        ) : (
-          <div className="stock-empty glass">
-            <h2>Can&apos;t find what you&apos;re looking for?</h2>
-            <p className="muted">
-              Contact us and we will find exactly what you need from auctions and
-              dealerships across Japan.
-            </p>
-            <div className="stock-source-actions">
-              <Link className="btn btn-gold" href="/about#contact-form">
-                Contact us
-              </Link>
-              <WhatsAppLink className="btn btn-outline" location="stock_empty">
-                WhatsApp us
-              </WhatsAppLink>
-            </div>
-          </div>
-        )}
-
-        {items.length > 0 ? (
-          <aside className="stock-source-cta glass">
-            <h2 className="heading">Can&apos;t find what you&apos;re looking for?</h2>
-            <p className="muted">
-              Contact us and we will find exactly what you&apos;re looking for from
-              Japanese auctions and dealerships across Japan.
-            </p>
-            <div className="stock-source-actions">
-              <Link className="btn btn-gold" href="/about#contact-form">
-                Contact us
-              </Link>
-              <WhatsAppLink className="btn btn-outline" location="stock_source_cta">
-                WhatsApp us
-              </WhatsAppLink>
-            </div>
-          </aside>
-        ) : null}
-      </div>
-    </main>
+    <StockBrowseView
+      items={items}
+      total={total}
+      page={page}
+      totalPages={totalPages}
+      catalog={catalog}
+      filters={filters}
+      title={copy.title}
+      lead={copy.lead}
+      crumbs={crumbs}
+      jsonLdCrumbs={jsonLdCrumbs}
+    />
   );
 }

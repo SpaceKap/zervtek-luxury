@@ -4,10 +4,12 @@ import type { InquiryNotification } from "@/lib/inquiry-notify";
 import {
   deliverInquiryNotification,
   retryPendingInquiryNotifications,
+  snapshotFromNotification,
 } from "@/lib/inquiry-delivery";
 import { SITE } from "@/lib/site";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { isPublicVehicleStatus } from "@/lib/vehicle-constants";
+import type { Prisma } from "@prisma/client";
 
 const LIMITS = {
   name: 120,
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
     if (clientRequestId) {
       const existing = await prisma.inquiry.findUnique({ where: { clientRequestId } });
       if (existing) {
-        if (existing.notifyStatus !== "SENT") {
+        if (existing.notifyStatus === "PENDING" || existing.notifyStatus === "FAILED") {
           try {
             await deliverInquiryNotification(existing.id);
           } catch (err) {
@@ -82,7 +84,6 @@ export async function POST(req: NextRequest) {
             });
           }
         }
-        // Drain other pending outbox rows opportunistically.
         void retryPendingInquiryNotifications(3).catch((err) => {
           console.error("[inquiries] outbox drain failed", err);
         });
@@ -96,7 +97,10 @@ export async function POST(req: NextRequest) {
     const model = trimOrNull((body as { model?: string }).model, 80);
     const budget = trimOrNull((body as { budget?: string }).budget, 80);
     const timeline = trimOrNull((body as { timeline?: string }).timeline, 80);
-    const preferredContact = trimOrNull((body as { preferredContact?: string }).preferredContact, 40);
+    const preferredContact = trimOrNull(
+      (body as { preferredContact?: string }).preferredContact,
+      40,
+    );
     const phone = trimOrNull((body as { phone?: string }).phone, LIMITS.phone);
     const country = trimOrNull((body as { country?: string }).country, LIMITS.country);
     const message = trimOrNull((body as { message?: string }).message, LIMITS.message);
@@ -130,21 +134,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const inquiry = await prisma.inquiry.create({
-      data: {
-        name,
-        email,
-        phone,
-        country,
-        message,
-        vehicleId: safeVehicleId,
-        clientRequestId,
-        notifyStatus: "PENDING",
-      },
-    });
-
+    const submittedAt = new Date();
     const notification: InquiryNotification = {
-      id: inquiry.id,
+      id: "pending",
       name,
       email,
       phone,
@@ -158,9 +150,28 @@ export async function POST(req: NextRequest) {
       budget,
       timeline,
       preferredContact,
-      submittedAt: inquiry.createdAt.toISOString(),
+      submittedAt: submittedAt.toISOString(),
       siteUrl: SITE.url,
     };
+
+    const inquiry = await prisma.inquiry.create({
+      data: {
+        name,
+        email,
+        phone,
+        country,
+        message,
+        vehicleId: safeVehicleId,
+        clientRequestId,
+        notifyStatus: "PENDING",
+        notifyEmailStatus: "PENDING",
+        notifyWebhookStatus: "PENDING",
+        notifyPayload: snapshotFromNotification(notification) as Prisma.InputJsonValue,
+        createdAt: submittedAt,
+      },
+    });
+
+    notification.id = inquiry.id;
 
     try {
       await deliverInquiryNotification(inquiry.id, notification);

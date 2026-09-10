@@ -131,10 +131,13 @@ export function buildInquiryEmailBody(payload: InquiryNotification): string {
   return lines.join("\n");
 }
 
-export type ChannelDelivery = "sent" | "skipped" | "failed";
+export type ChannelDelivery = "sent" | "skipped" | "failed" | "unchanged";
 
 export type NotifyResult = {
+  /** True when no channel failed (skipped/unchanged/sent all OK). */
   ok: boolean;
+  /** True when every attempted channel was skipped and none sent. */
+  skippedAll: boolean;
   email: ChannelDelivery;
   webhook: ChannelDelivery;
   error: string | null;
@@ -219,7 +222,7 @@ export async function fireInquiryWebhook(
 
 function channelFromSettled(
   result: PromiseSettledResult<"sent" | "skipped">,
-): { delivery: ChannelDelivery; error: string | null } {
+): { delivery: "sent" | "skipped" | "failed"; error: string | null } {
   if (result.status === "fulfilled") {
     return { delivery: result.value, error: null };
   }
@@ -228,16 +231,37 @@ function channelFromSettled(
   return { delivery: "failed", error };
 }
 
-export async function notifyInquiry(payload: InquiryNotification): Promise<NotifyResult> {
-  const results = await Promise.allSettled([
-    sendInquiryEmail(payload),
-    fireInquiryWebhook(payload),
-  ]);
+export type NotifyChannels = {
+  email?: boolean;
+  webhook?: boolean;
+};
 
-  const email = channelFromSettled(results[0]);
-  const webhook = channelFromSettled(results[1]);
+export async function notifyInquiry(
+  payload: InquiryNotification,
+  channels: NotifyChannels = { email: true, webhook: true },
+): Promise<NotifyResult> {
+  const runEmail = channels.email !== false;
+  const runWebhook = channels.webhook !== false;
+
+  const tasks: Promise<"sent" | "skipped">[] = [];
+  if (runEmail) tasks.push(sendInquiryEmail(payload));
+  if (runWebhook) tasks.push(fireInquiryWebhook(payload));
+
+  const settled = await Promise.allSettled(tasks);
+  let i = 0;
+  const email = runEmail
+    ? channelFromSettled(settled[i++]!)
+    : { delivery: "unchanged" as const, error: null };
+  const webhook = runWebhook
+    ? channelFromSettled(settled[i++]!)
+    : { delivery: "unchanged" as const, error: null };
+
   const errors = [email.error, webhook.error].filter(Boolean);
   const ok = email.delivery !== "failed" && webhook.delivery !== "failed";
+
+  const attempted = [email.delivery, webhook.delivery].filter((d) => d !== "unchanged");
+  const skippedAll =
+    attempted.length > 0 && attempted.every((d) => d === "skipped");
 
   for (const detail of errors) {
     console.error("[inquiry-notify] failed:", detail);
@@ -245,6 +269,7 @@ export async function notifyInquiry(payload: InquiryNotification): Promise<Notif
 
   return {
     ok,
+    skippedAll,
     email: email.delivery,
     webhook: webhook.delivery,
     error: errors.length ? errors.join("; ") : null,

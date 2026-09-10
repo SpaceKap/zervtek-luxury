@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { trackStockFilter } from "@/lib/analytics";
 
@@ -13,6 +13,7 @@ const SORTS = [
 
 export function StockSort() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useSearchParams();
 
   const updateSort = useCallback(
@@ -21,10 +22,14 @@ export function StockSort() {
       if (sort && sort !== "newest") next.set("sort", sort);
       else next.delete("sort");
       next.delete("page");
+      next.delete("make");
+      next.delete("model");
       trackStockFilter({ sort: next.get("sort") || undefined });
-      router.push(`/stock?${next.toString()}`);
+      const qs = next.toString();
+      const base = pathname.startsWith("/stock") ? pathname : "/stock";
+      router.push(qs ? `${base}?${qs}` : base);
     },
-    [params, router],
+    [params, pathname, router],
   );
 
   return (

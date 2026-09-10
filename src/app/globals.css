@@ -23,13 +23,17 @@ body {
 }
 
 html {
-  scroll-behavior: smooth;
+  /* Instant route scroll; HashScroll still uses smooth for in-page anchors. */
+  scroll-behavior: auto;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+body {
+  background-color: var(--bg-base);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Gallery / lazy images on detail pages were shifting the viewport down. */
+  overflow-anchor: none;
 }
 
 #contact,
@@ -39,13 +43,6 @@ html {
 #featured,
 #inquire {
   scroll-margin-top: 96px;
-}
-
-body {
-  background-color: var(--bg-base);
-  color: var(--ink);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 /* ---- Colorflow animated mesh background ---- */
@@ -1367,54 +1364,25 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   margin-top: 48px;
 }
 .stock-filters {
-  border-radius: 18px;
-  padding: 20px 22px 18px;
+  border-radius: 14px;
+  padding: 14px 16px;
   margin-bottom: 8px;
-}
-.stock-filters-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-.stock-filters-head-copy {
-  min-width: 0;
-}
-.stock-filters-title {
-  margin: 0;
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  color: var(--ink);
-}
-.stock-filters-sub {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--muted);
 }
 .stock-filters-clear {
   flex: 0 0 auto;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.85);
-  padding: 8px 14px;
-  font-size: 13px;
+  background: transparent;
+  padding: 6px 12px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--muted);
   cursor: pointer;
   white-space: nowrap;
 }
 .stock-filters-clear:hover {
   border-color: var(--gold);
   color: var(--gold-soft);
-}
-.stock-filters-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
 }
 .stock-filters-search-row {
   display: grid;
@@ -1426,24 +1394,19 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 }
 .stock-filters-primary {
   display: grid;
-  gap: 14px 16px;
+  gap: 10px 14px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .stock-filters-field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
   min-width: 0;
 }
 .stock-filters-label {
-  font-size: 13px;
-  font-weight: 550;
-  color: var(--ink);
-}
-.stock-filters-hint {
   font-size: 12px;
+  font-weight: 550;
   color: var(--muted);
-  line-height: 1.35;
 }
 .stock-filters-range {
   display: grid;
@@ -1477,9 +1440,10 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .stock-filter-chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  padding: 14px 0 2px;
-  margin-top: 14px;
+  padding-top: 10px;
+  margin-top: 10px;
   border-top: 1px solid var(--line);
 }
 .stock-filter-chip {
@@ -1526,27 +1490,72 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .stock-grid .vcard-media {
   aspect-ratio: 3 / 2;
 }
-.stock-infinite {
-  margin-top: 28px;
+.stock-pagination {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  min-height: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-top: 32px;
+  padding-top: 8px;
 }
-.stock-infinite-sentinel {
-  width: 100%;
-  height: 1px;
-}
-.stock-infinite-status {
-  font-size: 14px;
+.stock-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
-.stock-infinite-error {
-  display: flex;
-  flex-direction: column;
+.stock-pagination-page {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 550;
+  text-decoration: none;
+}
+.stock-pagination-page:hover {
+  border-color: var(--gold);
+  color: var(--gold-soft);
+}
+.stock-pagination-page.is-current {
+  border-color: var(--gold);
+  background: rgba(184, 148, 72, 0.12);
+  color: var(--ink);
+  cursor: default;
+}
+.stock-pagination-gap {
+  min-width: 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  user-select: none;
+}
+.stock-pagination-dir {
+  min-width: 110px;
+  justify-content: center;
+}
+.stock-pagination-disabled {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  opacity: 0.45;
+  user-select: none;
 }
 .stock-empty {
   border-radius: 18px;
@@ -1598,14 +1607,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 
 @media (max-width: 720px) {
   .stock-filters {
-    padding: 16px 16px 14px;
-  }
-  .stock-filters-head {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .stock-filters-clear {
-    align-self: flex-start;
+    padding: 12px 14px;
   }
 }
 
@@ -1759,11 +1761,35 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .carousel-thumbs img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
 
 /* ---- Vehicle detail ---- */
+.related-scroller {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  margin-inline: -4px;
+  padding-inline: 4px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.related-scroller-item {
+  flex: 0 0 min(300px, 78vw);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+.related-scroller-item .vcard {
+  height: 100%;
+}
+.related-scroller-item .vcard-media {
+  aspect-ratio: 3 / 2;
+}
 .detail-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: 36px;
   align-items: stretch;
+  overflow-anchor: none;
 }
 .detail-gallery {
   min-width: 0;

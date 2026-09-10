@@ -183,6 +183,7 @@ describe("notifyInquiry", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     await expect(notifyInquiry(basePayload)).resolves.toEqual({
       ok: true,
+      skippedAll: true,
       email: "skipped",
       webhook: "skipped",
       error: null,

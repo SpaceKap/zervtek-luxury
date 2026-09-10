@@ -15,6 +15,8 @@ Internal integration for automated vehicle intake. **Do not use n8n.** Hermes ca
 | `DATABASE_URL` | Postgres |
 | `NEXT_PUBLIC_SITE_URL` | Used in `reviewUrl` responses |
 
+Also used by Hermes auth: enquiry notify retry at `POST /api/internal/inquiries/notify-retry` (cron every few minutes).
+
 Generate a token:
 
 ```bash
