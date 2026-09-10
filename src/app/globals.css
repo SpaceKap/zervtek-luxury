@@ -1293,6 +1293,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .make-hub-stock-more a:hover {
   color: var(--gold-soft);
 }
+/* Reading column only — CTA + FAQ sit full-bleed in the shell (stock → CTA → article → FAQ). */
 .make-hub-article {
   max-width: 760px;
   width: 100%;
@@ -1308,9 +1309,17 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   margin-top: 40px;
 }
 .make-hub-block .heading,
-.make-hub-model .heading {
+.make-hub-model .heading,
+.make-hub-faq .heading {
   margin: 0 0 16px;
   font-size: clamp(22px, 2.5vw, 28px);
+}
+.make-hub-faq {
+  width: 100%;
+  min-width: 0;
+}
+.make-hub-faq .faq-a {
+  max-width: none;
 }
 .make-hub-table-wrap {
   overflow-x: auto;
@@ -1378,8 +1387,31 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 }
 .make-hub-cta {
   margin-top: 0;
-  max-width: 760px;
   width: 100%;
+  max-width: none;
+}
+.make-hub-cta .muted {
+  max-width: 64ch;
+}
+.make-hub-model-spoke {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-top: 40px;
+  padding-bottom: 48px;
+}
+.make-hub-spoke-links {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+.make-hub-spoke-links a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.make-hub-spoke-links a:hover {
+  color: var(--gold-soft);
 }
 @media (max-width: 720px) {
   .make-hub-shell {

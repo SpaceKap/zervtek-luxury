@@ -39,6 +39,8 @@ import {
   stockBrowseCopy,
   stockBrowseCrumbs,
 } from "@/components/StockBrowseView";
+import { MakeModelGuideArticle } from "@/components/MakeModelGuideArticle";
+import { getMakeModelGuide } from "@/lib/make-hubs";
 import {
   STOCK_PAGE_SIZE,
   buildStockHref,
@@ -186,9 +188,10 @@ export async function generateMetadata({
       hasExtraFilters: noindex,
     });
     const copy = stockBrowseCopy(make, model ?? undefined);
+    const guide = model ? getMakeModelGuide(make, model) : null;
     return {
-      title: `${copy.title} | ${SITE.name}`,
-      description: copy.lead,
+      title: `${guide?.title ?? copy.title} | ${SITE.name}`,
+      description: guide?.description ?? copy.lead,
       alternates: { canonical },
       robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
     };
@@ -255,6 +258,7 @@ async function renderBrowse(path: string[], sp: SP) {
 
   const copy = stockBrowseCopy(make, model);
   const { crumbs, jsonLdCrumbs } = stockBrowseCrumbs(make, model);
+  const guide = model ? getMakeModelGuide(make, model) : null;
 
   return (
     <StockBrowseView
@@ -264,10 +268,15 @@ async function renderBrowse(path: string[], sp: SP) {
       totalPages={totalPages}
       catalog={catalog}
       filters={filters}
-      title={copy.title}
-      lead={copy.lead}
+      title={guide?.title ?? copy.title}
+      lead={guide?.intro ?? copy.lead}
       crumbs={crumbs}
       jsonLdCrumbs={jsonLdCrumbs}
+      afterStock={
+        guide && model ? (
+          <MakeModelGuideArticle make={make} model={model} guide={guide} />
+        ) : undefined
+      }
     />
   );
 }
@@ -507,24 +516,6 @@ export default async function StockPathPage({
 
   if (isVehicleDetailPath(path)) {
     return renderVehicleDetail(path);
-  }
-
-  // Legacy /stock/ferrari/{model} → hub query (so /stock/ferrari/.../…-for-sale stays a detail URL).
-  if (path.length === 2 && path[0]?.toLowerCase() === "ferrari") {
-    const { catalog } = await getStockFilterMeta();
-    const model = resolveCatalogModel("Ferrari", path[1], catalog);
-    if (model) {
-      permanentRedirect(
-        buildStockHref({
-          make: "Ferrari",
-          model,
-          steering: first(sp.steering),
-          sort: first(sp.sort),
-          status: first(sp.status),
-          page: first(sp.page),
-        }),
-      );
-    }
   }
 
   if (path.length === 1) {

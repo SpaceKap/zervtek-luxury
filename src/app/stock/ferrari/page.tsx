@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 import { getStockFilterMeta, searchVehicles } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
@@ -38,11 +38,10 @@ export async function generateMetadata({
   searchParams: Promise<SP>;
 }): Promise<Metadata> {
   const sp = await searchParams;
-  const { catalog } = await getStockFilterMeta();
-  const modelParam = first(sp.model);
-  const model = modelParam
-    ? resolveCatalogModel("Ferrari", modelParam, catalog) ?? undefined
-    : undefined;
+  // Model spokes live at /stock/ferrari/{model} — never on the make hub.
+  if (first(sp.model)) {
+    return { title: FERRARI_HUB.title, robots: { index: false, follow: true } };
+  }
 
   const page = parseStockPage(first(sp.page)) ?? 1;
   const noindex = stockShouldNoIndex({
@@ -52,36 +51,30 @@ export async function generateMetadata({
   });
   const canonical = stockCanonicalPath(page, {
     make: "Ferrari",
-    model,
     hasExtraFilters: noindex,
   });
 
-  const titleBase = model
-    ? `${model} Ferrari for Sale from Japan`
-    : FERRARI_HUB.title;
-
   return {
-    title: page > 1 ? `${titleBase} | Page ${page}` : titleBase,
+    title: page > 1 ? `${FERRARI_HUB.title} | Page ${page}` : FERRARI_HUB.title,
     description: FERRARI_HUB.description,
     alternates: { canonical },
     openGraph: {
-      title: titleBase,
+      title: FERRARI_HUB.title,
       description: FERRARI_HUB.description,
-      url: `${SITE.url}${buildStockHref({ make: "Ferrari", model })}`,
+      url: `${SITE.url}/stock/ferrari`,
       type: "website",
     },
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
   };
 }
 
-function collectionJsonLd(vehicleCount: number, model?: string) {
-  const url = `${SITE.url}${buildStockHref({ make: "Ferrari", model })}`;
+function collectionJsonLd(vehicleCount: number) {
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: model ? `${model} Ferrari stock` : FERRARI_HUB.h1,
+    name: FERRARI_HUB.h1,
     description: FERRARI_HUB.description,
-    url,
+    url: `${SITE.url}/stock/ferrari`,
     isPartOf: { "@type": "WebSite", name: SITE.name, url: SITE.url },
     about: { "@type": "Brand", name: "Ferrari" },
     numberOfItems: vehicleCount,
@@ -98,17 +91,42 @@ export default async function FerrariStockHubPage({
   const page = parseStockPage(pageRaw);
   if (page === null) notFound();
 
-  const { catalog } = await getStockFilterMeta();
   const modelParam = first(sp.model);
-  const model = modelParam
-    ? resolveCatalogModel("Ferrari", modelParam, catalog) ?? undefined
-    : undefined;
+  if (modelParam) {
+    const { catalog } = await getStockFilterMeta();
+    const model = resolveCatalogModel("Ferrari", modelParam, catalog);
+    if (model) {
+      permanentRedirect(
+        buildStockHref({
+          make: "Ferrari",
+          model,
+          steering: first(sp.steering),
+          sort: first(sp.sort),
+          status: first(sp.status),
+          page: page > 1 ? String(page) : undefined,
+        }),
+      );
+    }
+    notFound();
+  }
 
+  if (pageRaw === "1") {
+    permanentRedirect(
+      buildStockHref({
+        make: "Ferrari",
+        steering: first(sp.steering),
+        sort: first(sp.sort),
+        status: first(sp.status),
+      }),
+    );
+  }
+
+  const { catalog } = await getStockFilterMeta();
   const steering = first(sp.steering);
   const sort = (first(sp.sort) as "newest" | "price_asc" | "price_desc" | "year_desc") ?? "newest";
 
   const { items, total } = await searchVehicles(
-    { make: "Ferrari", model, sort, steering },
+    { make: "Ferrari", sort, steering },
     page,
     STOCK_PAGE_SIZE,
   );
@@ -117,17 +135,9 @@ export default async function FerrariStockHubPage({
 
   const paginationQuery = {
     make: "Ferrari",
-    model,
     steering,
     sort: sort !== "newest" ? sort : undefined,
   };
-
-  const crumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Stock", href: "/stock" },
-    { label: "Ferrari", href: model ? "/stock/ferrari" : undefined },
-    ...(model ? [{ label: model }] : []),
-  ];
 
   return (
     <main className="stock-page make-hub-page">
@@ -136,22 +146,25 @@ export default async function FerrariStockHubPage({
           { name: "Home", url: SITE.url },
           { name: "Stock", url: `${SITE.url}/stock` },
           { name: "Ferrari", url: `${SITE.url}/stock/ferrari` },
-          ...(model
-            ? [{ name: model, url: `${SITE.url}${buildStockHref({ make: "Ferrari", model })}` }]
-            : []),
         ])}
       />
-      <JsonLd data={collectionJsonLd(total, model)} />
+      <JsonLd data={collectionJsonLd(total)} />
       <JsonLd data={faqJsonLd([...FERRARI_HUB.faqs])} />
       {items.length > 0 ? <JsonLd data={productListJsonLd(items)} /> : null}
 
       <div className="container make-hub-shell">
         <header className="stock-hero make-hub-hero">
           <div className="stock-meta">
-            <Breadcrumbs items={crumbItems} />
+            <Breadcrumbs
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Stock", href: "/stock" },
+                { label: "Ferrari" },
+              ]}
+            />
             <span>
               {total > 0
-                ? `${total} Ferrari${total === 1 ? "" : "s"}${model ? ` · ${model}` : ""} in stock`
+                ? `${total} Ferrari${total === 1 ? "" : "s"} in stock`
                 : "Sourcing Ferraris in Japan"}
             </span>
           </div>
@@ -161,11 +174,7 @@ export default async function FerrariStockHubPage({
 
         <section className="make-hub-stock" aria-label="Ferrari stock">
           <Suspense fallback={null}>
-            <SearchFilters
-              catalog={catalog}
-              selectedMake="Ferrari"
-              selectedModel={model ?? ""}
-            />
+            <SearchFilters catalog={catalog} selectedMake="Ferrari" selectedModel="" />
           </Suspense>
 
           <div className="stock-results-bar">
@@ -217,6 +226,20 @@ export default async function FerrariStockHubPage({
             </div>
           )}
         </section>
+
+        {/* Hub order: stock → CTA (full) → article → FAQ (full). */}
+        <aside className="stock-source-cta glass make-hub-cta">
+          <h2 className="heading">{FERRARI_HUB.closing.title}</h2>
+          <p className="muted">{FERRARI_HUB.closing.body}</p>
+          <div className="stock-source-actions">
+            <Link className="btn btn-gold" href="/about#contact-form">
+              Contact us
+            </Link>
+            <WhatsAppLink className="btn btn-outline" location="ferrari_hub_cta">
+              WhatsApp us
+            </WhatsAppLink>
+          </div>
+        </aside>
 
         <article className="make-hub-article">
           {FERRARI_HUB.lead.slice(1).map((p) => (
@@ -290,27 +313,14 @@ export default async function FerrariStockHubPage({
               </p>
             ))}
           </section>
-
-          <section className="make-hub-block" aria-labelledby="ferrari-faq">
-            <h2 id="ferrari-faq" className="heading">
-              Frequently asked questions
-            </h2>
-            <Faq items={[...FERRARI_HUB.faqs]} />
-          </section>
         </article>
 
-        <aside className="stock-source-cta glass make-hub-cta">
-          <h2 className="heading">{FERRARI_HUB.closing.title}</h2>
-          <p className="muted">{FERRARI_HUB.closing.body}</p>
-          <div className="stock-source-actions">
-            <Link className="btn btn-gold" href="/about#contact-form">
-              Contact us
-            </Link>
-            <WhatsAppLink className="btn btn-outline" location="ferrari_hub_cta">
-              WhatsApp us
-            </WhatsAppLink>
-          </div>
-        </aside>
+        <section className="make-hub-faq" aria-labelledby="ferrari-faq">
+          <h2 id="ferrari-faq" className="heading">
+            Frequently asked questions
+          </h2>
+          <Faq items={[...FERRARI_HUB.faqs]} />
+        </section>
       </div>
     </main>
   );

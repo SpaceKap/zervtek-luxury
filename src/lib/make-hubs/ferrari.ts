@@ -1,6 +1,7 @@
 /** Editorial content for the Ferrari make hub at /stock/ferrari */
 
 import { buildStockHref } from "@/lib/stock";
+import { lookupModelGuide, type MakeModelGuide } from "@/lib/make-hubs/types";
 
 export const FERRARI_HUB = {
   make: "Ferrari",
@@ -187,6 +188,16 @@ export const FERRARI_HUB = {
     body: "Tell ZervTek which Ferrari you want, your preferred specification and your destination. We can search for the 308, 328, 348, F355, 360 Modena, F430, 458 Italia, Testarossa, 512 TR and F12 Berlinetta in Japan, then help you compare the individual cars that fit your brief.",
   },
 } as const;
+
+/**
+ * Per-model Ferrari guides at `/stock/ferrari/{model}`.
+ * Add an entry keyed by slugify(model) when ready — until then model pages are stock-only.
+ */
+export const FERRARI_MODEL_GUIDES: Record<string, MakeModelGuide> = {};
+
+export function getFerrariModelGuide(model: string): MakeModelGuide | null {
+  return lookupModelGuide(FERRARI_MODEL_GUIDES, model);
+}
 
 export function ferrariStockHref(model?: string): string {
   return buildStockHref({ make: "Ferrari", model: model || undefined });

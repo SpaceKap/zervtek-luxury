@@ -21,10 +21,10 @@ describe("stock pagination helpers", () => {
   it("puts make/model in the path", () => {
     expect(stockBrowsePath("Audi")).toBe("/stock/audi");
     expect(stockBrowsePath("Audi", "RS6")).toBe("/stock/audi/rs6");
-    expect(stockBrowsePath("Ferrari", "360 Spider")).toBe("/stock/ferrari");
+    expect(stockBrowsePath("Ferrari", "360 Spider")).toBe("/stock/ferrari/360-spider");
     expect(buildStockHref({ make: "Ferrari", page: "2" })).toBe("/stock/ferrari?page=2");
     expect(buildStockHref({ make: "Ferrari", model: "360 Spider" })).toBe(
-      "/stock/ferrari?model=360+Spider",
+      "/stock/ferrari/360-spider",
     );
     expect(buildStockHref({ make: "Audi", model: "A4", steering: "RHD" })).toBe(
       "/stock/audi/a4?steering=RHD",

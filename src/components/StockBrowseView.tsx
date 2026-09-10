@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import type { CatalogMake, PublicVehicleCard, VehicleFilters } from "@/lib/vehicles";
 import { SearchFilters } from "@/components/SearchFilters";
 import { StockSort } from "@/components/StockSort";
@@ -24,6 +24,8 @@ type Props = {
   lead: string;
   crumbs: { label: string; href?: string }[];
   jsonLdCrumbs: { name: string; url: string }[];
+  /** Optional make-model editorial (only when a guide exists). */
+  afterStock?: ReactNode;
 };
 
 export function StockBrowseView({
@@ -37,6 +39,7 @@ export function StockBrowseView({
   lead,
   crumbs,
   jsonLdCrumbs,
+  afterStock,
 }: Props) {
   const paginationQuery = {
     make: filters.make,
@@ -55,7 +58,7 @@ export function StockBrowseView({
   };
 
   return (
-    <main className="stock-page">
+    <main className={`stock-page${afterStock ? " make-hub-page" : ""}`}>
       <JsonLd data={breadcrumbJsonLd(jsonLdCrumbs)} />
       {items.length > 0 ? <JsonLd data={productListJsonLd(items)} /> : null}
 
@@ -129,7 +132,7 @@ export function StockBrowseView({
         )}
 
         {items.length > 0 ? (
-          <aside className="stock-source-cta glass">
+          <aside className="stock-source-cta glass make-hub-cta">
             <h2 className="heading">Can&apos;t find what you&apos;re looking for?</h2>
             <p className="muted">
               Contact us and we will find exactly what you&apos;re looking for from Japanese auctions
@@ -145,6 +148,8 @@ export function StockBrowseView({
             </div>
           </aside>
         ) : null}
+
+        {afterStock}
       </div>
     </main>
   );
