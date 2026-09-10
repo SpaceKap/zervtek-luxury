@@ -319,7 +319,7 @@ async function renderVehicleDetail(path: string[]) {
 
   const gradeLabel = (v.variant || v.model).trim();
   const makeHref = stockBrowsePath(v.make);
-  const modelHref = stockBrowsePath(v.make, v.model);
+  const modelHref = buildStockHref({ make: v.make, model: v.model });
 
   const crumbItems = [
     { label: "Home", href: "/" },
@@ -507,6 +507,24 @@ export default async function StockPathPage({
 
   if (isVehicleDetailPath(path)) {
     return renderVehicleDetail(path);
+  }
+
+  // Legacy /stock/ferrari/{model} → hub query (so /stock/ferrari/.../…-for-sale stays a detail URL).
+  if (path.length === 2 && path[0]?.toLowerCase() === "ferrari") {
+    const { catalog } = await getStockFilterMeta();
+    const model = resolveCatalogModel("Ferrari", path[1], catalog);
+    if (model) {
+      permanentRedirect(
+        buildStockHref({
+          make: "Ferrari",
+          model,
+          steering: first(sp.steering),
+          sort: first(sp.sort),
+          status: first(sp.status),
+          page: first(sp.page),
+        }),
+      );
+    }
   }
 
   if (path.length === 1) {

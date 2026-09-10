@@ -17,9 +17,9 @@ import { SITE } from "@/lib/site";
 import { FERRARI_HUB, ferrariStockHref } from "@/lib/make-hubs/ferrari";
 import {
   STOCK_PAGE_SIZE,
+  buildStockHref,
   parseStockPage,
   resolveCatalogModel,
-  stockBrowsePath,
   stockCanonicalPath,
   stockShouldNoIndex,
 } from "@/lib/stock";
@@ -33,22 +33,16 @@ function first(v: string | string[] | undefined): string | undefined {
 }
 
 export async function generateMetadata({
-  params,
   searchParams,
 }: {
-  params: Promise<{ slug?: string[] }>;
   searchParams: Promise<SP>;
 }): Promise<Metadata> {
-  const { slug = [] } = await params;
   const sp = await searchParams;
   const { catalog } = await getStockFilterMeta();
-  const model = slug[0] ? resolveCatalogModel("Ferrari", slug[0], catalog) ?? undefined : undefined;
-  if (slug.length > 1) {
-    return { title: "Stock not found", robots: { index: false, follow: false } };
-  }
-  if (slug[0] && !model) {
-    return { title: "Stock not found", robots: { index: false, follow: false } };
-  }
+  const modelParam = first(sp.model);
+  const model = modelParam
+    ? resolveCatalogModel("Ferrari", modelParam, catalog) ?? undefined
+    : undefined;
 
   const page = parseStockPage(first(sp.page)) ?? 1;
   const noindex = stockShouldNoIndex({
@@ -58,7 +52,7 @@ export async function generateMetadata({
   });
   const canonical = stockCanonicalPath(page, {
     make: "Ferrari",
-    model: model ?? undefined,
+    model,
     hasExtraFilters: noindex,
   });
 
@@ -73,7 +67,7 @@ export async function generateMetadata({
     openGraph: {
       title: titleBase,
       description: FERRARI_HUB.description,
-      url: `${SITE.url}${stockBrowsePath("Ferrari", model ?? undefined)}`,
+      url: `${SITE.url}${buildStockHref({ make: "Ferrari", model })}`,
       type: "website",
     },
     robots: noindex ? { index: false, follow: true } : { index: true, follow: true },
@@ -81,7 +75,7 @@ export async function generateMetadata({
 }
 
 function collectionJsonLd(vehicleCount: number, model?: string) {
-  const url = `${SITE.url}${stockBrowsePath("Ferrari", model)}`;
+  const url = `${SITE.url}${buildStockHref({ make: "Ferrari", model })}`;
   return {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -95,24 +89,20 @@ function collectionJsonLd(vehicleCount: number, model?: string) {
 }
 
 export default async function FerrariStockHubPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ slug?: string[] }>;
   searchParams: Promise<SP>;
 }) {
-  const { slug = [] } = await params;
   const sp = await searchParams;
-  if (slug.length > 1) notFound();
-
   const pageRaw = first(sp.page);
   const page = parseStockPage(pageRaw);
   if (page === null) notFound();
 
   const { catalog } = await getStockFilterMeta();
-  const modelRaw = slug[0] ? resolveCatalogModel("Ferrari", slug[0], catalog) : undefined;
-  const model = modelRaw ?? undefined;
-  if (slug[0] && !model) notFound();
+  const modelParam = first(sp.model);
+  const model = modelParam
+    ? resolveCatalogModel("Ferrari", modelParam, catalog) ?? undefined
+    : undefined;
 
   const steering = first(sp.steering);
   const sort = (first(sp.sort) as "newest" | "price_asc" | "price_desc" | "year_desc") ?? "newest";
@@ -147,7 +137,7 @@ export default async function FerrariStockHubPage({
           { name: "Stock", url: `${SITE.url}/stock` },
           { name: "Ferrari", url: `${SITE.url}/stock/ferrari` },
           ...(model
-            ? [{ name: model, url: `${SITE.url}${stockBrowsePath("Ferrari", model)}` }]
+            ? [{ name: model, url: `${SITE.url}${buildStockHref({ make: "Ferrari", model })}` }]
             : []),
         ])}
       />

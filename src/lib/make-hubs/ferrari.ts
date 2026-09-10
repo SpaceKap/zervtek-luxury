@@ -1,6 +1,6 @@
 /** Editorial content for the Ferrari make hub at /stock/ferrari */
 
-import { stockBrowsePath } from "@/lib/stock";
+import { buildStockHref } from "@/lib/stock";
 
 export const FERRARI_HUB = {
   make: "Ferrari",
@@ -189,5 +189,5 @@ export const FERRARI_HUB = {
 } as const;
 
 export function ferrariStockHref(model?: string): string {
-  return stockBrowsePath("Ferrari", model);
+  return buildStockHref({ make: "Ferrari", model: model || undefined });
 }

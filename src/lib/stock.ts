@@ -5,11 +5,18 @@ export const STOCK_PAGE_SIZE = 15;
 
 type StockQuery = Record<string, string | undefined>;
 
+/** Ferrari hub must stay at /stock/ferrari so vehicle detail URLs keep working. */
+export function isFerrariMake(make?: string): boolean {
+  return slugify(make || "") === "ferrari";
+}
+
 /** Path segment(s) for make / make+model browse URLs. */
 export function stockBrowsePath(make?: string, model?: string): string {
   if (!make?.trim()) return "/stock";
   const makeSeg = slugify(make);
   if (!makeSeg) return "/stock";
+  // Hub owns all Ferrari browse; model is a query param (see buildStockHref).
+  if (makeSeg === "ferrari") return "/stock/ferrari";
   if (!model?.trim()) return `/stock/${makeSeg}`;
   const modelSeg = slugify(model);
   return modelSeg ? `/stock/${makeSeg}/${modelSeg}` : `/stock/${makeSeg}`;
@@ -17,17 +24,22 @@ export function stockBrowsePath(make?: string, model?: string): string {
 
 /**
  * Build stock href: make/model live in the path (`/stock/audi`, `/stock/audi/rs6`);
- * remaining filters stay as query params.
+ * Ferrari model stays on `/stock/ferrari?model=…` so `/stock/ferrari/…/…-for-sale` details work.
  */
 export function buildStockHref(query: StockQuery): string {
   const make = query.make?.trim();
   const model = query.model?.trim();
   const path = stockBrowsePath(make, make ? model : undefined);
+  const ferrariHub = isFerrariMake(make);
 
   const next = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (!value) continue;
-    if (key === "make" || key === "model") continue;
+    if (key === "make") continue;
+    if (key === "model") {
+      if (ferrariHub) next.set("model", value);
+      continue;
+    }
     if (key === "page" && value === "1") continue;
     next.set(key, value);
   }
@@ -47,10 +59,11 @@ export function stockCanonicalPath(
   page: number,
   opts: { make?: string; model?: string; hasExtraFilters: boolean },
 ): string {
-  const base = stockBrowsePath(opts.make, opts.model);
-  if (opts.hasExtraFilters) return base;
-  if (page <= 1) return base;
-  return `${base}?page=${page}`;
+  return buildStockHref({
+    make: opts.make,
+    model: opts.model,
+    page: opts.hasExtraFilters || page <= 1 ? undefined : String(page),
+  });
 }
 
 /** Extra facets beyond make/model — those stay noindex. Make/model path pages are indexable. */
