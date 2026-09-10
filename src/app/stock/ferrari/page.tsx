@@ -120,7 +120,11 @@ export default async function FerrariStockHubPage() {
 
           {items.length > 0 ? (
             <p className="make-hub-stock-more">
-              <Link href={ferrariStockHref()}>View all Ferrari filters on stock →</Link>
+              <Link href={ferrariStockHref()}>
+                {total > items.length
+                  ? `View all ${total} Ferraris with filters →`
+                  : "Browse Ferrari stock with filters →"}
+              </Link>
             </p>
           ) : null}
         </section>

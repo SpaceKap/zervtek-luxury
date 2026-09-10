@@ -131,17 +131,28 @@ export function buildInquiryEmailBody(payload: InquiryNotification): string {
   return lines.join("\n");
 }
 
-export async function sendInquiryEmail(payload: InquiryNotification): Promise<void> {
+export type ChannelDelivery = "sent" | "skipped" | "failed";
+
+export type NotifyResult = {
+  ok: boolean;
+  email: ChannelDelivery;
+  webhook: ChannelDelivery;
+  error: string | null;
+};
+
+export async function sendInquiryEmail(
+  payload: InquiryNotification,
+): Promise<"sent" | "skipped"> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
     console.warn("[inquiry-notify] RESEND_API_KEY unset — skipping email");
-    return;
+    return "skipped";
   }
 
   const from = process.env.INQUIRY_NOTIFY_FROM?.trim();
   if (!from) {
     console.warn("[inquiry-notify] INQUIRY_NOTIFY_FROM unset — skipping email");
-    return;
+    return "skipped";
   }
 
   const to = process.env.INQUIRY_NOTIFY_TO?.trim() || SITE.email;
@@ -164,13 +175,16 @@ export async function sendInquiryEmail(payload: InquiryNotification): Promise<vo
     id: payload.id,
     resendId: data?.id ?? null,
   });
+  return "sent";
 }
 
-export async function fireInquiryWebhook(payload: InquiryNotification): Promise<void> {
+export async function fireInquiryWebhook(
+  payload: InquiryNotification,
+): Promise<"sent" | "skipped"> {
   const url = process.env.INQUIRY_WEBHOOK_URL?.trim();
   if (!url) {
     console.warn("[inquiry-notify] INQUIRY_WEBHOOK_URL unset — skipping webhook");
-    return;
+    return "skipped";
   }
 
   const headers: Record<string, string> = {
@@ -199,20 +213,40 @@ export async function fireInquiryWebhook(payload: InquiryNotification): Promise<
   } finally {
     clearTimeout(timeout);
   }
+
+  return "sent";
 }
 
-export async function notifyInquiry(payload: InquiryNotification): Promise<void> {
+function channelFromSettled(
+  result: PromiseSettledResult<"sent" | "skipped">,
+): { delivery: ChannelDelivery; error: string | null } {
+  if (result.status === "fulfilled") {
+    return { delivery: result.value, error: null };
+  }
+  const reason = result.reason;
+  const error = reason instanceof Error ? reason.message : String(reason);
+  return { delivery: "failed", error };
+}
+
+export async function notifyInquiry(payload: InquiryNotification): Promise<NotifyResult> {
   const results = await Promise.allSettled([
     sendInquiryEmail(payload),
     fireInquiryWebhook(payload),
   ]);
 
-  for (const result of results) {
-    if (result.status === "rejected") {
-      const reason = result.reason;
-      const detail =
-        reason instanceof Error ? reason.message : String(reason);
-      console.error("[inquiry-notify] failed:", detail);
-    }
+  const email = channelFromSettled(results[0]);
+  const webhook = channelFromSettled(results[1]);
+  const errors = [email.error, webhook.error].filter(Boolean);
+  const ok = email.delivery !== "failed" && webhook.delivery !== "failed";
+
+  for (const detail of errors) {
+    console.error("[inquiry-notify] failed:", detail);
   }
+
+  return {
+    ok,
+    email: email.delivery,
+    webhook: webhook.delivery,
+    error: errors.length ? errors.join("; ") : null,
+  };
 }

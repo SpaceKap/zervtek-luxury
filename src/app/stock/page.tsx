@@ -120,25 +120,6 @@ export default async function StockPage({
     permanentRedirect(qs ? `/stock?${qs}` : "/stock");
   }
 
-  // Exact make-only Ferrari filter → permanent make hub.
-  const makeOnly =
-    first(sp.make)?.toLowerCase() === "ferrari" &&
-    !first(sp.model) &&
-    !first(sp.q) &&
-    !first(sp.bodyType) &&
-    !first(sp.steering) &&
-    !first(sp.minYear) &&
-    !first(sp.maxYear) &&
-    !first(sp.minMileage) &&
-    !first(sp.maxMileage) &&
-    !first(sp.minPrice) &&
-    !first(sp.maxPrice) &&
-    !first(sp.transmission) &&
-    !first(sp.status) &&
-    (!first(sp.sort) || first(sp.sort) === "newest") &&
-    page === 1;
-  if (makeOnly) permanentRedirect("/stock/ferrari");
-
   const filters = filtersFromSp(sp);
   const qs = queryStrings(sp);
 

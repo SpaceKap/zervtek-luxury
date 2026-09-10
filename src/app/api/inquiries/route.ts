@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { notifyInquiry, type InquiryNotification } from "@/lib/inquiry-notify";
+import type { InquiryNotification } from "@/lib/inquiry-notify";
+import {
+  deliverInquiryNotification,
+  retryPendingInquiryNotifications,
+} from "@/lib/inquiry-delivery";
 import { SITE } from "@/lib/site";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { isPublicVehicleStatus } from "@/lib/vehicle-constants";
@@ -68,6 +72,20 @@ export async function POST(req: NextRequest) {
     if (clientRequestId) {
       const existing = await prisma.inquiry.findUnique({ where: { clientRequestId } });
       if (existing) {
+        if (existing.notifyStatus !== "SENT") {
+          try {
+            await deliverInquiryNotification(existing.id);
+          } catch (err) {
+            console.error("[inquiries] notify retry on duplicate failed", {
+              id: existing.id,
+              err,
+            });
+          }
+        }
+        // Drain other pending outbox rows opportunistically.
+        void retryPendingInquiryNotifications(3).catch((err) => {
+          console.error("[inquiries] outbox drain failed", err);
+        });
         return NextResponse.json({ ok: true, id: existing.id, duplicate: true });
       }
     }
@@ -121,6 +139,7 @@ export async function POST(req: NextRequest) {
         message,
         vehicleId: safeVehicleId,
         clientRequestId,
+        notifyStatus: "PENDING",
       },
     });
 
@@ -144,10 +163,14 @@ export async function POST(req: NextRequest) {
     };
 
     try {
-      await notifyInquiry(notification);
+      await deliverInquiryNotification(inquiry.id, notification);
     } catch (err) {
       console.error("[inquiries] notification failed after save", { id: inquiry.id, err });
     }
+
+    void retryPendingInquiryNotifications(3).catch((err) => {
+      console.error("[inquiries] outbox drain failed", err);
+    });
 
     return NextResponse.json({ ok: true, id: inquiry.id });
   } catch (err) {

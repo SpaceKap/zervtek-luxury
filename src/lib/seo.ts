@@ -186,11 +186,12 @@ function firstRegistrationDate(v: ProductVehicle | PublicVehicle): string | unde
     "registrationMonth" in v && v.registrationMonth != null
       ? Number(v.registrationMonth)
       : null;
-  const month =
-    monthRaw != null && Number.isFinite(monthRaw) && monthRaw >= 1 && monthRaw <= 12
-      ? String(monthRaw).padStart(2, "0")
-      : "01";
-  return `${year}-${month}-01`;
+  // Require verified month — do not invent January or day-of-month.
+  if (monthRaw == null || !Number.isFinite(monthRaw) || monthRaw < 1 || monthRaw > 12) {
+    return undefined;
+  }
+  // ISO 8601 year-month (day unknown).
+  return `${year}-${String(monthRaw).padStart(2, "0")}`;
 }
 
 /** Product (+ Car) schema object without @context — safe to nest in ItemList. */

@@ -13,6 +13,22 @@ import { mergeCatalogWithStock, type CatalogMake } from "./vehicle-catalog";
 
 export type { Vehicle, PublicVehicle, PublicVehicleCard, CatalogMake };
 
+/** Thrown when Prisma/DB fails — callers must not treat as empty inventory / missing listing. */
+export class DatabaseUnavailableError extends Error {
+  constructor(operation: string, cause?: unknown) {
+    super(`Database unavailable during ${operation}`);
+    this.name = "DatabaseUnavailableError";
+    if (cause !== undefined) {
+      (this as Error & { cause?: unknown }).cause = cause;
+    }
+  }
+}
+
+function rethrowDb(operation: string, err: unknown): never {
+  console.error(`[${operation}]`, err);
+  throw new DatabaseUnavailableError(operation, err);
+}
+
 export type VehicleFilters = {
   q?: string;
   make?: string;
@@ -128,8 +144,7 @@ export async function searchVehicles(
     ]);
     return { items: items.map(toPublicVehicleCard), total };
   } catch (err) {
-    console.error("[searchVehicles]", err);
-    return { items: [], total: 0 };
+    rethrowDb("searchVehicles", err);
   }
 }
 
@@ -170,8 +185,8 @@ export async function getVehicleBySlug(slug: string): Promise<PublicVehicle | nu
     const v = await prisma.vehicle.findUnique({ where: { slug } });
     if (!v || !isPublicVehicleStatus(v.status)) return null;
     return toPublicVehicle(v);
-  } catch {
-    return null;
+  } catch (err) {
+    rethrowDb("getVehicleBySlug", err);
   }
 }
 
@@ -179,8 +194,8 @@ export async function getVehicleBySlug(slug: string): Promise<PublicVehicle | nu
 export async function getVehicleBySlugAdmin(slug: string): Promise<Vehicle | null> {
   try {
     return await prisma.vehicle.findUnique({ where: { slug } });
-  } catch {
-    return null;
+  } catch (err) {
+    rethrowDb("getVehicleBySlugAdmin", err);
   }
 }
 
@@ -191,8 +206,8 @@ export async function getAllVehicleSlugs(): Promise<{ slug: string; updatedAt: D
       select: { slug: true, updatedAt: true },
       orderBy: { createdAt: "desc" },
     });
-  } catch {
-    return [];
+  } catch (err) {
+    rethrowDb("getAllVehicleSlugs", err);
   }
 }
 
@@ -266,13 +281,8 @@ export const getStockFilterMeta = unstable_cache(
           max: agg._max.mileage ?? 200_000,
         },
       };
-    } catch {
-      const now = new Date().getFullYear();
-      return {
-        catalog: [],
-        yearBounds: { min: now - 30, max: now },
-        mileageBounds: { min: 0, max: 200_000 },
-      };
+    } catch (err) {
+      rethrowDb("getStockFilterMeta", err);
     }
   },
   ["stock-filter-meta"],
@@ -348,8 +358,8 @@ export async function findSlugRedirect(fromSlug: string): Promise<string | null>
   try {
     const row = await prisma.vehicleSlugRedirect.findUnique({ where: { fromSlug } });
     return row?.toSlug ?? null;
-  } catch {
-    return null;
+  } catch (err) {
+    rethrowDb("findSlugRedirect", err);
   }
 }
 

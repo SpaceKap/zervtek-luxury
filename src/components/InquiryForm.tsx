@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   COUNTRY_NAMES,
   DEFAULT_PHONE_COUNTRY,
@@ -8,6 +8,7 @@ import {
   PHONE_COUNTRIES,
 } from "@/lib/phone-codes";
 import { trackGenerateLead } from "@/lib/analytics";
+import { createInquiryRequestId } from "@/lib/inquiry-request-id";
 
 type Props = {
   vehicleId?: string;
@@ -30,6 +31,7 @@ export function InquiryForm({
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [error, setError] = useState<string>("");
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_PHONE_COUNTRY);
+  const clientRequestIdRef = useRef<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +42,9 @@ export function InquiryForm({
     const phoneNumber = String(data.phoneNumber || "").trim();
     const dial = getPhoneDial(phoneCountry);
     const phone = phoneNumber ? `${dial} ${phoneNumber}`.trim() : undefined;
+    if (!clientRequestIdRef.current) {
+      clientRequestIdRef.current = createInquiryRequestId();
+    }
 
     try {
       const res = await fetch("/api/inquiries", {
@@ -53,10 +58,13 @@ export function InquiryForm({
           message: data.message,
           vehicleId,
           formLocation,
+          clientRequestId: clientRequestIdRef.current,
+          companyWebsite: String(data.companyWebsite || ""),
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");
       setStatus("ok");
+      clientRequestIdRef.current = null;
       // Only a server-accepted inquiry counts as a lead.
       trackGenerateLead({
         formLocation,
@@ -158,6 +166,17 @@ export function InquiryForm({
           name="message"
           placeholder={compact || embedded ? "Questions, budget, timeline..." : "Tell us about your dream car, budget and timeline..."}
           style={embedded ? { minHeight: 72 } : undefined}
+        />
+      </div>
+
+      <div className="hp-field" aria-hidden="true">
+        <label htmlFor="inquiry-company-website">Company website</label>
+        <input
+          id="inquiry-company-website"
+          name="companyWebsite"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
         />
       </div>
 

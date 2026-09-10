@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchVehicles, type VehicleFilters } from "@/lib/vehicles";
+import { DatabaseUnavailableError, searchVehicles, type VehicleFilters } from "@/lib/vehicles";
 import { STOCK_PAGE_SIZE } from "@/lib/stock";
 
 export const dynamic = "force-dynamic";
@@ -28,20 +28,30 @@ function filtersFromSearchParams(sp: URLSearchParams): VehicleFilters {
 
 /** Public stock search — used by infinite scroll on /stock. */
 export async function GET(req: NextRequest) {
-  const sp = req.nextUrl.searchParams;
-  const page = Math.max(1, parseInt(sp.get("page") ?? "1", 10) || 1);
-  const pageSize = Math.min(
-    48,
-    Math.max(1, parseInt(sp.get("pageSize") ?? String(STOCK_PAGE_SIZE), 10) || STOCK_PAGE_SIZE),
-  );
+  try {
+    const sp = req.nextUrl.searchParams;
+    const page = Math.max(1, parseInt(sp.get("page") ?? "1", 10) || 1);
+    const pageSize = Math.min(
+      48,
+      Math.max(1, parseInt(sp.get("pageSize") ?? String(STOCK_PAGE_SIZE), 10) || STOCK_PAGE_SIZE),
+    );
 
-  const { items, total } = await searchVehicles(filtersFromSearchParams(sp), page, pageSize);
+    const { items, total } = await searchVehicles(filtersFromSearchParams(sp), page, pageSize);
 
-  return NextResponse.json({
-    items,
-    total,
-    page,
-    pageSize,
-    hasMore: page * pageSize < total,
-  });
+    return NextResponse.json({
+      items,
+      total,
+      page,
+      pageSize,
+      hasMore: page * pageSize < total,
+    });
+  } catch (err) {
+    if (err instanceof DatabaseUnavailableError) {
+      return NextResponse.json(
+        { error: "Inventory temporarily unavailable. Please try again shortly." },
+        { status: 503 },
+      );
+    }
+    throw err;
+  }
 }

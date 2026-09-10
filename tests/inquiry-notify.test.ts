@@ -111,7 +111,7 @@ describe("sendInquiryEmail", () => {
   it("skips when RESEND_API_KEY is unset", async () => {
     delete process.env.RESEND_API_KEY;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(sendInquiryEmail(basePayload)).resolves.toBeUndefined();
+    await expect(sendInquiryEmail(basePayload)).resolves.toBe("skipped");
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("RESEND_API_KEY unset"),
     );
@@ -135,7 +135,7 @@ describe("fireInquiryWebhook", () => {
   it("skips when INQUIRY_WEBHOOK_URL is unset", async () => {
     delete process.env.INQUIRY_WEBHOOK_URL;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(fireInquiryWebhook(basePayload)).resolves.toBeUndefined();
+    await expect(fireInquiryWebhook(basePayload)).resolves.toBe("skipped");
     expect(warn).toHaveBeenCalledWith(
       expect.stringContaining("INQUIRY_WEBHOOK_URL unset"),
     );
@@ -151,7 +151,7 @@ describe("fireInquiryWebhook", () => {
     });
     globalThis.fetch = fetchMock as typeof fetch;
 
-    await fireInquiryWebhook(basePayload);
+    await expect(fireInquiryWebhook(basePayload)).resolves.toBe("sent");
 
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, init] = fetchMock.mock.calls[0];
@@ -181,7 +181,12 @@ describe("notifyInquiry", () => {
 
   it("continues when both channels are skipped", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(notifyInquiry(basePayload)).resolves.toBeUndefined();
+    await expect(notifyInquiry(basePayload)).resolves.toEqual({
+      ok: true,
+      email: "skipped",
+      webhook: "skipped",
+      error: null,
+    });
     expect(warn).toHaveBeenCalled();
   });
 });

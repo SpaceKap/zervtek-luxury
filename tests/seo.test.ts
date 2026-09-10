@@ -48,10 +48,34 @@ describe("seo schema", () => {
     expect(schema.offers).not.toHaveProperty("shippingDetails");
   });
 
-  it("emits registration date, not vehicleModelDate, from DB year", () => {
+  it("emits year-month registration date when month is known", () => {
     const schema = productSchema(sampleVehicle as never);
     expect(schema).not.toHaveProperty("vehicleModelDate");
-    expect(schema.dateVehicleFirstRegistered).toBe("2020-03-01");
+    expect(schema.dateVehicleFirstRegistered).toBe("2020-03");
+  });
+
+  it("omits registration date when month is unknown", () => {
+    const { registrationMonth: _m, ...yearOnly } = sampleVehicle;
+    const schema = productSchema(yearOnly as never);
+    expect(schema).not.toHaveProperty("dateVehicleFirstRegistered");
+  });
+
+  it("does not invent January for list cards without registrationMonth", () => {
+    const list = productListJsonLd([
+      {
+        id: "card1",
+        slug: "porsche/911/turbo-for-sale",
+        year: 2020,
+        make: "Porsche",
+        model: "911",
+        variant: "Turbo",
+        images: ["/media/vehicles/abc/medium/1.jpg"],
+        price: 20000000,
+        status: "AVAILABLE",
+      } as never,
+    ]);
+    const item = list.itemListElement[0].item as Record<string, unknown>;
+    expect(item).not.toHaveProperty("dateVehicleFirstRegistered");
   });
 
   it("excludes sold vehicles from item lists", () => {

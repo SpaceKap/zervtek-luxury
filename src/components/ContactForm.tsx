@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   COUNTRY_NAMES,
   DEFAULT_PHONE_COUNTRY,
@@ -17,6 +17,7 @@ import {
 import type { CatalogMake } from "@/lib/vehicles";
 import { groupCatalogByCountry } from "@/lib/vehicle-catalog";
 import { trackContact, trackGenerateLead } from "@/lib/analytics";
+import { createInquiryRequestId } from "@/lib/inquiry-request-id";
 
 type Props = {
   catalog?: CatalogMake[];
@@ -28,6 +29,7 @@ export function ContactForm({ catalog = [] }: Props) {
   const [phoneCountry, setPhoneCountry] = useState(DEFAULT_PHONE_COUNTRY);
   const [make, setMake] = useState("");
   const [model, setModel] = useState("");
+  const clientRequestIdRef = useRef<string | null>(null);
 
   const makeGroups = useMemo(() => groupCatalogByCountry(catalog), [catalog]);
 
@@ -48,6 +50,9 @@ export function ContactForm({ catalog = [] }: Props) {
     const phoneNumber = String(data.phoneNumber || "").trim();
     const dial = getPhoneDial(phoneCountry);
     const phone = phoneNumber ? `${dial} ${phoneNumber}`.trim() : undefined;
+    if (!clientRequestIdRef.current) {
+      clientRequestIdRef.current = createInquiryRequestId();
+    }
 
     try {
       const res = await fetch("/api/inquiries", {
@@ -65,10 +70,13 @@ export function ContactForm({ catalog = [] }: Props) {
           budget: data.budget ? String(data.budget) : null,
           timeline: data.timeline ? String(data.timeline) : null,
           preferredContact: data.preferredContact ? String(data.preferredContact) : null,
+          clientRequestId: clientRequestIdRef.current,
+          companyWebsite: String(data.companyWebsite || ""),
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Failed to send");
       setStatus("ok");
+      clientRequestIdRef.current = null;
       trackGenerateLead({
         formLocation: "contact_page",
         destinationCountry: String(data.country || "") || undefined,
@@ -256,6 +264,17 @@ export function ContactForm({ catalog = [] }: Props) {
             name="message"
             rows={4}
             placeholder="Any specific requirements or questions..."
+          />
+        </div>
+
+        <div className="hp-field" aria-hidden="true">
+          <label htmlFor="contact-company-website">Company website</label>
+          <input
+            id="contact-company-website"
+            name="companyWebsite"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
           />
         </div>
 
