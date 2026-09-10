@@ -168,6 +168,15 @@ curl -sS "https://performance.zervtek.com/api/internal/vehicles/check-queue?limi
   -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN"
 ```
 
+### FX refresh (display rates)
+
+```bash
+curl -sS -X POST "https://performance.zervtek.com/api/internal/fx/refresh" \
+  -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN"
+```
+
+Pulls ECB rates via Frankfurter; stores JPY-per-USD and JPY-per-EUR for price display. Run daily (see `deploy/README.md`).
+
 ### Availability result
 
 ```bash

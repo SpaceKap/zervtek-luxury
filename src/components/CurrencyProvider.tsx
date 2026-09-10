@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   type CurrencyCode,
+  type JpyPerUnitRates,
+  FALLBACK_JPY_PER_UNIT,
   formatVehiclePrice,
 } from "@/lib/currency";
 
@@ -12,12 +14,20 @@ type CurrencyContextValue = {
   currency: CurrencyCode;
   setCurrency: (currency: CurrencyCode) => void;
   formatPrice: (amountJpy: number) => string;
+  rates: JpyPerUnitRates;
 };
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
-export function CurrencyProvider({ children }: { children: React.ReactNode }) {
+export function CurrencyProvider({
+  children,
+  rates: initialRates,
+}: {
+  children: React.ReactNode;
+  rates?: JpyPerUnitRates;
+}) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("JPY");
+  const rates = initialRates ?? FALLBACK_JPY_PER_UNIT;
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as CurrencyCode | null;
@@ -32,13 +42,13 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const formatPrice = useCallback(
-    (amountJpy: number) => formatVehiclePrice(amountJpy, currency),
-    [currency],
+    (amountJpy: number) => formatVehiclePrice(amountJpy, currency, rates),
+    [currency, rates],
   );
 
   const value = useMemo(
-    () => ({ currency, setCurrency, formatPrice }),
-    [currency, setCurrency, formatPrice],
+    () => ({ currency, setCurrency, formatPrice, rates }),
+    [currency, setCurrency, formatPrice, rates],
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

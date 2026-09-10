@@ -6,23 +6,38 @@ export const CURRENCIES: { code: CurrencyCode; label: string }[] = [
   { code: "EUR", label: "€ EUR" },
 ];
 
+export type JpyPerUnitRates = Record<CurrencyCode, number>;
+
 /**
  * JPY per 1 unit of foreign currency for display conversion.
- * Rates are intended to be refreshed daily via API (not shown as legal quotes in UI).
+ * Live values come from FxRate (Frankfurter); these are boot fallbacks.
  */
-export const JPY_PER_UNIT: Record<CurrencyCode, number> = {
+export const FALLBACK_JPY_PER_UNIT: JpyPerUnitRates = {
   JPY: 1,
   USD: 150,
   EUR: 163,
 };
 
-export function convertFromJpy(amountJpy: number, currency: CurrencyCode): number {
+/** @deprecated Prefer FALLBACK_JPY_PER_UNIT or rates passed into formatters. */
+export const JPY_PER_UNIT = FALLBACK_JPY_PER_UNIT;
+
+export function convertFromJpy(
+  amountJpy: number,
+  currency: CurrencyCode,
+  rates: JpyPerUnitRates = FALLBACK_JPY_PER_UNIT,
+): number {
   if (currency === "JPY") return amountJpy;
-  return amountJpy / JPY_PER_UNIT[currency];
+  const per = rates[currency];
+  if (!Number.isFinite(per) || per <= 0) return amountJpy / FALLBACK_JPY_PER_UNIT[currency];
+  return amountJpy / per;
 }
 
-export function formatVehiclePrice(amountJpy: number, currency: CurrencyCode): string {
-  const value = convertFromJpy(amountJpy, currency);
+export function formatVehiclePrice(
+  amountJpy: number,
+  currency: CurrencyCode,
+  rates: JpyPerUnitRates = FALLBACK_JPY_PER_UNIT,
+): string {
+  const value = convertFromJpy(amountJpy, currency, rates);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,

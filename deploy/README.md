@@ -85,3 +85,25 @@ Failed staff email/webhook deliveries retry with backoff. Drain also runs on eac
   -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
   https://performance.zervtek.com/api/internal/inquiries/notify-retry
 ```
+
+## Daily FX rates (JPY → USD / EUR)
+
+Display conversions use [Frankfurter](https://www.frankfurter.app/) (ECB). Vehicle prices stay JPY in the DB.
+
+One-shot after deploy (seeds `FxRate` table):
+
+```bash
+curl -fsS -X POST \
+  -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
+  https://performance.zervtek.com/api/internal/fx/refresh
+```
+
+Cron once per day (06:00 JST = 21:00 UTC previous day):
+
+```cron
+0 21 * * * curl -fsS -X POST \
+  -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
+  https://performance.zervtek.com/api/internal/fx/refresh
+```
+
+On the VPS, put the token in the crontab environment or a small wrapper script that sources `/opt/zervtek-luxury/.env`.

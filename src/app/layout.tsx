@@ -10,6 +10,8 @@ import { CurrencyProvider } from "@/components/CurrencyProvider";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { getFxRates } from "@/lib/fx";
+import { FALLBACK_JPY_PER_UNIT } from "@/lib/currency";
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-5L8XN9VF";
 
@@ -55,9 +57,16 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  let rates = FALLBACK_JPY_PER_UNIT;
+  try {
+    rates = await getFxRates();
+  } catch {
+    // DB cold / migrate pending — keep hardcoded fallbacks
+  }
+
   return (
     <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
@@ -81,7 +90,7 @@ export default function RootLayout({
           </noscript>
         ) : null}
         <ColorflowBackground />
-        <CurrencyProvider>
+        <CurrencyProvider rates={rates}>
           <div className="app-shell">
             <Navbar />
             <SsgoiProvider>{children}</SsgoiProvider>

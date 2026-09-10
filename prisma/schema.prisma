@@ -179,3 +179,13 @@ model AdminSession {
 
   @@index([expiresAt])
 }
+
+/// Display FX: JPY per 1 unit of foreign currency (id = USD | EUR).
+model FxRate {
+  id         String   @id // USD | EUR
+  jpyPerUnit Float
+  source     String   @default("frankfurter")
+  asOfDate   String? // ECB / Frankfurter date YYYY-MM-DD
+  fetchedAt  DateTime
+  updatedAt  DateTime @updatedAt
+}
