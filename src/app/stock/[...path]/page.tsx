@@ -476,21 +476,19 @@ async function renderVehicleDetail(path: string[]) {
 
       {related.length > 0 ? (
         <section className="related-section" style={{ paddingBottom: 40 }}>
-          <h2 className="heading" style={{ fontSize: 26, marginBottom: 20 }}>
-            Similar vehicles
-          </h2>
-          <div className="related-scroller" role="list">
+          <div className="related-section-head">
+            <h2 className="heading related-section-title">Similar vehicles</h2>
+            <Link className="btn btn-outline" href={makeHref}>
+              More {v.make} stock →
+            </Link>
+          </div>
+          <div className="related-grid" role="list">
             {related.map((item) => (
-              <div key={item.id} className="related-scroller-item" role="listitem">
+              <div key={item.id} className="related-grid-item" role="listitem">
                 <VehicleCard v={item} listName="related_vehicles" />
               </div>
             ))}
           </div>
-          <p style={{ marginTop: 16 }}>
-            <Link className="btn btn-outline" href={makeHref}>
-              More {v.make} stock →
-            </Link>
-          </p>
         </section>
       ) : null}
     </main>

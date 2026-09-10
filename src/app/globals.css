@@ -1244,6 +1244,21 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 }
 
 /* ---- Make hub (e.g. /stock/ferrari) ---- */
+.make-hub-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding-bottom: 80px;
+}
+.make-hub-hero {
+  padding-block: 28px 8px;
+}
+.make-hub-intro {
+  max-width: 68ch;
+}
+.make-hub-stock {
+  min-width: 0;
+}
 .make-hub-body {
   display: flex;
   flex-direction: column;
@@ -1282,13 +1297,16 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--gold-soft);
 }
 .make-hub-article {
-  max-width: 760px;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
 }
 .make-hub-prose {
   margin: 0 0 1.15em;
   line-height: 1.8;
   color: var(--muted);
   font-size: 16px;
+  max-width: 72ch;
 }
 .make-hub-block {
   margin-top: 40px;
@@ -1300,12 +1318,14 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 }
 .make-hub-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.72);
 }
 .make-hub-table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -1361,7 +1381,24 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--ink);
 }
 .make-hub-cta {
-  margin-top: 48px;
+  margin-top: 0;
+  width: 100%;
+}
+@media (max-width: 720px) {
+  .make-hub-shell {
+    gap: 28px;
+    padding-bottom: 56px;
+  }
+  .make-hub-hero {
+    padding-block: 20px 4px;
+  }
+  .make-hub-prose {
+    font-size: 15px;
+  }
+  .make-hub-model-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 .stock-filters {
   border-radius: 14px;
@@ -1484,11 +1521,21 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   font-weight: 600;
 }
 .stock-grid {
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px;
 }
 .stock-grid .vcard-media {
   aspect-ratio: 3 / 2;
+}
+@media (max-width: 960px) {
+  .stock-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .stock-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .stock-pagination {
   display: flex;
@@ -1761,28 +1808,41 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .carousel-thumbs img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; -webkit-user-drag: none; }
 
 /* ---- Vehicle detail ---- */
-.related-scroller {
+.related-section-head {
   display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 8px;
-  margin-inline: -4px;
-  padding-inline: 4px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
-.related-scroller-item {
-  flex: 0 0 min(300px, 78vw);
-  scroll-snap-align: start;
+.related-section-title {
+  margin: 0;
+  font-size: 26px;
+}
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+.related-grid-item {
   min-width: 0;
 }
-.related-scroller-item .vcard {
+.related-grid-item .vcard {
   height: 100%;
 }
-.related-scroller-item .vcard-media {
+.related-grid-item .vcard-media {
   aspect-ratio: 3 / 2;
+}
+@media (max-width: 960px) {
+  .related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .related-grid {
+    grid-template-columns: 1fr;
+  }
 }
 .detail-grid {
   display: grid;
