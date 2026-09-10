@@ -43,7 +43,7 @@ export async function allocateUniqueBlogSlug(title: string, excludeId?: string):
   }
 }
 
-export async function listPublishedBlogPosts(limit = 50, offset = 0): Promise<PublicBlogPost[]> {
+export async function listPublishedBlogPosts(limit = 1000, offset = 0): Promise<PublicBlogPost[]> {
   const rows = await prisma.blogPost.findMany({
     where: { status: "PUBLISHED" },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],

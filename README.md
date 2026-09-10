@@ -14,7 +14,7 @@ A dark-mode luxury vehicle showcase and export site, inspired by toprank.jp and 
 
 - Full-page landing hero with animated gradient backdrop
 - **Stock** page with search + filters (make, body type, sort, keyword) and pagination
-- **Vehicle detail** pages with a **non-downloadable** image carousel (right-click / drag disabled, transparent guard layer, `noimageindex` header on originals)
+- **Vehicle detail** pages with a protected image carousel (right-click / drag disabled). Public `/media/vehicles/*` derivatives are indexable; `/uploads` stays out of image search.
 - **About** page including a FAQ accordion
 - **Inquiry form** on the homepage and every vehicle page; WhatsApp button in the navbar
 - **Admin backend** (`/admin`) to upload/manage vehicles with drag-free image upload

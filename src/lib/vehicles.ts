@@ -2,11 +2,16 @@ import type { Prisma, Vehicle } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { pickDailyItems } from "./daily-shuffle";
 import { prisma } from "./prisma";
-import { PUBLIC_VEHICLE_STATUSES, isPublicVehicleStatus } from "./vehicle-constants";
-import { toPublicVehicle, type PublicVehicle } from "./vehicle-public";
+import { PUBLIC_VEHICLE_STATUSES, ACTIVE_LISTING_STATUSES, isPublicVehicleStatus } from "./vehicle-constants";
+import {
+  toPublicVehicle,
+  toPublicVehicleCard,
+  type PublicVehicle,
+  type PublicVehicleCard,
+} from "./vehicle-public";
 import { mergeCatalogWithStock, type CatalogMake } from "./vehicle-catalog";
 
-export type { Vehicle, PublicVehicle, CatalogMake };
+export type { Vehicle, PublicVehicle, PublicVehicleCard, CatalogMake };
 
 export type VehicleFilters = {
   q?: string;
@@ -29,7 +34,7 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
   const and: Prisma.VehicleWhereInput[] = [];
 
   if (publicOnly) {
-    and.push({ status: { in: [...PUBLIC_VEHICLE_STATUSES] } });
+    and.push({ status: { in: [...ACTIVE_LISTING_STATUSES] } });
   } else if (f.status) {
     and.push({ status: f.status });
   }
@@ -91,25 +96,25 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
   return and.length ? { AND: and } : {};
 }
 
-function orderBy(sort?: VehicleFilters["sort"]): Prisma.VehicleOrderByWithRelationInput {
+function orderBy(sort?: VehicleFilters["sort"]): Prisma.VehicleOrderByWithRelationInput[] {
   switch (sort) {
     case "price_asc":
-      return { price: "asc" };
+      return [{ price: "asc" }, { id: "asc" }];
     case "price_desc":
-      return { price: "desc" };
+      return [{ price: "desc" }, { id: "asc" }];
     case "year_desc":
-      return { year: "desc" };
+      return [{ year: "desc" }, { id: "asc" }];
     default:
-      return { createdAt: "desc" };
+      return [{ createdAt: "desc" }, { id: "asc" }];
   }
 }
 
-/** Public search — never returns DRAFT / NEEDS_REVIEW / UNAVAILABLE / ARCHIVED. */
+/** Public search — active listings only (AVAILABLE + RESERVED). Sold stays on detail URLs. */
 export async function searchVehicles(
   filters: VehicleFilters,
   page = 1,
   pageSize = 12,
-): Promise<{ items: PublicVehicle[]; total: number }> {
+): Promise<{ items: PublicVehicleCard[]; total: number }> {
   try {
     const where = buildWhere(filters, true);
     const [items, total] = await Promise.all([
@@ -121,26 +126,36 @@ export async function searchVehicles(
       }),
       prisma.vehicle.count({ where }),
     ]);
-    return { items: items.map(toPublicVehicle), total };
+    return { items: items.map(toPublicVehicleCard), total };
   } catch (err) {
     console.error("[searchVehicles]", err);
     return { items: [], total: 0 };
   }
 }
 
-/** Homepage featured grid — daily random sample from available CMS stock. */
-export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicle[]> {
+/** Homepage featured grid — daily sample without loading every available row. */
+export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicleCard[]> {
   return getFeaturedVehiclesCached(limit);
 }
 
 const getFeaturedVehiclesCached = unstable_cache(
   async (limit: number) => {
     try {
-      const pool = await prisma.vehicle.findMany({
+      const ids = await prisma.vehicle.findMany({
         where: { status: "AVAILABLE" },
+        select: { id: true },
         orderBy: { id: "asc" },
       });
-      return pickDailyItems(pool, limit).map(toPublicVehicle);
+      const picked = pickDailyItems(ids, limit);
+      if (picked.length === 0) return [];
+      const rows = await prisma.vehicle.findMany({
+        where: { id: { in: picked.map((p) => p.id) } },
+      });
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      return picked
+        .map((p) => byId.get(p.id))
+        .filter((v): v is Vehicle => Boolean(v))
+        .map(toPublicVehicleCard);
     } catch {
       return [];
     }
@@ -211,12 +226,12 @@ export const getStockFilterMeta = unstable_cache(
     try {
       const [rows, agg] = await Promise.all([
         prisma.vehicle.findMany({
-          where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+          where: { status: { in: [...ACTIVE_LISTING_STATUSES] } },
           select: { make: true, model: true },
           orderBy: [{ make: "asc" }, { model: "asc" }],
         }),
         prisma.vehicle.aggregate({
-          where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
+          where: { status: { in: [...ACTIVE_LISTING_STATUSES] } },
           _min: { mileage: true, year: true },
           _max: { mileage: true, year: true },
         }),
@@ -290,5 +305,64 @@ export async function getCatalogMakeModels(): Promise<CatalogMake[]> {
     return mergeCatalogWithStock(stock);
   } catch {
     return mergeCatalogWithStock([]);
+  }
+}
+
+/** Related active stock — same model first, then same make. */
+export async function getRelatedVehicles(
+  v: Pick<Vehicle | PublicVehicle, "id" | "make" | "model">,
+  limit = 4,
+): Promise<PublicVehicleCard[]> {
+  try {
+    const sameModel = await prisma.vehicle.findMany({
+      where: {
+        status: { in: [...ACTIVE_LISTING_STATUSES] },
+        id: { not: v.id },
+        make: { equals: v.make, mode: "insensitive" },
+        model: { equals: v.model, mode: "insensitive" },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: limit,
+    });
+    if (sameModel.length >= limit) {
+      return sameModel.map(toPublicVehicleCard);
+    }
+
+    const remaining = limit - sameModel.length;
+    const sameMake = await prisma.vehicle.findMany({
+      where: {
+        status: { in: [...ACTIVE_LISTING_STATUSES] },
+        id: { notIn: [v.id, ...sameModel.map((row) => row.id)] },
+        make: { equals: v.make, mode: "insensitive" },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+      take: remaining,
+    });
+    return [...sameModel, ...sameMake].map(toPublicVehicleCard);
+  } catch {
+    return [];
+  }
+}
+
+export async function findSlugRedirect(fromSlug: string): Promise<string | null> {
+  try {
+    const row = await prisma.vehicleSlugRedirect.findUnique({ where: { fromSlug } });
+    return row?.toSlug ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Record old→new slug when a public URL changes. */
+export async function recordSlugRedirect(fromSlug: string, toSlug: string): Promise<void> {
+  if (!fromSlug || !toSlug || fromSlug === toSlug) return;
+  try {
+    await prisma.vehicleSlugRedirect.upsert({
+      where: { fromSlug },
+      create: { fromSlug, toSlug },
+      update: { toSlug },
+    });
+  } catch (err) {
+    console.error("[recordSlugRedirect]", err);
   }
 }

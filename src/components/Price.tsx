@@ -18,16 +18,12 @@ export function Price({ amount, className, style }: Props) {
 }
 
 export function VehiclePrice({ price }: { price: number }) {
-  const { currency, formatPrice } = useCurrency();
-  const isConverted = currency !== "JPY";
+  const { formatPrice } = useCurrency();
 
   return (
     <div className="detail-price-block">
       <div className="detail-price">{formatPrice(price)}</div>
-      <p className="muted detail-price-note">
-        Plus shipping
-        {isConverted ? " · approx. exchange rate" : null}
-      </p>
+      <p className="muted detail-price-note">Plus shipping</p>
     </div>
   );
 }

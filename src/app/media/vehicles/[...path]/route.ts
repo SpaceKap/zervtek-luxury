@@ -39,7 +39,8 @@ export async function GET(
         "Content-Type": type,
         "Cache-Control": "public, max-age=31536000, immutable",
         "X-Content-Type-Options": "nosniff",
-        "X-Robots-Tag": "noimageindex",
+        // Public marketing derivatives — allow image indexing.
+        "X-Robots-Tag": "index, follow",
       },
     });
   } catch {

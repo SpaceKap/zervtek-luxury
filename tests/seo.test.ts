@@ -12,6 +12,7 @@ const sampleVehicle = {
   id: "abc123",
   slug: "porsche/911/turbo-for-sale",
   year: 2020,
+  registrationMonth: 3,
   make: "Porsche",
   model: "911",
   variant: "Turbo",
@@ -32,7 +33,7 @@ const sampleVehicle = {
 
 describe("seo schema", () => {
   it("uses human-readable vehicle enums", () => {
-    const schema = productSchema(sampleVehicle);
+    const schema = productSchema(sampleVehicle as never);
     expect(schema.bodyType).toBe("Coupe");
     expect(schema.fuelType).toBe("Petrol");
     expect(schema.vehicleTransmission).toBe("DCT");
@@ -40,24 +41,30 @@ describe("seo schema", () => {
     expect(schema.vehicleConfiguration).toContain("Right-hand drive");
   });
 
-  it("includes offer shipping and price validity", () => {
-    const schema = productSchema(sampleVehicle);
+  it("omits fictional offer validity and shipping transit", () => {
+    const schema = productSchema(sampleVehicle as never);
     expect(schema.offers?.description).toContain("JPY");
-    expect(schema.offers?.priceValidUntil).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(schema.offers?.shippingDetails?.deliveryTime?.transitTime?.unitCode).toBe("WK");
+    expect(schema.offers).not.toHaveProperty("priceValidUntil");
+    expect(schema.offers).not.toHaveProperty("shippingDetails");
+  });
+
+  it("emits registration date, not vehicleModelDate, from DB year", () => {
+    const schema = productSchema(sampleVehicle as never);
+    expect(schema).not.toHaveProperty("vehicleModelDate");
+    expect(schema.dateVehicleFirstRegistered).toBe("2020-03-01");
   });
 
   it("excludes sold vehicles from item lists", () => {
     const list = productListJsonLd([
-      sampleVehicle,
-      { ...sampleVehicle, id: "sold1", status: "SOLD" },
+      sampleVehicle as never,
+      { ...sampleVehicle, id: "sold1", status: "SOLD" } as never,
     ]);
     expect(list.numberOfItems).toBe(1);
     expect(list.itemListElement).toHaveLength(1);
   });
 
   it("uses lightweight product entries in item lists", () => {
-    const list = productListJsonLd([sampleVehicle]);
+    const list = productListJsonLd([sampleVehicle as never]);
     const item = list.itemListElement[0].item as Record<string, unknown>;
     expect(item).not.toHaveProperty("description");
     expect(item.image).toBe("https://performance.zervtek.com/media/vehicles/abc/medium/1.jpg");
@@ -71,9 +78,9 @@ describe("seo schema", () => {
     expect(org.areaServed?.name).toBe("Worldwide");
   });
 
-  it("keeps sitelinks search target on stock q param", () => {
+  it("does not advertise a keyword SearchAction", () => {
     const site = websiteJsonLd();
-    expect(site.potentialAction?.target).toContain("/stock?q={search_term_string}");
+    expect(site).not.toHaveProperty("potentialAction");
   });
 
   it("strips undefined blog fields and adds publisher logo", () => {

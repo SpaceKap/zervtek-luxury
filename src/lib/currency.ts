@@ -6,7 +6,10 @@ export const CURRENCIES: { code: CurrencyCode; label: string }[] = [
   { code: "EUR", label: "€ EUR" },
 ];
 
-/** JPY per 1 unit of foreign currency (approximate display rates). */
+/**
+ * JPY per 1 unit of foreign currency for display conversion.
+ * Rates are intended to be refreshed daily via API (not shown as legal quotes in UI).
+ */
 export const JPY_PER_UNIT: Record<CurrencyCode, number> = {
   JPY: 1,
   USD: 150,

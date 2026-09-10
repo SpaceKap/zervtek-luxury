@@ -11,15 +11,22 @@ export const VEHICLE_STATUSES = [
 
 export type VehicleStatus = (typeof VEHICLE_STATUSES)[number];
 
-/** Statuses visible on the public website. */
+/** Statuses visible on the public website (detail pages). */
 export const PUBLIC_VEHICLE_STATUSES: VehicleStatus[] = [
   "AVAILABLE",
   "RESERVED",
   "SOLD",
 ];
 
+/** Active inventory grids / hubs — not sold. */
+export const ACTIVE_LISTING_STATUSES: VehicleStatus[] = ["AVAILABLE", "RESERVED"];
+
 export function isPublicVehicleStatus(status: string): boolean {
   return (PUBLIC_VEHICLE_STATUSES as string[]).includes(status);
+}
+
+export function isActiveListingStatus(status: string): boolean {
+  return (ACTIVE_LISTING_STATUSES as string[]).includes(status);
 }
 
 export const TRANSMISSIONS = ["AUTOMATIC", "MANUAL", "DCT", "CVT"] as const;

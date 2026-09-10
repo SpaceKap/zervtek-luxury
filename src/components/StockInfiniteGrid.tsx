@@ -3,40 +3,44 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { VehicleCard } from "@/components/VehicleCard";
-import type { PublicVehicle } from "@/lib/vehicle-public";
+import type { PublicVehicleCard } from "@/lib/vehicle-public";
 import { STOCK_PAGE_SIZE } from "@/lib/stock";
+import { trackViewItemList } from "@/lib/analytics";
 
 type Props = {
-  initialItems: PublicVehicle[];
+  initialItems: PublicVehicleCard[];
   total: number;
+  initialPage?: number;
 };
 
-export function StockInfiniteGrid({ initialItems, total }: Props) {
+export function StockInfiniteGrid({ initialItems, total, initialPage = 1 }: Props) {
   const params = useSearchParams();
   const filterKey = params.toString();
 
   const [items, setItems] = useState(initialItems);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(initialItems.length < total);
+  const [hasMore, setHasMore] = useState(initialPage * STOCK_PAGE_SIZE < total);
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef(false);
-  const pageRef = useRef(1);
-  const hasMoreRef = useRef(initialItems.length < total);
+  const pageRef = useRef(initialPage);
+  const hasMoreRef = useRef(initialPage * STOCK_PAGE_SIZE < total);
 
   // Reset when SSR payload or filters change (new navigation).
   useEffect(() => {
     setItems(initialItems);
-    setPage(1);
-    pageRef.current = 1;
-    setHasMore(initialItems.length < total);
-    hasMoreRef.current = initialItems.length < total;
+    setPage(initialPage);
+    pageRef.current = initialPage;
+    const more = initialPage * STOCK_PAGE_SIZE < total;
+    setHasMore(more);
+    hasMoreRef.current = more;
     setError(null);
     setLoading(false);
     loadingRef.current = false;
-  }, [initialItems, total, filterKey]);
+    trackViewItemList({ listName: "stock_grid", vehicles: initialItems });
+  }, [initialItems, total, filterKey, initialPage]);
 
   const loadMore = useCallback(async () => {
     if (loadingRef.current || !hasMoreRef.current) return;
@@ -53,7 +57,7 @@ export function StockInfiniteGrid({ initialItems, total }: Props) {
       const res = await fetch(`/api/stock?${qs.toString()}`);
       if (!res.ok) throw new Error(`Load failed (${res.status})`);
       const data = (await res.json()) as {
-        items: PublicVehicle[];
+        items: PublicVehicleCard[];
         total: number;
         hasMore: boolean;
       };

@@ -17,6 +17,8 @@ export function ColorflowBackground() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
+    // Skip heavy decorative iframe on narrow phones.
+    if (window.matchMedia("(max-width: 720px)").matches) return;
 
     let cancelled = false;
     const enable = () => {

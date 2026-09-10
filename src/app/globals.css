@@ -1245,6 +1245,127 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   display: flex;
   flex-direction: column;
 }
+
+/* ---- Make hub (e.g. /stock/ferrari) ---- */
+.make-hub-body {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding-bottom: 80px;
+}
+.make-hub-section-head {
+  margin-bottom: 24px;
+}
+.make-hub-section-head .heading {
+  margin: 0 0 8px;
+  font-size: clamp(22px, 2.6vw, 28px);
+}
+.make-hub-section-head .muted {
+  margin: 0;
+  max-width: 56ch;
+  line-height: 1.6;
+}
+.make-hub-empty {
+  text-align: center;
+}
+.make-hub-empty h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+.make-hub-stock-more {
+  margin: 20px 0 0;
+  font-size: 14px;
+}
+.make-hub-stock-more a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.make-hub-stock-more a:hover {
+  color: var(--gold-soft);
+}
+.make-hub-article {
+  max-width: 760px;
+}
+.make-hub-prose {
+  margin: 0 0 1.15em;
+  line-height: 1.8;
+  color: var(--muted);
+  font-size: 16px;
+}
+.make-hub-block {
+  margin-top: 40px;
+}
+.make-hub-block .heading,
+.make-hub-model .heading {
+  margin: 0 0 16px;
+  font-size: clamp(22px, 2.5vw, 28px);
+}
+.make-hub-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+}
+.make-hub-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.make-hub-table th,
+.make-hub-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.make-hub-table th {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(20, 18, 15, 0.03);
+}
+.make-hub-table tr:last-child td {
+  border-bottom: none;
+}
+.make-hub-table a {
+  color: var(--ink);
+  font-weight: 550;
+  text-decoration: none;
+}
+.make-hub-table a:hover {
+  color: var(--gold-soft);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.make-hub-model {
+  margin-top: 44px;
+  padding-top: 8px;
+  scroll-margin-top: 96px;
+}
+.make-hub-model-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin-bottom: 4px;
+}
+.make-hub-model-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.make-hub-model-link:hover {
+  color: var(--ink);
+}
+.make-hub-cta {
+  margin-top: 48px;
+}
 .stock-filters {
   border-radius: 18px;
   padding: 20px 22px 18px;
@@ -1528,8 +1649,29 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .carousel-stage {
   position: relative;
   aspect-ratio: 3 / 2;
-  transition: aspect-ratio 0.35s ease;
   background: #e6e1d8;
+}
+.carousel-pause {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 4;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 550;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 .carousel-slide {
   position: absolute;

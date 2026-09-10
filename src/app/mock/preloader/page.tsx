@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getFeaturedVehicles } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { InquiryForm } from "@/components/InquiryForm";
@@ -7,6 +8,11 @@ import { PreloaderLab } from "@/components/mock/PreloaderLab";
 import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  title: "Preloader mock",
+};
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2400&q=80";

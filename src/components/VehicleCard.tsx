@@ -11,13 +11,13 @@ import {
   TRANSMISSION_LABELS,
   displayEnum,
 } from "@/lib/vehicle-constants";
-import type { PublicVehicle } from "@/lib/vehicle-public";
+import type { PublicVehicleCard } from "@/lib/vehicle-public";
 
 export function VehicleCard({
   v,
   listName = "stock_grid",
 }: {
-  v: PublicVehicle;
+  v: PublicVehicleCard;
   listName?: string;
 }) {
   const img = vehicleGridImageUrl(v.images[0] || "/placeholder.svg");

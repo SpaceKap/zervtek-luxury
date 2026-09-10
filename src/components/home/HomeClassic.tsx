@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { HomePortsGlobe } from "@/components/home/HomePortsGlobe";
 import { productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
-import type { PublicVehicle } from "@/lib/vehicle-public";
+import type { PublicVehicleCard } from "@/lib/vehicle-public";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2400&q=80";
@@ -20,17 +20,17 @@ const STEPS = [
   {
     n: "02",
     t: "Curated selection",
-    d: "We hand-pick vehicles from our stock and Japan's finest sources, with full condition reports.",
+    d: "We hand-pick vehicles from our stock and Japan's finest sources, with clear photography and known condition notes.",
   },
   {
     n: "03",
     t: "Inspect & reserve",
-    d: "Review detailed photography and inspection notes, then reserve your car with confidence.",
+    d: "Review photos and notes; request an in-person inspection before you commit, then reserve with confidence.",
   },
   {
     n: "04",
     t: "We handle everything",
-    d: "Servicing, documentation, customs and shipping to your destination port, all managed for you.",
+    d: "Documentation, customs and shipping to your destination port — managed for you once the purchase is agreed.",
   },
   {
     n: "05",
@@ -40,7 +40,7 @@ const STEPS = [
 ];
 
 type Props = {
-  featured: PublicVehicle[];
+  featured: PublicVehicleCard[];
 };
 
 /** Previous homepage layout — kept for side-by-side comparison. */
@@ -108,7 +108,8 @@ export function HomeClassic({ featured }: Props) {
           <h2 className="stock-title">The collection</h2>
           <p className="stock-lead">
             Hand-selected performance and luxury vehicles from Japan,
-            inspected, documented and ready to ship worldwide.
+            Hand-selected performance and luxury vehicles from Japan, documented and ready to ship
+            worldwide. Inspection support is available on request before you commit.
           </p>
         </header>
 

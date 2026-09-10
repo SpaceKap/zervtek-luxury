@@ -1,5 +1,5 @@
 import type { Vehicle } from "@prisma/client";
-import type { PublicVehicle } from "./vehicle-public";
+import type { PublicVehicle, PublicVehicleCard } from "./vehicle-public";
 import { formatJPY, formatKm } from "./format";
 import { SITE } from "./site";
 import { vehicleStockPath } from "./slug";
@@ -38,12 +38,6 @@ function siteLogoImageObject() {
   };
 }
 
-function offerPriceValidUntil(days = 90): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
 const DRIVETRAIN_SCHEMA: Record<string, string> = {
   FWD: "https://schema.org/FrontWheelDriveConfiguration",
   RWD: "https://schema.org/RearWheelDriveConfiguration",
@@ -66,6 +60,7 @@ type ProductVehicle = Pick<
   | "id"
   | "slug"
   | "year"
+  | "registrationMonth"
   | "make"
   | "model"
   | "variant"
@@ -172,28 +167,30 @@ function vehicleOffers(v: ProductVehicle | PublicVehicle, url: string) {
     url,
     price: String(v.price),
     priceCurrency: "JPY",
-    priceValidUntil: offerPriceValidUntil(),
     availability: offerAvailability(v.status),
     itemCondition: "https://schema.org/UsedCondition",
     description: "Vehicle price in JPY. Shipping to your destination port is quoted separately.",
-    shippingDetails: {
-      "@type": "OfferShippingDetails",
-      deliveryTime: {
-        "@type": "ShippingDeliveryTime",
-        transitTime: {
-          "@type": "QuantitativeValue",
-          minValue: 4,
-          maxValue: 8,
-          unitCode: "WK",
-        },
-      },
-    },
     seller: {
       "@type": "AutoDealer",
+      "@id": `${SITE.url}/#organization`,
       name: SITE.name,
       url: SITE.url,
     },
   };
+}
+
+function firstRegistrationDate(v: ProductVehicle | PublicVehicle): string | undefined {
+  const year = Number(v.year);
+  if (!Number.isFinite(year) || year < 1900) return undefined;
+  const monthRaw =
+    "registrationMonth" in v && v.registrationMonth != null
+      ? Number(v.registrationMonth)
+      : null;
+  const month =
+    monthRaw != null && Number.isFinite(monthRaw) && monthRaw >= 1 && monthRaw <= 12
+      ? String(monthRaw).padStart(2, "0")
+      : "01";
+  return `${year}-${month}-01`;
 }
 
 /** Product (+ Car) schema object without @context — safe to nest in ItemList. */
@@ -212,12 +209,15 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
     "@id": `${url}#product`,
     name,
     description: v.description,
-    image: images.length > 0 ? images : [`${SITE.url}/placeholder.svg`],
+    image: images.length > 0 ? images : undefined,
     url,
     sku: v.id,
     brand: { "@type": "Brand", name: v.make },
     model: v.model,
-    vehicleModelDate: String(v.year),
+    // DB `year` is registration year — do not emit as vehicleModelDate.
+    ...(firstRegistrationDate(v)
+      ? { dateVehicleFirstRegistered: firstRegistrationDate(v) }
+      : {}),
     ...(v.vin ? { vehicleIdentificationNumber: v.vin } : {}),
     ...(bodyType ? { bodyType } : {}),
     ...(configuration ? { vehicleConfiguration: configuration } : {}),
@@ -251,6 +251,7 @@ export function organizationJsonLd() {
   return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "AutoDealer",
+    "@id": `${SITE.url}/#organization`,
     name: SITE.name,
     legalName: SITE.legalName,
     url: SITE.url,
@@ -288,11 +289,6 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     name: SITE.name,
     url: SITE.url,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE.url}/stock?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
   };
 }
 
@@ -339,23 +335,25 @@ export function vehicleJsonLd(v: ProductVehicle | PublicVehicle, _absImage?: (sr
 function productListItemSchema(v: ProductVehicle | PublicVehicle) {
   const name = vehicleName(v);
   const url = `${SITE.url}${vehicleStockPath(v.slug)}`;
-  const cover = v.images[0] ? absUrl(v.images[0]) : `${SITE.url}/placeholder.svg`;
+  const cover = v.images[0] ? absUrl(v.images[0]) : undefined;
 
   return compactJsonLd({
     "@type": ["Product", "Car"] as const,
     "@id": `${url}#product`,
     name,
     url,
-    image: cover,
+    ...(cover ? { image: cover } : {}),
     brand: { "@type": "Brand", name: v.make },
     model: v.model,
-    vehicleModelDate: String(v.year),
+    ...(firstRegistrationDate(v)
+      ? { dateVehicleFirstRegistered: firstRegistrationDate(v) }
+      : {}),
     offers: vehicleOffers(v, url),
   });
 }
 
 /** ItemList of Product schemas for stock / featured grids (excludes sold listings). */
-export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle>) {
+export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle | PublicVehicleCard>) {
   const listed = vehicles.filter((v) => v.status !== "SOLD");
   return compactJsonLd({
     "@context": "https://schema.org",
@@ -364,7 +362,7 @@ export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle
     itemListElement: listed.map((v, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      item: productListItemSchema(v),
+      item: productListItemSchema(v as PublicVehicle),
     })),
   });
 }

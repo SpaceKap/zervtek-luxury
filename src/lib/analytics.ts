@@ -65,16 +65,26 @@ export function trackSelectItem(v: AnalyticsVehicle, listName: string) {
 /** Inquiry submitted AND accepted by the API. */
 export function trackGenerateLead(params: {
   formLocation: string;
+  leadType?: "general_inquiry" | "vehicle_inquiry";
   vehicleId?: string;
   vehicleName?: string;
+  vehicleMake?: string;
   destinationCountry?: string;
 }) {
+  const leadType =
+    params.leadType ??
+    (params.vehicleId ? "vehicle_inquiry" : "general_inquiry");
+
   pushEvent({
     event: "generate_lead",
+    lead_type: leadType,
     form_location: params.formLocation,
-    vehicle_id: params.vehicleId,
-    vehicle_name: params.vehicleName,
-    destination_country: params.destinationCountry || undefined,
+    ...(params.vehicleId ? { vehicle_id: params.vehicleId } : {}),
+    ...(params.vehicleName ? { vehicle_name: params.vehicleName } : {}),
+    ...(params.vehicleMake ? { vehicle_make: params.vehicleMake } : {}),
+    ...(params.destinationCountry
+      ? { destination_country: params.destinationCountry }
+      : {}),
     currency: "JPY",
   });
 }
@@ -108,6 +118,20 @@ export function trackShare(params: {
     method: params.method,
     vehicle_id: params.vehicleId,
     vehicle_name: params.vehicleName,
+  });
+}
+
+/** Stock / featured grid impressions (bounded list, not full inventory dump). */
+export function trackViewItemList(params: {
+  listName: string;
+  vehicles: AnalyticsVehicle[];
+}) {
+  const items = params.vehicles.slice(0, 12).map(vehicleItem);
+  if (items.length === 0) return;
+  pushEvent({
+    event: "view_item_list",
+    item_list_name: params.listName,
+    ecommerce: { currency: "JPY", items },
   });
 }
 

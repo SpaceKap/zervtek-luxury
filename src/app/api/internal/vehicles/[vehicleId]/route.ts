@@ -14,6 +14,7 @@ import {
   canHermesPatch,
 } from "@/lib/hermes-vehicle-mutations";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
+import { recordSlugRedirect } from "@/lib/vehicles";
 
 export const dynamic = "force-dynamic";
 
@@ -135,10 +136,15 @@ export async function PATCH(
       !updated.slug.includes("/");
 
     if (needsSlug) {
+      const previousSlug = updated.slug;
+      const nextSlug = await allocateUniqueVehicleSlug(updated);
       updated = await prisma.vehicle.update({
         where: { id: vehicleId },
-        data: { slug: await allocateUniqueVehicleSlug(updated) },
+        data: { slug: nextSlug },
       });
+      if (previousSlug !== nextSlug) {
+        await recordSlugRedirect(previousSlug, nextSlug);
+      }
     }
 
     await auditHermes({

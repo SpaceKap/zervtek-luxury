@@ -8,11 +8,11 @@ import {
   PHONE_COUNTRIES,
 } from "@/lib/phone-codes";
 import { trackGenerateLead } from "@/lib/analytics";
-import { SITE } from "@/lib/site";
 
 type Props = {
   vehicleId?: string;
   vehicleName?: string;
+  vehicleMake?: string;
   /** Where this form lives — used as the `form_location` analytics property. */
   formLocation?: string;
   compact?: boolean;
@@ -22,6 +22,7 @@ type Props = {
 export function InquiryForm({
   vehicleId,
   vehicleName,
+  vehicleMake,
   formLocation = "site_general",
   compact,
   embedded,
@@ -61,6 +62,7 @@ export function InquiryForm({
         formLocation,
         vehicleId,
         vehicleName,
+        vehicleMake,
         destinationCountry: String(data.country || "") || undefined,
       });
       form.reset();

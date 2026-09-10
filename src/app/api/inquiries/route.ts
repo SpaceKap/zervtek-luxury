@@ -2,18 +2,57 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { notifyInquiry, type InquiryNotification } from "@/lib/inquiry-notify";
 import { SITE } from "@/lib/site";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { isPublicVehicleStatus } from "@/lib/vehicle-constants";
 
-function trimOrNull(v: unknown): string | null {
+const LIMITS = {
+  name: 120,
+  email: 254,
+  phone: 40,
+  country: 100,
+  message: 5000,
+  clientRequestId: 80,
+} as const;
+
+function trimOrNull(v: unknown, max: number): string | null {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
-  return s || null;
+  if (!s) return null;
+  return s.slice(0, max);
+}
+
+function clampRequired(v: unknown, max: number): string {
+  return String(v || "")
+    .trim()
+    .slice(0, max);
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const name = String(body.name || "").trim();
-    const email = String(body.email || "").trim();
+    const ip = clientIp(req);
+    const limited = rateLimit(`inquiry:${ip}`, 8, 60_000);
+    if (!limited.ok) {
+      return NextResponse.json(
+        { error: "Too many inquiries. Please wait a minute and try again." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(limited.retryAfterSec) },
+        },
+      );
+    }
+
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    }
+
+    // Honeypot — bots fill hidden fields; humans leave empty.
+    if (String((body as { companyWebsite?: string }).companyWebsite || "").trim()) {
+      return NextResponse.json({ ok: true });
+    }
+
+    const name = clampRequired((body as { name?: string }).name, LIMITS.name);
+    const email = clampRequired((body as { email?: string }).email, LIMITS.email);
 
     if (!name || !email) {
       return NextResponse.json({ error: "Name and email are required." }, { status: 400 });
@@ -22,16 +61,56 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a valid email." }, { status: 400 });
     }
 
-    const vehicleId = trimOrNull(body.vehicleId);
-    const formLocation = trimOrNull(body.formLocation);
-    const make = trimOrNull(body.make);
-    const model = trimOrNull(body.model);
-    const budget = trimOrNull(body.budget);
-    const timeline = trimOrNull(body.timeline);
-    const preferredContact = trimOrNull(body.preferredContact);
-    const phone = trimOrNull(body.phone);
-    const country = trimOrNull(body.country);
-    const message = trimOrNull(body.message);
+    const clientRequestId = trimOrNull(
+      (body as { clientRequestId?: string }).clientRequestId,
+      LIMITS.clientRequestId,
+    );
+    if (clientRequestId) {
+      const existing = await prisma.inquiry.findUnique({ where: { clientRequestId } });
+      if (existing) {
+        return NextResponse.json({ ok: true, id: existing.id, duplicate: true });
+      }
+    }
+
+    const vehicleId = trimOrNull((body as { vehicleId?: string }).vehicleId, 64);
+    const formLocation = trimOrNull((body as { formLocation?: string }).formLocation, 80);
+    const make = trimOrNull((body as { make?: string }).make, 80);
+    const model = trimOrNull((body as { model?: string }).model, 80);
+    const budget = trimOrNull((body as { budget?: string }).budget, 80);
+    const timeline = trimOrNull((body as { timeline?: string }).timeline, 80);
+    const preferredContact = trimOrNull((body as { preferredContact?: string }).preferredContact, 40);
+    const phone = trimOrNull((body as { phone?: string }).phone, LIMITS.phone);
+    const country = trimOrNull((body as { country?: string }).country, LIMITS.country);
+    const message = trimOrNull((body as { message?: string }).message, LIMITS.message);
+
+    let safeVehicleId: string | null = null;
+    let vehicle = null;
+    if (vehicleId) {
+      const found = await prisma.vehicle.findUnique({
+        where: { id: vehicleId },
+        select: {
+          id: true,
+          make: true,
+          model: true,
+          variant: true,
+          year: true,
+          slug: true,
+          price: true,
+          status: true,
+        },
+      });
+      if (found && isPublicVehicleStatus(found.status)) {
+        safeVehicleId = found.id;
+        vehicle = {
+          make: found.make,
+          model: found.model,
+          variant: found.variant,
+          year: found.year,
+          slug: found.slug,
+          price: found.price,
+        };
+      }
+    }
 
     const inquiry = await prisma.inquiry.create({
       data: {
@@ -40,23 +119,10 @@ export async function POST(req: NextRequest) {
         phone,
         country,
         message,
-        vehicleId,
+        vehicleId: safeVehicleId,
+        clientRequestId,
       },
     });
-
-    const vehicle = vehicleId
-      ? await prisma.vehicle.findUnique({
-          where: { id: vehicleId },
-          select: {
-            make: true,
-            model: true,
-            variant: true,
-            year: true,
-            slug: true,
-            price: true,
-          },
-        })
-      : null;
 
     const notification: InquiryNotification = {
       id: inquiry.id,
@@ -65,7 +131,7 @@ export async function POST(req: NextRequest) {
       phone,
       country,
       message,
-      vehicleId,
+      vehicleId: safeVehicleId,
       vehicle,
       formLocation,
       make,
@@ -77,10 +143,19 @@ export async function POST(req: NextRequest) {
       siteUrl: SITE.url,
     };
 
-    await notifyInquiry(notification);
+    try {
+      await notifyInquiry(notification);
+    } catch (err) {
+      console.error("[inquiries] notification failed after save", { id: inquiry.id, err });
+    }
 
-    return NextResponse.json({ ok: true });
-  } catch {
+    return NextResponse.json({ ok: true, id: inquiry.id });
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    if (code === "P2002") {
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
+    console.error("[inquiries]", err);
     return NextResponse.json(
       { error: "Could not submit your inquiry. Please try again or contact us directly." },
       { status: 500 },

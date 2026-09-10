@@ -15,6 +15,7 @@ import {
 import { syncVehicleMediaOrder, purgeVehicleImagesNotInUrls } from "@/lib/vehicle-images";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { parseFeatureList } from "@/lib/features";
+import { recordSlugRedirect } from "@/lib/vehicles";
 
 function toInt(v: unknown): number | null | undefined {
   if (v === undefined) return undefined;
@@ -196,10 +197,15 @@ export async function PATCH(
       await syncVehicleMediaOrder(id, updated.images, prisma);
     }
     if (needsSlug) {
+      const previousSlug = updated.slug;
+      const nextSlug = await allocateUniqueVehicleSlug(updated);
       updated = await prisma.vehicle.update({
         where: { id },
-        data: { slug: await allocateUniqueVehicleSlug(updated) },
+        data: { slug: nextSlug },
       });
+      if (previousSlug !== nextSlug) {
+        await recordSlugRedirect(previousSlug, nextSlug);
+      }
     }
     return NextResponse.json({ vehicle: updated });
   } catch (err) {

@@ -18,13 +18,13 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "About ZervTek Performance | Car Export from Japan",
   description:
-    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan. Learn about our company, payment details, and get in touch.",
+    "ZervTek Performance sources and exports performance cars, supercars and luxury vehicles from Japan. Learn about our company, payment details, and get in touch.",
   alternates: { canonical: "/about" },
 };
 
 const VALUES = [
-  { t: "Quality first", d: "Every vehicle is hand-selected and passes a thorough multi-point inspection at our in-house facility before it is offered." },
-  { t: "Radical transparency", d: "Clear pricing and honest condition reporting. Shipping is quoted upfront, with no surprises." },
+  { t: "Quality first", d: "Every vehicle is hand-selected. We can arrange inspection support, additional photography and condition review before you commit." },
+  { t: "Clear pricing", d: "Listed price plus shipping. Destination costs are quoted separately for your port." },
   { t: "Concierge service", d: "From first enquiry to delivery and beyond, a dedicated specialist looks after you personally." },
 ];
 
@@ -55,7 +55,7 @@ export default async function AboutPage() {
           {" "}
           is the performance car division of ZervTek, dedicated to sourcing, preparing and
           exporting performance cars, supercars and luxury vehicles. We combine deep access to Japan&apos;s
-          finest cars with meticulous inspection and a genuinely personal service.
+          finest cars with careful verification and a genuinely personal service.
         </p>
       </section>
 
@@ -70,9 +70,9 @@ export default async function AboutPage() {
                 condition, delivered without compromise.
               </p>
               <p style={{ margin: 0 }}>
-                We source from across Japan&apos;s leading dealers and auctions, verify every condition
-                report, inspect and prepare each vehicle, and manage the full export: documentation,
-                customs and shipping to your destination port.
+                We source from across Japan&apos;s leading dealers and auctions, review available
+                condition information, arrange inspection support when you request it, and manage the
+                full export: documentation, customs and shipping to your destination port.
               </p>
               <p style={{ margin: 0 }}>
                 All operations remain unified under ZervTek Co., Ltd. This site focuses on

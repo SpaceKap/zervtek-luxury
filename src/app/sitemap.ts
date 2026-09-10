@@ -1,21 +1,31 @@
 import type { MetadataRoute } from "next";
-import { listPublishedBlogPosts } from "@/lib/blog";
-import { getAllVehicleSlugs } from "@/lib/vehicles";
+import { getAllVehicleSlugs, searchVehicles } from "@/lib/vehicles";
 import { SITE } from "@/lib/site";
 import { vehicleStockPath } from "@/lib/slug";
+import { STOCK_PAGE_SIZE } from "@/lib/stock";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [vehicles, posts] = await Promise.all([
+  const [vehicles, stock] = await Promise.all([
     getAllVehicleSlugs(),
-    listPublishedBlogPosts(200),
+    searchVehicles({}, 1, 1),
   ]);
+
+  const stockPageCount = Math.max(1, Math.ceil(stock.total / STOCK_PAGE_SIZE));
+  const stockPages: MetadataRoute.Sitemap = Array.from({ length: stockPageCount }, (_, i) => {
+    const page = i + 1;
+    return {
+      url: page === 1 ? `${SITE.url}/stock` : `${SITE.url}/stock?page=${page}`,
+      changeFrequency: "hourly" as const,
+      priority: page === 1 ? 0.9 : 0.7,
+    };
+  });
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE.url}/`, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE.url}/stock`, changeFrequency: "hourly", priority: 0.9 },
-    { url: `${SITE.url}/blog`, changeFrequency: "weekly", priority: 0.7 },
+    ...stockPages,
+    { url: `${SITE.url}/stock/ferrari`, changeFrequency: "weekly", priority: 0.85 },
     { url: `${SITE.url}/about`, changeFrequency: "monthly", priority: 0.6 },
   ];
 
@@ -26,12 +36,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${SITE.url}/blog/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: "monthly",
-    priority: 0.65,
-  }));
-
-  return [...staticRoutes, ...vehicleRoutes, ...blogRoutes];
+  return [...staticRoutes, ...vehicleRoutes];
 }

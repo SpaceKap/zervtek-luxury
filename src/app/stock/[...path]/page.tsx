@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
-import { getVehicleBySlug, getVehicleBySlugAdmin } from "@/lib/vehicles";
+import { notFound, permanentRedirect, redirect } from "next/navigation";
+import { getRelatedVehicles, getVehicleBySlug, getVehicleBySlugAdmin, findSlugRedirect } from "@/lib/vehicles";
+import { VehicleCard } from "@/components/VehicleCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { ProtectedCarousel } from "@/components/ProtectedCarousel";
 import { DetailQuickActions } from "@/components/DetailQuickActions";
@@ -18,6 +19,8 @@ import {
   TRANSMISSION_LABELS,
   displayEnum,
 } from "@/lib/vehicle-constants";
+import Link from "next/link";
+import { WhatsAppLink } from "@/components/WhatsAppLink";
 
 export const revalidate = 60;
 
@@ -28,7 +31,14 @@ function absUrl(src: string): string {
 async function resolveVehicle(path: string[]) {
   const slug = slugFromStockPath(path);
   if (!slug) return null;
-  return getVehicleBySlug(slug);
+  const vehicle = await getVehicleBySlug(slug);
+  if (vehicle) return vehicle;
+
+  const redirected = await findSlugRedirect(slug);
+  if (redirected) {
+    permanentRedirect(vehicleStockPath(redirected));
+  }
+  return null;
 }
 
 export async function generateMetadata({
@@ -75,7 +85,15 @@ export default async function VehicleDetailPage({
   }
 
   const v = slug ? await getVehicleBySlug(slug) : null;
-  if (!v) notFound();
+  if (!v) {
+    if (slug) {
+      const redirected = await findSlugRedirect(slug);
+      if (redirected) permanentRedirect(vehicleStockPath(redirected));
+    }
+    notFound();
+  }
+
+  const related = await getRelatedVehicles(v, 4);
 
   const href = vehicleStockPath(v.slug);
   const abs = `${SITE.url}${href}`;
@@ -103,8 +121,8 @@ export default async function VehicleDetailPage({
 
   const gradeLabel = (v.variant || v.model).trim();
 
-  const makeHref = `/stock?make=${encodeURIComponent(v.make)}`;
-  const modelHref = `/stock?make=${encodeURIComponent(v.make)}&q=${encodeURIComponent(v.model)}`;
+  const makeHref = v.make.toLowerCase() === "ferrari" ? "/stock/ferrari" : `/stock?make=${encodeURIComponent(v.make)}`;
+  const modelHref = `/stock?make=${encodeURIComponent(v.make)}&model=${encodeURIComponent(v.model)}`;
 
   const crumbItems = [
     { label: "Home", href: "/" },
@@ -152,7 +170,7 @@ export default async function VehicleDetailPage({
               <div className="detail-header">
                 <span className="vcard-make">{v.make}</span>
                 <h1 className="heading detail-title">
-                  {v.model}
+                  {v.year} {v.make} {v.model}
                   {v.variant ? <span className="muted"> {v.variant}</span> : null}
                 </h1>
                 {v.status !== "AVAILABLE" ? (
@@ -176,17 +194,40 @@ export default async function VehicleDetailPage({
             <div className="detail-panel-divider" />
 
             <div className="detail-panel-scroll">
-              <div className="detail-enquiry-head">
-                <h2 className="heading">Send an enquiry</h2>
-                <p className="muted">A specialist will confirm availability and share the condition report.</p>
-              </div>
-              <InquiryForm
-                vehicleId={v.id}
-                vehicleName={fullName}
-                formLocation="vehicle_detail"
-                compact
-                embedded
-              />
+              {v.status === "SOLD" ? (
+                <div className="detail-enquiry-head">
+                  <h2 className="heading">This vehicle is sold</h2>
+                  <p className="muted">
+                    We can source a similar {v.make} {v.model} from Japan. Tell us your destination and
+                    preferred specification.
+                  </p>
+                  <div className="stock-source-actions" style={{ marginTop: 16, justifyContent: "flex-start" }}>
+                    <Link className="btn btn-gold" href="/about#contact-form">
+                      Request similar
+                    </Link>
+                    <WhatsAppLink className="btn btn-outline" location="vehicle_sold">
+                      WhatsApp us
+                    </WhatsAppLink>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="detail-enquiry-head">
+                    <h2 className="heading">Send an enquiry</h2>
+                    <p className="muted">
+                      A specialist will confirm availability. Inspection support is available on request.
+                    </p>
+                  </div>
+                  <InquiryForm
+                    vehicleId={v.id}
+                    vehicleName={fullName}
+                    vehicleMake={v.make}
+                    formLocation="vehicle_detail"
+                    compact
+                    embedded
+                  />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -229,6 +270,22 @@ export default async function VehicleDetailPage({
               </span>
             ))}
           </div>
+        </section>
+      ) : null}
+
+      {related.length > 0 ? (
+        <section style={{ paddingBottom: 40 }}>
+          <h2 className="heading" style={{ fontSize: 26, marginBottom: 20 }}>
+            Similar vehicles
+          </h2>
+          <div className="vehicle-grid stock-grid">
+            {related.map((item) => (
+              <VehicleCard key={item.id} v={item} listName="related_vehicles" />
+            ))}
+          </div>
+          <p style={{ marginTop: 16 }}>
+            <Link href={makeHref}>More {v.make} stock →</Link>
+          </p>
         </section>
       ) : null}
     </main>

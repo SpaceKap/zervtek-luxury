@@ -22,15 +22,23 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Discourage hotlinking / indexing of raw uploaded originals.
+        // Admin upload originals stay out of image search; public /media is indexable.
         source: "/uploads/:path*",
         headers: [{ key: "X-Robots-Tag", value: "noimageindex" }],
       },
       {
         source: "/media/vehicles/:path*",
         headers: [
-          { key: "X-Robots-Tag", value: "noimageindex" },
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "X-Robots-Tag", value: "index, follow" },
+        ],
+      },
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
         ],
       },
     ];

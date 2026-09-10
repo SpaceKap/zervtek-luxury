@@ -24,17 +24,17 @@ const STEPS = [
   {
     n: "02",
     t: "Curated selection",
-    d: "We hand-pick vehicles from our stock and Japan's finest sources, with full condition reports.",
+    d: "We hand-pick vehicles from our stock and Japan's finest sources, with clear photography and known condition notes.",
   },
   {
     n: "03",
     t: "Inspect & reserve",
-    d: "Review detailed photography and inspection notes, then reserve your car with confidence.",
+    d: "Review photos and notes; request an in-person inspection before you commit, then reserve with confidence.",
   },
   {
     n: "04",
     t: "We handle everything",
-    d: "Servicing, documentation, customs and shipping to your destination port, all managed for you.",
+    d: "Documentation, customs and shipping to your destination port — managed for you once the purchase is agreed.",
   },
   {
     n: "05",
@@ -124,8 +124,8 @@ export default async function HomePage() {
             </div>
             <h2 className="stock-title">The collection</h2>
             <p className="stock-lead">
-              Hand-selected performance and luxury vehicles from Japan,
-              inspected, documented and ready to ship worldwide.
+              Hand-selected performance and luxury vehicles from Japan, documented and ready to ship
+              worldwide. Inspection support is available on request before you commit.
             </p>
           </header>
 
@@ -208,7 +208,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="glass" style={{ padding: 28, borderRadius: 16 }}>
-              <InquiryForm compact formLocation="home_inquiry" />
+              <InquiryForm compact formLocation="homepage" />
             </div>
           </div>
           <style>{`@media (max-width: 820px){ .inquire-grid{ grid-template-columns: 1fr !important; } }`}</style>

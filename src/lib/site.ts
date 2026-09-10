@@ -3,7 +3,7 @@ export const SITE = {
   legalName: "ZervTek Co. Ltd",
   tagline: "The Pride for Quality",
   description:
-    "ZervTek Performance sources, inspects and exports performance cars, supercars and luxury vehicles from Japan: Mercedes-AMG, Porsche, Ferrari, Land Rover and more, with transparent all-in pricing.",
+    "ZervTek Performance sources and exports performance cars, supercars and luxury vehicles from Japan: Mercedes-AMG, Porsche, Ferrari, Land Rover and more. Prices are FOB Japan; shipping is quoted separately.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://performance.zervtek.com",
   email: "info@zervtek.com",
   phone: "+81 80 6659 4632",
@@ -50,7 +50,6 @@ export function googleMapsPlaceUrl(): string {
 export const NAV = [
   { label: "Home", href: "/" },
   { label: "Stock", href: "/stock" },
-  { label: "Blog", href: "/blog" },
   { label: "About", href: "/about" },
 ];
 
@@ -206,7 +205,7 @@ export const PREFECTURES = [
 export const FAQS = [
   {
     q: "What does ZervTek Performance do?",
-    a: "We source, inspect and export performance cars, supercars and luxury vehicles from Japan to buyers worldwide.",
+    a: "We source and export performance cars, supercars and luxury vehicles from Japan to buyers worldwide. Pre-purchase inspection support is available on request.",
   },
   {
     q: "Why buy a performance or luxury car from Japan?",
@@ -214,7 +213,7 @@ export const FAQS = [
   },
   {
     q: "Do the prices include everything?",
-    a: "Yes. Each listing shows the total FOB payment for Japan, which includes the vehicle price, inspections, documentation charges, inland transport, customs clearance, and applicable fees. Shipping is charged separately based on your destination port and shipping method (RoRo or container).",
+    a: "Each listing shows the FOB Japan price, which covers the vehicle and Japan-side charges stated on the listing (typically documentation, inland transport and export clearance where applicable). Shipping, marine insurance, destination taxes, customs clearance and registration are quoted separately for your port and shipping method (RoRo or container).",
   },
   {
     q: "Can you ship internationally?",
@@ -222,11 +221,11 @@ export const FAQS = [
   },
   {
     q: "How do I reserve a vehicle?",
-    a: "Send an inquiry through any vehicle page or the form on our homepage, or message us on WhatsApp. A specialist will confirm availability, walk you through the condition report, and secure the car for you. We can also arrange an in-person inspection anywhere across Japan before you commit.",
+    a: "Send an inquiry through any vehicle page or the form on our homepage, or message us on WhatsApp. A specialist will confirm availability, walk you through available photography and condition notes, and secure the car for you. We can also arrange an in-person inspection in Japan before you commit.",
   },
   {
     q: "Is every vehicle inspected before delivery?",
-    a: "Absolutely. We inspect every vehicle in person, capture detailed photos and videos, and provide a full condition report before you commit.",
+    a: "We can arrange an in-person visit, additional photos and videos, and a condition review before you commit. Do not assume a full independent inspection is already completed on every listing unless the listing states that clearly.",
   },
 ];
 
