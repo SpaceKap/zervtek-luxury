@@ -1253,12 +1253,6 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .make-hub-hero {
   padding-block: 28px 8px;
 }
-.make-hub-intro {
-  max-width: none;
-}
-.stock-page .make-hub-intro.stock-lead {
-  max-width: none;
-}
 .make-hub-stock {
   min-width: 0;
 }
@@ -1300,8 +1294,8 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--gold-soft);
 }
 .make-hub-article {
+  max-width: 760px;
   width: 100%;
-  max-width: none;
   min-width: 0;
 }
 .make-hub-prose {
@@ -1309,7 +1303,6 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   line-height: 1.8;
   color: var(--muted);
   font-size: 16px;
-  max-width: none;
 }
 .make-hub-block {
   margin-top: 40px;
@@ -1385,6 +1378,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 }
 .make-hub-cta {
   margin-top: 0;
+  max-width: 760px;
   width: 100%;
 }
 @media (max-width: 720px) {
