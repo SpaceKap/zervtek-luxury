@@ -213,11 +213,11 @@ export const FAQS = [
   },
   {
     q: "Do the prices include everything?",
-    a: "Each listing shows the FOB Japan price, which covers the vehicle and Japan-side charges stated on the listing (typically documentation, inland transport and export clearance where applicable). Shipping, marine insurance, destination taxes, customs clearance and registration are quoted separately for your port and shipping method (RoRo or container).",
+    a: "Each listing shows the FOB Japan price. That covers the vehicle and Japan-side charges stated on the listing, including documentation, inland transport, and customs clearance in Japan. Shipping and marine insurance are quoted separately for your port and shipping method (RoRo or container).",
   },
   {
     q: "Can you ship internationally?",
-    a: "We export worldwide — including North America, South America, Europe, Oceania, Asia, Middle East, and Africa. Our most popular destinations are United States, Canada, United Kingdom, Italy, Germany, Cyprus, Australia, New Zealand, UAE, Saudi Arabia, Hong Kong and Singapore. Our team handles documentation, logistics and customs clearance to your destination port. <a href=\"/#destinations\">See the full list of destinations</a>.",
+    a: "We export worldwide — including North America, South America, Europe, Oceania, Asia, Middle East, and Africa. Our most popular destinations are United States, Canada, United Kingdom, Italy, Germany, Cyprus, Australia, New Zealand, UAE, Saudi Arabia, Hong Kong and Singapore. Our team handles Japan-side documentation and logistics to your destination port. <a href=\"/#destinations\">See the full list of destinations</a>.",
   },
   {
     q: "How do I reserve a vehicle?",

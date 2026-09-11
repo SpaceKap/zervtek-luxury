@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 const VALUES = [
   { t: "Quality first", d: "Every vehicle is hand-selected. We can arrange inspection support, additional photography and condition review before you commit." },
-  { t: "Clear pricing", d: "Listed price plus shipping. Destination costs are quoted separately for your port." },
+  { t: "Clear pricing", d: "Listed FOB Japan price plus shipping and insurance. Destination import costs are handled by you or your broker." },
   { t: "Concierge service", d: "From first enquiry to delivery and beyond, a dedicated specialist looks after you personally." },
 ];
 
