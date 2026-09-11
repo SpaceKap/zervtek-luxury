@@ -112,7 +112,7 @@ export function validateHermesMetadata(raw: unknown): HermesValidation {
   if (year === null) missingFields.push("registrationYear");
   if (mileage === null) missingFields.push("mileageKm");
 
-  if (year !== null && (year < 1980 || year > new Date().getFullYear() + 1)) {
+  if (year !== null && (year < 1960 || year > new Date().getFullYear() + 1)) {
     invalidFields.registrationYear = "Out of allowed range";
   }
   if (pricePresent && (price === null || price < 0)) {

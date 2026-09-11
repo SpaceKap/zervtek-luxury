@@ -126,7 +126,7 @@ export function buildHermesPatchData(body: Record<string, unknown>): HermesPatch
   if (body.registrationYear !== undefined || body.year !== undefined) {
     const year = toInt(body.registrationYear ?? body.year);
     if (year === null) invalidFields.registrationYear = "Must be an integer";
-    else if (year < 1980 || year > new Date().getFullYear() + 1) {
+    else if (year < 1960 || year > new Date().getFullYear() + 1) {
       invalidFields.registrationYear = "Out of allowed range";
     } else {
       data.year = year;

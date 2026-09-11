@@ -87,6 +87,30 @@ describe("Hermes metadata validation", () => {
     expect(res.data?.vin).toBe("205264-123456");
   });
 
+  it("accepts registration years from 1960", () => {
+    const res = validateHermesMetadata({
+      make: "Ferrari",
+      model: "308",
+      description: "Classic",
+      registrationYear: 1978,
+      mileageKm: 50000,
+      totalPriceJpy: 10000000,
+    });
+    expect(res.ok).toBe(true);
+    expect(res.data?.year).toBe(1978);
+
+    const tooOld = validateHermesMetadata({
+      make: "Ferrari",
+      model: "250",
+      description: "Too old",
+      registrationYear: 1959,
+      mileageKm: 10000,
+      totalPriceJpy: 10000000,
+    });
+    expect(tooOld.ok).toBe(false);
+    expect(tooOld.invalidFields.registrationYear).toBeTruthy();
+  });
+
   it("rejects missing required fields", () => {
     const res = validateHermesMetadata({ make: "X" });
     expect(res.ok).toBe(false);
