@@ -1,10 +1,21 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import {
-  type CurrencyCode,
-  FALLBACK_JPY_PER_UNIT,
   type JpyPerUnitRates,
 } from "@/lib/currency";
+import {
+  FALLBACK_FX_SNAPSHOT,
+  type FxSnapshot,
+  fxIsStale,
+} from "@/lib/fx-meta";
+
+export {
+  FALLBACK_FX_SNAPSHOT,
+  FX_STALE_AFTER_MS,
+  fxEstimateLabel,
+  fxIsStale,
+  type FxSnapshot,
+} from "@/lib/fx-meta";
 
 const FRANKFURTER_URL =
   "https://api.frankfurter.app/latest?from=JPY&to=USD,EUR";
@@ -102,24 +113,46 @@ export async function refreshFxRatesFromFrankfurter(): Promise<{
   };
 }
 
-async function loadFxRatesFromDb(): Promise<JpyPerUnitRates> {
+async function loadFxSnapshotFromDb(): Promise<FxSnapshot> {
   const rows = await prisma.fxRate.findMany({
     where: { id: { in: ["USD", "EUR"] } },
   });
-  const next: JpyPerUnitRates = { ...FALLBACK_JPY_PER_UNIT };
-  for (const row of rows) {
-    if (row.id === "USD" || row.id === "EUR") {
-      if (Number.isFinite(row.jpyPerUnit) && row.jpyPerUnit > 0) {
-        next[row.id as CurrencyCode] = row.jpyPerUnit;
-      }
-    }
+
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const usd = byId.get("USD");
+  const eur = byId.get("EUR");
+  const usdOk = usd && Number.isFinite(usd.jpyPerUnit) && usd.jpyPerUnit > 0;
+  const eurOk = eur && Number.isFinite(eur.jpyPerUnit) && eur.jpyPerUnit > 0;
+
+  if (!usdOk || !eurOk) {
+    return FALLBACK_FX_SNAPSHOT;
   }
-  return next;
+
+  const fetchedAtMs = Math.min(usd.fetchedAt.getTime(), eur.fetchedAt.getTime());
+  const asOfDate = usd.asOfDate || eur.asOfDate || null;
+
+  return {
+    rates: {
+      JPY: 1,
+      USD: usd.jpyPerUnit,
+      EUR: eur.jpyPerUnit,
+    },
+    asOfDate,
+    fetchedAt: new Date(fetchedAtMs).toISOString(),
+    source: "live",
+    stale: fxIsStale(fetchedAtMs),
+  };
 }
 
 /** Cached for 1h so layout does not hit DB every request; cron updates daily. */
-export const getFxRates = unstable_cache(
-  async () => loadFxRatesFromDb(),
+export const getFxSnapshot = unstable_cache(
+  async () => loadFxSnapshotFromDb(),
   ["fx-rates"],
   { revalidate: 3600, tags: ["fx-rates"] },
 );
+
+/** @deprecated Prefer getFxSnapshot */
+export async function getFxRates(): Promise<JpyPerUnitRates> {
+  const snap = await getFxSnapshot();
+  return snap.rates;
+}

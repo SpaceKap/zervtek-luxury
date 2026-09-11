@@ -1,9 +1,85 @@
 import { slugify } from "@/lib/slug";
+import type { VehicleFilters } from "@/lib/vehicles";
 
 /** Shared stock listing page size (server + client). */
 export const STOCK_PAGE_SIZE = 15;
 
-type StockQuery = Record<string, string | undefined>;
+export type StockQuery = Record<string, string | undefined>;
+export type StockSp = Record<string, string | string[] | undefined>;
+
+export function firstStockParam(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+/** All browse facets as strings (for redirects / buildStockHref). */
+export function stockQueryFromSp(
+  sp: StockSp,
+  overrides: { make?: string; model?: string; page?: string | undefined } = {},
+): StockQuery {
+  return {
+    q: firstStockParam(sp.q),
+    make: overrides.make !== undefined ? overrides.make : firstStockParam(sp.make),
+    model: overrides.model !== undefined ? overrides.model : firstStockParam(sp.model),
+    bodyType: firstStockParam(sp.bodyType),
+    transmission: firstStockParam(sp.transmission),
+    minYear: firstStockParam(sp.minYear),
+    maxYear: firstStockParam(sp.maxYear),
+    minMileage: firstStockParam(sp.minMileage),
+    maxMileage: firstStockParam(sp.maxMileage),
+    steering: firstStockParam(sp.steering),
+    minPrice: firstStockParam(sp.minPrice),
+    maxPrice: firstStockParam(sp.maxPrice),
+    sort: firstStockParam(sp.sort),
+    status: firstStockParam(sp.status),
+    page: overrides.page !== undefined ? overrides.page : firstStockParam(sp.page),
+  };
+}
+
+export function filtersFromStockSp(
+  sp: StockSp,
+  make?: string,
+  model?: string,
+): VehicleFilters {
+  const q = stockQueryFromSp(sp, {
+    make: make ?? firstStockParam(sp.make),
+    model: model ?? firstStockParam(sp.model),
+  });
+  return {
+    q: q.q,
+    make: make ?? q.make,
+    model: model ?? q.model,
+    bodyType: q.bodyType,
+    transmission: q.transmission,
+    minYear: q.minYear ? Number(q.minYear) : undefined,
+    maxYear: q.maxYear ? Number(q.maxYear) : undefined,
+    minMileage: q.minMileage ? Number(q.minMileage) : undefined,
+    maxMileage: q.maxMileage ? Number(q.maxMileage) : undefined,
+    steering: q.steering,
+    minPrice: q.minPrice ? Number(q.minPrice) : undefined,
+    maxPrice: q.maxPrice ? Number(q.maxPrice) : undefined,
+    sort: (q.sort as VehicleFilters["sort"]) ?? "newest",
+    status: q.status,
+  };
+}
+
+export function paginationQueryFromFilters(filters: VehicleFilters): StockQuery {
+  return {
+    make: filters.make,
+    model: filters.model,
+    q: filters.q,
+    bodyType: filters.bodyType,
+    transmission: filters.transmission,
+    minYear: filters.minYear != null ? String(filters.minYear) : undefined,
+    maxYear: filters.maxYear != null ? String(filters.maxYear) : undefined,
+    minMileage: filters.minMileage != null ? String(filters.minMileage) : undefined,
+    maxMileage: filters.maxMileage != null ? String(filters.maxMileage) : undefined,
+    steering: filters.steering,
+    minPrice: filters.minPrice != null ? String(filters.minPrice) : undefined,
+    maxPrice: filters.maxPrice != null ? String(filters.maxPrice) : undefined,
+    sort: filters.sort && filters.sort !== "newest" ? filters.sort : undefined,
+    status: filters.status,
+  };
+}
 
 /** Path segment(s) for make / make+model browse URLs. */
 export function stockBrowsePath(make?: string, model?: string): string {

@@ -11,7 +11,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd, productListJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 import { WhatsAppLink } from "@/components/WhatsAppLink";
-import { stockBrowsePath } from "@/lib/stock";
+import { paginationQueryFromFilters, stockBrowsePath } from "@/lib/stock";
 
 type Props = {
   items: PublicVehicleCard[];
@@ -41,21 +41,7 @@ export function StockBrowseView({
   jsonLdCrumbs,
   afterStock,
 }: Props) {
-  const paginationQuery = {
-    make: filters.make,
-    model: filters.model,
-    bodyType: filters.bodyType,
-    transmission: filters.transmission,
-    minYear: filters.minYear != null ? String(filters.minYear) : undefined,
-    maxYear: filters.maxYear != null ? String(filters.maxYear) : undefined,
-    minMileage: filters.minMileage != null ? String(filters.minMileage) : undefined,
-    maxMileage: filters.maxMileage != null ? String(filters.maxMileage) : undefined,
-    steering: filters.steering,
-    minPrice: filters.minPrice != null ? String(filters.minPrice) : undefined,
-    maxPrice: filters.maxPrice != null ? String(filters.maxPrice) : undefined,
-    sort: filters.sort && filters.sort !== "newest" ? filters.sort : undefined,
-    status: filters.status,
-  };
+  const paginationQuery = paginationQueryFromFilters(filters);
 
   return (
     <main className={`stock-page${afterStock ? " make-hub-page" : ""}`}>

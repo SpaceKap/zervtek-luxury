@@ -18,19 +18,19 @@ import { FERRARI_HUB, ferrariStockHref } from "@/lib/make-hubs/ferrari";
 import {
   STOCK_PAGE_SIZE,
   buildStockHref,
+  filtersFromStockSp,
+  firstStockParam,
+  paginationQueryFromFilters,
   parseStockPage,
   resolveCatalogModel,
   stockCanonicalPath,
+  stockQueryFromSp,
   stockShouldNoIndex,
 } from "@/lib/stock";
 
 export const dynamic = "force-dynamic";
 
 type SP = Record<string, string | string[] | undefined>;
-
-function first(v: string | string[] | undefined): string | undefined {
-  return Array.isArray(v) ? v[0] : v;
-}
 
 export async function generateMetadata({
   searchParams,
@@ -39,16 +39,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const sp = await searchParams;
   // Model spokes live at /stock/ferrari/{model} — never on the make hub.
-  if (first(sp.model)) {
+  if (firstStockParam(sp.model)) {
     return { title: FERRARI_HUB.title, robots: { index: false, follow: true } };
   }
 
-  const page = parseStockPage(first(sp.page)) ?? 1;
-  const noindex = stockShouldNoIndex({
-    steering: first(sp.steering),
-    sort: first(sp.sort),
-    status: first(sp.status),
-  });
+  const page = parseStockPage(firstStockParam(sp.page)) ?? 1;
+  const noindex = stockShouldNoIndex(stockQueryFromSp(sp, { make: "Ferrari" }));
   const canonical = stockCanonicalPath(page, {
     make: "Ferrari",
     hasExtraFilters: noindex,
@@ -87,24 +83,23 @@ export default async function FerrariStockHubPage({
   searchParams: Promise<SP>;
 }) {
   const sp = await searchParams;
-  const pageRaw = first(sp.page);
+  const pageRaw = firstStockParam(sp.page);
   const page = parseStockPage(pageRaw);
   if (page === null) notFound();
 
-  const modelParam = first(sp.model);
+  const modelParam = firstStockParam(sp.model);
   if (modelParam) {
     const { catalog } = await getStockFilterMeta();
     const model = resolveCatalogModel("Ferrari", modelParam, catalog);
     if (model) {
       permanentRedirect(
-        buildStockHref({
-          make: "Ferrari",
-          model,
-          steering: first(sp.steering),
-          sort: first(sp.sort),
-          status: first(sp.status),
-          page: page > 1 ? String(page) : undefined,
-        }),
+        buildStockHref(
+          stockQueryFromSp(sp, {
+            make: "Ferrari",
+            model,
+            page: page > 1 ? String(page) : undefined,
+          }),
+        ),
       );
     }
     notFound();
@@ -112,32 +107,18 @@ export default async function FerrariStockHubPage({
 
   if (pageRaw === "1") {
     permanentRedirect(
-      buildStockHref({
-        make: "Ferrari",
-        steering: first(sp.steering),
-        sort: first(sp.sort),
-        status: first(sp.status),
-      }),
+      buildStockHref(stockQueryFromSp(sp, { make: "Ferrari", page: undefined })),
     );
   }
 
   const { catalog } = await getStockFilterMeta();
-  const steering = first(sp.steering);
-  const sort = (first(sp.sort) as "newest" | "price_asc" | "price_desc" | "year_desc") ?? "newest";
+  const filters = filtersFromStockSp(sp, "Ferrari");
 
-  const { items, total } = await searchVehicles(
-    { make: "Ferrari", sort, steering },
-    page,
-    STOCK_PAGE_SIZE,
-  );
+  const { items, total } = await searchVehicles(filters, page, STOCK_PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(total / STOCK_PAGE_SIZE));
   if (page > totalPages) notFound();
 
-  const paginationQuery = {
-    make: "Ferrari",
-    steering,
-    sort: sort !== "newest" ? sort : undefined,
-  };
+  const paginationQuery = paginationQueryFromFilters(filters);
 
   return (
     <main className="stock-page make-hub-page">

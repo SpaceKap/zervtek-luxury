@@ -3,10 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   type CurrencyCode,
-  type JpyPerUnitRates,
-  FALLBACK_JPY_PER_UNIT,
   formatVehiclePrice,
 } from "@/lib/currency";
+import { type FxSnapshot, FALLBACK_FX_SNAPSHOT } from "@/lib/fx-meta";
 
 const STORAGE_KEY = "luxury-currency";
 
@@ -14,20 +13,19 @@ type CurrencyContextValue = {
   currency: CurrencyCode;
   setCurrency: (currency: CurrencyCode) => void;
   formatPrice: (amountJpy: number) => string;
-  rates: JpyPerUnitRates;
 };
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
 export function CurrencyProvider({
   children,
-  rates: initialRates,
+  fx: initialFx,
 }: {
   children: React.ReactNode;
-  rates?: JpyPerUnitRates;
+  fx?: FxSnapshot;
 }) {
   const [currency, setCurrencyState] = useState<CurrencyCode>("JPY");
-  const rates = initialRates ?? FALLBACK_JPY_PER_UNIT;
+  const fx = initialFx ?? FALLBACK_FX_SNAPSHOT;
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY) as CurrencyCode | null;
@@ -42,13 +40,13 @@ export function CurrencyProvider({
   }, []);
 
   const formatPrice = useCallback(
-    (amountJpy: number) => formatVehiclePrice(amountJpy, currency, rates),
-    [currency, rates],
+    (amountJpy: number) => formatVehiclePrice(amountJpy, currency, fx.rates),
+    [currency, fx.rates],
   );
 
   const value = useMemo(
-    () => ({ currency, setCurrency, formatPrice, rates }),
-    [currency, setCurrency, formatPrice, rates],
+    () => ({ currency, setCurrency, formatPrice }),
+    [currency, setCurrency, formatPrice],
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

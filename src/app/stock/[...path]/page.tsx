@@ -7,7 +7,6 @@ import {
   getVehicleBySlugAdmin,
   findSlugRedirect,
   searchVehicles,
-  type VehicleFilters,
 } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -44,11 +43,14 @@ import { getMakeModelGuide } from "@/lib/make-hubs";
 import {
   STOCK_PAGE_SIZE,
   buildStockHref,
+  filtersFromStockSp,
+  firstStockParam,
   parseStockPage,
   resolveCatalogMake,
   resolveCatalogModel,
   stockBrowsePath,
   stockCanonicalPath,
+  stockQueryFromSp,
   stockShouldNoIndex,
 } from "@/lib/stock";
 
@@ -56,35 +58,12 @@ export const dynamic = "force-dynamic";
 
 type SP = Record<string, string | string[] | undefined>;
 
-function first(v: string | string[] | undefined): string | undefined {
-  return Array.isArray(v) ? v[0] : v;
-}
-
 function absUrl(src: string): string {
   return src.startsWith("http") ? src : `${SITE.url}${src}`;
 }
 
 function isVehicleDetailPath(path: string[]): boolean {
   return path.length === 3 && Boolean(path[2]?.endsWith("-for-sale"));
-}
-
-function filtersFromSp(sp: SP, make?: string, model?: string): VehicleFilters {
-  return {
-    q: first(sp.q),
-    make,
-    model,
-    bodyType: first(sp.bodyType),
-    transmission: first(sp.transmission),
-    minYear: first(sp.minYear) ? Number(first(sp.minYear)) : undefined,
-    maxYear: first(sp.maxYear) ? Number(first(sp.maxYear)) : undefined,
-    minMileage: first(sp.minMileage) ? Number(first(sp.minMileage)) : undefined,
-    maxMileage: first(sp.maxMileage) ? Number(first(sp.maxMileage)) : undefined,
-    steering: first(sp.steering),
-    minPrice: first(sp.minPrice) ? Number(first(sp.minPrice)) : undefined,
-    maxPrice: first(sp.maxPrice) ? Number(first(sp.maxPrice)) : undefined,
-    sort: (first(sp.sort) as VehicleFilters["sort"]) ?? "newest",
-    status: first(sp.status),
-  };
 }
 
 async function resolveVehicle(path: string[]) {
@@ -163,25 +142,12 @@ export async function generateMetadata({
       return { title: "Stock not found", robots: { index: false, follow: false } };
     }
 
-    const page = parseStockPage(first(sp.page));
+    const page = parseStockPage(firstStockParam(sp.page));
     if (page === null) {
       return { title: "Stock not found", robots: { index: false, follow: false } };
     }
 
-    const noindex = stockShouldNoIndex({
-      q: first(sp.q),
-      bodyType: first(sp.bodyType),
-      transmission: first(sp.transmission),
-      minYear: first(sp.minYear),
-      maxYear: first(sp.maxYear),
-      minMileage: first(sp.minMileage),
-      maxMileage: first(sp.maxMileage),
-      steering: first(sp.steering),
-      minPrice: first(sp.minPrice),
-      maxPrice: first(sp.maxPrice),
-      sort: first(sp.sort),
-      status: first(sp.status),
-    });
+    const noindex = stockShouldNoIndex(stockQueryFromSp(sp));
     const canonical = stockCanonicalPath(page, {
       make,
       model: model ?? undefined,
@@ -201,7 +167,7 @@ export async function generateMetadata({
 }
 
 async function renderBrowse(path: string[], sp: SP) {
-  const pageRaw = first(sp.page);
+  const pageRaw = firstStockParam(sp.page);
   const page = parseStockPage(pageRaw);
   if (page === null) notFound();
 
@@ -217,41 +183,25 @@ async function renderBrowse(path: string[], sp: SP) {
   }
 
   // Drop stale make/model query params onto clean path.
-  if (first(sp.make) || first(sp.model)) {
+  if (firstStockParam(sp.make) || firstStockParam(sp.model)) {
     permanentRedirect(
-      buildStockHref({
-        make,
-        model,
-        q: first(sp.q),
-        bodyType: first(sp.bodyType),
-        transmission: first(sp.transmission),
-        minYear: first(sp.minYear),
-        maxYear: first(sp.maxYear),
-        minMileage: first(sp.minMileage),
-        maxMileage: first(sp.maxMileage),
-        steering: first(sp.steering),
-        minPrice: first(sp.minPrice),
-        maxPrice: first(sp.maxPrice),
-        sort: first(sp.sort),
-        status: first(sp.status),
-        page: page > 1 ? String(page) : undefined,
-      }),
+      buildStockHref(
+        stockQueryFromSp(sp, {
+          make,
+          model,
+          page: page > 1 ? String(page) : undefined,
+        }),
+      ),
     );
   }
 
   if (pageRaw === "1") {
     permanentRedirect(
-      buildStockHref({
-        make,
-        model,
-        steering: first(sp.steering),
-        sort: first(sp.sort),
-        status: first(sp.status),
-      }),
+      buildStockHref(stockQueryFromSp(sp, { make, model, page: undefined })),
     );
   }
 
-  const filters = filtersFromSp(sp, make, model);
+  const filters = filtersFromStockSp(sp, make, model);
   const { items, total } = await searchVehicles(filters, page, STOCK_PAGE_SIZE);
   const totalPages = Math.max(1, Math.ceil(total / STOCK_PAGE_SIZE));
   if (page > totalPages) notFound();

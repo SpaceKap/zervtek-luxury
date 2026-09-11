@@ -60,6 +60,7 @@ export function SearchFilters({
       return buildStockHref({
         make: make || undefined,
         model: make ? model || undefined : undefined,
+        q: params.get("q") || undefined,
         bodyType: params.get("bodyType") || undefined,
         transmission: params.get("transmission") || undefined,
         minYear: params.get("minYear") || undefined,
