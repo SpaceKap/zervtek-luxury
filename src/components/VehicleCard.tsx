@@ -54,9 +54,15 @@ export function VehicleCard({
           {body ? <span>{body}</span> : null}
           {transmission ? <span>{transmission}</span> : null}
         </div>
-        <div className="vcard-price">
-          <Price amount={v.price} />
-          {v.price != null ? <small>Plus shipping</small> : null}
+        <div className={`vcard-price${v.price == null ? " vcard-price--inquire" : ""}`}>
+          {v.price != null ? (
+            <>
+              <Price amount={v.price} />
+              <small>Plus shipping</small>
+            </>
+          ) : (
+            <span className="vcard-inquire-btn">Inquire</span>
+          )}
         </div>
       </div>
     </Link>

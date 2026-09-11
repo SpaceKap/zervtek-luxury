@@ -1126,7 +1126,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   flex-wrap: wrap;
   color: var(--muted);
   font-size: 13px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 .vcard-meta span:not(:last-child)::after {
   content: "·";
@@ -1138,10 +1138,35 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   font-weight: 700;
   color: var(--gold);
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 10px;
   border-top: 1px solid var(--line);
 }
 .vcard-price small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.vcard-price--inquire {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.vcard-inquire-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.vcard:hover .vcard-inquire-btn {
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--line);
+}
 
 /* ---- Stock listing ---- */
 .stock-page {
