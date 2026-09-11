@@ -199,11 +199,13 @@ export async function getVehicleBySlugAdmin(slug: string): Promise<Vehicle | nul
   }
 }
 
-export async function getAllVehicleSlugs(): Promise<{ slug: string; updatedAt: Date }[]> {
+export async function getAllVehicleSlugs(): Promise<
+  { slug: string; updatedAt: Date; images: string[] }[]
+> {
   try {
     return await prisma.vehicle.findMany({
       where: { status: { in: [...PUBLIC_VEHICLE_STATUSES] } },
-      select: { slug: true, updatedAt: true },
+      select: { slug: true, updatedAt: true, images: true },
       orderBy: { createdAt: "desc" },
     });
   } catch (err) {

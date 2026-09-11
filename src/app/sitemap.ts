@@ -6,6 +6,13 @@ import { STOCK_PAGE_SIZE } from "@/lib/stock";
 
 export const dynamic = "force-dynamic";
 
+/** Cap per listing — Google allows 1000; keep sitemap lean. */
+const MAX_IMAGES_PER_VEHICLE = 20;
+
+function absImageUrl(src: string): string {
+  return src.startsWith("http") ? src : `${SITE.url}${src}`;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [vehicles, stock] = await Promise.all([
     getAllVehicleSlugs(),
@@ -32,8 +39,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const vehicleRoutes: MetadataRoute.Sitemap = vehicles.map((v) => ({
     url: `${SITE.url}${vehicleStockPath(v.slug)}`,
     lastModified: v.updatedAt,
-    changeFrequency: "weekly",
+    changeFrequency: "weekly" as const,
     priority: 0.8,
+    images: v.images.slice(0, MAX_IMAGES_PER_VEHICLE).map(absImageUrl),
   }));
 
   return [...staticRoutes, ...vehicleRoutes];
