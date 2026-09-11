@@ -27,7 +27,7 @@ function serializeHermesVehicle(v: {
   variant: string | null;
   year: number;
   registrationMonth: number | null;
-  price: number;
+  price: number | null;
   mileage: number;
   status: string;
   sourceListingId: string | null;

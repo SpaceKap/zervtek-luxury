@@ -15,7 +15,7 @@ model Vehicle {
   variant     String?
   year        Int // registration year
   registrationMonth Int?
-  price       Int // totalPriceJpy — integer JPY, no commas
+  price       Int? // totalPriceJpy — integer JPY; null = inquire for price
   mileage     Int // km
   transmission String?
   fuelType    String?

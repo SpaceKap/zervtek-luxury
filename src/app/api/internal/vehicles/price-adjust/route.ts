@@ -89,6 +89,10 @@ export async function POST(req: NextRequest) {
         skipped.push({ vehicleId: v.id, reason: `status=${v.status}` });
         continue;
       }
+      if (v.price == null) {
+        skipped.push({ vehicleId: v.id, reason: "price=null (inquire for price)" });
+        continue;
+      }
 
       const nextPrice = applyPriceAdjustPercent(v.price, body.percent);
       if (!dryRun) {

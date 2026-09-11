@@ -27,7 +27,7 @@ export type AnalyticsVehicle = {
   model: string;
   variant?: string | null;
   year: number;
-  price: number;
+  price: number | null;
   bodyType?: string | null;
   slug: string;
 };
@@ -39,7 +39,7 @@ export function vehicleItem(v: AnalyticsVehicle) {
     item_brand: v.make,
     item_category: v.bodyType || undefined,
     item_variant: v.variant || undefined,
-    price: v.price,
+    ...(v.price != null ? { price: v.price } : {}),
     currency: "JPY",
     quantity: 1,
   };
@@ -49,7 +49,11 @@ export function vehicleItem(v: AnalyticsVehicle) {
 export function trackViewItem(v: AnalyticsVehicle) {
   pushEvent({
     event: "view_item",
-    ecommerce: { currency: "JPY", value: v.price, items: [vehicleItem(v)] },
+    ecommerce: {
+      currency: "JPY",
+      ...(v.price != null ? { value: v.price } : {}),
+      items: [vehicleItem(v)],
+    },
   });
 }
 

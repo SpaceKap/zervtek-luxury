@@ -92,7 +92,43 @@ describe("Hermes metadata validation", () => {
     expect(res.ok).toBe(false);
     expect(res.missingFields).toContain("model");
     expect(res.missingFields).toContain("registrationYear");
-    expect(res.missingFields).toContain("totalPriceJpy");
+    expect(res.missingFields).not.toContain("totalPriceJpy");
+  });
+
+  it("allows omit/null totalPriceJpy for inquire for price", () => {
+    const omitted = validateHermesMetadata({
+      make: "Ferrari",
+      model: "Roma",
+      description: "Dealer POA",
+      registrationYear: 2022,
+      mileageKm: 12000,
+    });
+    expect(omitted.ok).toBe(true);
+    expect(omitted.data?.price).toBeNull();
+
+    const explicitNull = validateHermesMetadata({
+      make: "Ferrari",
+      model: "Roma",
+      description: "Dealer POA",
+      registrationYear: 2022,
+      mileageKm: 12000,
+      totalPriceJpy: null,
+    });
+    expect(explicitNull.ok).toBe(true);
+    expect(explicitNull.data?.price).toBeNull();
+  });
+
+  it("rejects invalid totalPriceJpy when provided", () => {
+    const res = validateHermesMetadata({
+      make: "Ferrari",
+      model: "Roma",
+      description: "x",
+      registrationYear: 2022,
+      mileageKm: 10,
+      totalPriceJpy: "not-a-number",
+    });
+    expect(res.ok).toBe(false);
+    expect(res.invalidFields.totalPriceJpy).toBeTruthy();
   });
 
   it("rejects invalid bodyType and fee breakdown fields", () => {
@@ -214,6 +250,10 @@ describe("Hermes vehicle mutations", () => {
     expect(patch.ok).toBe(true);
     expect(patch.data?.price).toBe(10800000);
     expect(patch.data?.mileage).toBe(12000);
+
+    const clearPrice = buildHermesPatchData({ totalPriceJpy: null });
+    expect(clearPrice.ok).toBe(true);
+    expect(clearPrice.data?.price).toBeNull();
 
     const blocked = buildHermesPatchData({ status: "AVAILABLE" });
     expect(blocked.ok).toBe(false);

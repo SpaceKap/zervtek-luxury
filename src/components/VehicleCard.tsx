@@ -56,7 +56,7 @@ export function VehicleCard({
         </div>
         <div className="vcard-price">
           <Price amount={v.price} />
-          <small>Plus shipping</small>
+          {v.price != null ? <small>Plus shipping</small> : null}
         </div>
       </div>
     </Link>

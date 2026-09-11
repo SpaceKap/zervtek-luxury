@@ -162,7 +162,7 @@ function vehicleToForm(v: Vehicle): FormState {
     variant: v.variant || "",
     year: String(v.year),
     registrationMonth: v.registrationMonth ? String(v.registrationMonth) : "",
-    price: String(v.price),
+    price: v.price != null ? String(v.price) : "",
     mileage: String(v.mileage),
     transmission: v.transmission || "AUTOMATIC",
     fuelType: v.fuelType || "PETROL",
@@ -421,7 +421,6 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
     if (!form.make.trim()) errs.make = "Make is required.";
     if (!form.model.trim()) errs.model = "Model is required.";
     if (!form.description.trim()) errs.description = "Description is required.";
-    if (!form.price) errs.price = "Total price is required.";
     if (!form.mileage) errs.mileage = "Mileage is required.";
     if (!form.year) errs.year = "Year is required.";
     setErrors(errs);
@@ -797,8 +796,8 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
         </h3>
         <div className="form-grid">
           <div className="field">
-            <label>Total price (JPY) *</label>
-            <input {...numberProps("price", "8,850,000", true)} />
+            <label>Total price (JPY)</label>
+            <input {...numberProps("price", "Leave blank = Inquire for price")} />
             {fieldError("price")}
           </div>
           <div />

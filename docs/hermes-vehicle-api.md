@@ -91,7 +91,7 @@ curl -sS -X POST "https://performance.zervtek.com/api/internal/vehicles" \
   -F "images=@./side.jpg"
 ```
 
-Always starts as `NEEDS_REVIEW`. Fee breakdown fields are rejected; use `totalPriceJpy` only.
+Always starts as `NEEDS_REVIEW`. Fee breakdown fields are rejected; use `totalPriceJpy` only (or omit / `null` when the dealer has no list price — portal shows **Inquire for price**).
 
 Re-uploading the same Carsensor/dealer listing is blocked when `sourceListingId` already exists (returns `duplicate: true` with the existing `vehicleId`).
 
@@ -122,6 +122,7 @@ curl -sS -X PATCH "https://performance.zervtek.com/api/internal/vehicles/<vehicl
   -d '{"totalPriceJpy":9720000}'
 ```
 
+Omit price or send `"totalPriceJpy": null` for inquire-for-price listings (no dealer list price).
 ### Delete vehicle
 
 Only allowed for `NEEDS_REVIEW`, `DRAFT`, or `UNAVAILABLE`.

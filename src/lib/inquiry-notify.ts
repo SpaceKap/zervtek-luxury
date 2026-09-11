@@ -8,7 +8,7 @@ export type InquiryVehicleSummary = {
   variant: string | null;
   year: number;
   slug: string;
-  price: number;
+  price: number | null;
 };
 
 export type InquiryNotification = {

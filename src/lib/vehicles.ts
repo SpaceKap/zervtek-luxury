@@ -115,9 +115,9 @@ function buildWhere(f: VehicleFilters, publicOnly: boolean): Prisma.VehicleWhere
 function orderBy(sort?: VehicleFilters["sort"]): Prisma.VehicleOrderByWithRelationInput[] {
   switch (sort) {
     case "price_asc":
-      return [{ price: "asc" }, { id: "asc" }];
+      return [{ price: { sort: "asc", nulls: "last" } }, { id: "asc" }];
     case "price_desc":
-      return [{ price: "desc" }, { id: "asc" }];
+      return [{ price: { sort: "desc", nulls: "last" } }, { id: "asc" }];
     case "year_desc":
       return [{ year: "desc" }, { id: "asc" }];
     default:

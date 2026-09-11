@@ -68,7 +68,7 @@ function parsePayloadSnapshot(raw: unknown): InquiryNotifyPayloadSnapshot | null
       typeof v.model === "string" &&
       typeof v.year === "number" &&
       typeof v.slug === "string" &&
-      typeof v.price === "number"
+      (typeof v.price === "number" || v.price === null)
     ) {
       vehicle = {
         make: v.make,
@@ -76,7 +76,7 @@ function parsePayloadSnapshot(raw: unknown): InquiryNotifyPayloadSnapshot | null
         variant: typeof v.variant === "string" ? v.variant : v.variant === null ? null : null,
         year: v.year,
         slug: v.slug,
-        price: v.price,
+        price: v.price as number | null,
       };
     }
   }

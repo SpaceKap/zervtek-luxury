@@ -162,10 +162,26 @@ function offerAvailability(status: string): string {
 }
 
 function vehicleOffers(v: ProductVehicle | PublicVehicle, url: string) {
+  const price = v.price;
+  if (price == null) {
+    return {
+      "@type": "Offer" as const,
+      url,
+      availability: offerAvailability(v.status),
+      itemCondition: "https://schema.org/UsedCondition",
+      description: "Inquire for price. Shipping to your destination port is quoted separately.",
+      seller: {
+        "@type": "AutoDealer",
+        "@id": `${SITE.url}/#organization`,
+        name: SITE.name,
+        url: SITE.url,
+      },
+    };
+  }
   return {
     "@type": "Offer" as const,
     url,
-    price: String(v.price),
+    price: String(price),
     priceCurrency: "JPY",
     availability: offerAvailability(v.status),
     itemCondition: "https://schema.org/UsedCondition",

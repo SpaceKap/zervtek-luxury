@@ -15,7 +15,8 @@ export type HermesVehicleMetadata = {
   variant?: string;
   registrationYear: number;
   registrationMonth?: number;
-  totalPriceJpy: number;
+  /** Omit or null when dealer has no list price (inquire for price). */
+  totalPriceJpy?: number | null;
   mileageKm: number;
   engineCc?: number;
   transmission?: string;
@@ -60,7 +61,7 @@ export function mapHermesToDbFields(meta: HermesVehicleMetadata) {
     variant: meta.variant?.trim() || null,
     year: meta.registrationYear,
     registrationMonth: meta.registrationMonth ?? null,
-    price: meta.totalPriceJpy,
+    price: meta.totalPriceJpy ?? null,
     mileage: meta.mileageKm,
     engineCc: meta.engineCc ?? null,
     transmission: meta.transmission || null,
@@ -97,21 +98,25 @@ export function validateHermesMetadata(raw: unknown): HermesValidation {
   const model = String(body.model || "").trim();
   const description = String(body.description || "").trim();
   const year = toInt(body.registrationYear);
-  const price = toInt(body.totalPriceJpy);
+  // Missing / null / "" → inquire for price (null). Explicit invalid → reject.
+  const pricePresent =
+    Object.prototype.hasOwnProperty.call(body, "totalPriceJpy") &&
+    body.totalPriceJpy !== null &&
+    body.totalPriceJpy !== "";
+  const price = pricePresent ? toInt(body.totalPriceJpy) : null;
   const mileage = toInt(body.mileageKm);
 
   if (!make) missingFields.push("make");
   if (!model) missingFields.push("model");
   if (!description) missingFields.push("description");
   if (year === null) missingFields.push("registrationYear");
-  if (price === null) missingFields.push("totalPriceJpy");
   if (mileage === null) missingFields.push("mileageKm");
 
   if (year !== null && (year < 1980 || year > new Date().getFullYear() + 1)) {
     invalidFields.registrationYear = "Out of allowed range";
   }
-  if (price !== null && price < 0) {
-    invalidFields.totalPriceJpy = "Must be a non-negative integer";
+  if (pricePresent && (price === null || price < 0)) {
+    invalidFields.totalPriceJpy = "Must be a non-negative integer, or omit/null for inquire for price";
   }
   if (mileage !== null && mileage < 0) {
     invalidFields.mileageKm = "Must be a non-negative integer";
@@ -184,7 +189,7 @@ export function validateHermesMetadata(raw: unknown): HermesValidation {
     variant: body.variant ? String(body.variant) : undefined,
     registrationYear: year!,
     registrationMonth: month ?? undefined,
-    totalPriceJpy: price!,
+    totalPriceJpy: price,
     mileageKm: mileage!,
     engineCc: engineCc ?? undefined,
     transmission: transmission || undefined,

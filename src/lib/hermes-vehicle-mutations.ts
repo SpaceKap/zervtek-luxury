@@ -143,9 +143,18 @@ export function buildHermesPatchData(body: Record<string, unknown>): HermesPatch
   }
 
   if (body.totalPriceJpy !== undefined || body.price !== undefined) {
-    const price = toInt(body.totalPriceJpy ?? body.price);
-    if (price === null || price < 0) invalidFields.totalPriceJpy = "Must be a non-negative integer";
-    else data.price = price;
+    const raw = body.totalPriceJpy !== undefined ? body.totalPriceJpy : body.price;
+    if (raw === null || raw === "") {
+      data.price = null;
+    } else {
+      const price = toInt(raw);
+      if (price === null || price < 0) {
+        invalidFields.totalPriceJpy =
+          "Must be a non-negative integer, or null to clear (inquire for price)";
+      } else {
+        data.price = price;
+      }
+    }
   }
 
   if (body.mileageKm !== undefined || body.mileage !== undefined) {

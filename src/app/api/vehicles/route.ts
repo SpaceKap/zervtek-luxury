@@ -34,7 +34,7 @@ function toStrArray(v: unknown): string[] {
 
 function normalizeAdmin(body: Record<string, unknown>) {
   const year = toInt(body.year ?? body.registrationYear) ?? new Date().getFullYear();
-  const price = toInt(body.price ?? body.totalPriceJpy) ?? 0;
+  const price = toInt(body.price ?? body.totalPriceJpy);
   const mileage = toInt(body.mileage ?? body.mileageKm) ?? 0;
 
   const transmission =
