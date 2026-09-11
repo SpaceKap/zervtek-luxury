@@ -1134,9 +1134,8 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--line);
 }
 .vcard-price {
-  --vcard-price-line: calc(22px * 1.2);
-  --vcard-price-sub: calc(12px * 1.2);
-  --vcard-price-gap: 4px;
+  /* Price + note ≈ full-width Inquire button — keep footers same height. */
+  --vcard-footer-h: 2.75rem;
   font-size: 22px;
   font-weight: 700;
   color: var(--gold);
@@ -1145,24 +1144,22 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
-}
-.vcard-price > :first-child {
-  line-height: 1.2;
-  min-height: var(--vcard-price-line);
+  justify-content: center;
+  min-height: var(--vcard-footer-h);
 }
 .vcard-price small {
   display: block;
   font-size: 12px;
   line-height: 1.2;
-  min-height: var(--vcard-price-sub);
   color: var(--muted);
   font-weight: 400;
-  margin-top: var(--vcard-price-gap);
+  margin-top: 4px;
 }
 .vcard-price--inquire {
   color: inherit;
   font-size: inherit;
   font-weight: inherit;
+  justify-content: stretch;
 }
 .vcard-inquire-btn {
   display: inline-flex;
@@ -1171,7 +1168,8 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   align-self: stretch;
   box-sizing: border-box;
   width: 100%;
-  min-height: 2.75rem;
+  flex: 1;
+  min-height: var(--vcard-footer-h);
   padding: 12px 22px;
   border-radius: 8px;
   border: 1px solid var(--ink);
@@ -1238,6 +1236,9 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   text-transform: lowercase;
   margin-bottom: 16px;
 }
+.stock-meta .breadcrumbs {
+  text-transform: none;
+}
 
 /* ---- Breadcrumbs ---- */
 .breadcrumbs {
@@ -1245,6 +1246,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   font-size: 12px;
   letter-spacing: 0.02em;
   color: var(--ink);
+  text-transform: none;
   min-width: 0;
 }
 .breadcrumbs-list {
