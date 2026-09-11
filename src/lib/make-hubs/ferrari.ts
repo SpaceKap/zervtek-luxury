@@ -185,7 +185,7 @@ export const FERRARI_HUB = {
   ],
   closing: {
     title: "Find your Ferrari from Japan",
-    body: "Tell ZervTek which Ferrari you want, your preferred specification and your destination. We can search for the 308, 328, 348, F355, 360 Modena, F430, 458 Italia, Testarossa, 512 TR and F12 Berlinetta in Japan, then help you compare the individual cars that fit your brief.",
+    body: "Tell us the model, spec, and destination — we'll search Japan for you.",
   },
 } as const;
 
