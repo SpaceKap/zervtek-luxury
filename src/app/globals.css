@@ -1134,31 +1134,44 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--line);
 }
 .vcard-price {
-  /* Price + note ≈ full-width Inquire button — keep footers same height. */
-  --vcard-footer-h: 2.75rem;
-  font-size: 22px;
+  /* Lock footer to price + “Plus shipping” stack so Inquire matches. */
+  --vcard-price-size: 22px;
+  --vcard-price-lh: 1.4;
+  --vcard-note-size: 12px;
+  --vcard-note-lh: 1.2;
+  --vcard-note-gap: 4px;
+  --vcard-footer-pad: 10px;
+  --vcard-footer-h: calc(
+    var(--vcard-footer-pad) + (var(--vcard-price-size) * var(--vcard-price-lh)) +
+      var(--vcard-note-gap) + (var(--vcard-note-size) * var(--vcard-note-lh))
+  );
+  box-sizing: border-box;
+  font-size: var(--vcard-price-size);
   font-weight: 700;
+  line-height: var(--vcard-price-lh);
   color: var(--gold);
   margin-top: auto;
-  padding-top: 10px;
+  padding-top: var(--vcard-footer-pad);
   border-top: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   justify-content: center;
+  height: var(--vcard-footer-h);
   min-height: var(--vcard-footer-h);
 }
 .vcard-price small {
   display: block;
-  font-size: 12px;
-  line-height: 1.2;
+  font-size: var(--vcard-note-size);
+  line-height: var(--vcard-note-lh);
   color: var(--muted);
   font-weight: 400;
-  margin-top: 4px;
+  margin-top: var(--vcard-note-gap);
 }
 .vcard-price--inquire {
   color: inherit;
   font-size: inherit;
   font-weight: inherit;
+  line-height: normal;
   justify-content: stretch;
 }
 .vcard-inquire-btn {
@@ -1168,9 +1181,10 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   align-self: stretch;
   box-sizing: border-box;
   width: 100%;
-  flex: 1;
-  min-height: var(--vcard-footer-h);
-  padding: 12px 22px;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  padding: 0 22px;
   border-radius: 8px;
   border: 1px solid var(--ink);
   background: var(--ink);
