@@ -2859,6 +2859,20 @@ select.input optgroup {
   margin-top: 4px;
   word-break: break-all;
 }
+.admin-listing-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.admin-listing-meta span + span::before {
+  content: "·";
+  margin: 0 8px;
+  color: var(--muted);
+}
 .admin-listing-actions {
   display: flex;
   gap: 8px;

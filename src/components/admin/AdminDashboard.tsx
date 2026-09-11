@@ -17,10 +17,11 @@ import {
   STEERINGS,
   SOURCE_TYPES,
 } from "@/lib/vehicle-constants";
-import { digitsOnly, formatDigitsWithCommas } from "@/lib/format";
+import { digitsOnly, formatDigitsWithCommas, formatJPY, formatKm } from "@/lib/format";
 import { joinFeatures } from "@/lib/features";
 import { vehicleStockPath } from "@/lib/slug";
 import { vehicleGridImageUrl } from "@/lib/vehicle-media-url";
+import { INQUIRE_CARD_LABEL } from "@/components/Price";
 import {
   buildVehicleMetaDescription,
   buildVehicleMetaTitle,
@@ -1365,6 +1366,12 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
                   </div>
                   <div className="muted admin-listing-slug">
                     {vehicleStockPath(v.slug)}
+                  </div>
+                  <div className="admin-listing-meta">
+                    <span>{v.price != null ? formatJPY(v.price) : INQUIRE_CARD_LABEL}</span>
+                    <span>{formatKm(v.mileage)}</span>
+                    <span>{v.engineCc != null ? `${v.engineCc.toLocaleString()} cc` : "—"}</span>
+                    <span>{v.steering || "—"}</span>
                   </div>
                 </div>
               </div>
