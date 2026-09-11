@@ -129,18 +129,6 @@ export default async function HomePage() {
             </p>
           </header>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: 28,
-            }}
-          >
-            <Link className="btn btn-outline" href="/stock">
-              View all stock
-            </Link>
-          </div>
-
           {featured.length > 0 ? (
             <>
               <JsonLd data={productListJsonLd(featured)} />
@@ -148,6 +136,17 @@ export default async function HomePage() {
                 {featured.map((v) => (
                   <VehicleCard key={v.id} v={v} listName="home_featured" />
                 ))}
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  marginTop: 28,
+                }}
+              >
+                <Link className="btn btn-gold" href="/stock">
+                  View all stock
+                </Link>
               </div>
             </>
           ) : (
