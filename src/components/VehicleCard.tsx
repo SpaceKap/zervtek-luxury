@@ -23,6 +23,8 @@ export function VehicleCard({
   const img = vehicleGridImageUrl(v.images[0] || "/placeholder.svg");
   const body = displayEnum(v.bodyType, BODY_TYPE_LABELS);
   const transmission = displayEnum(v.transmission, TRANSMISSION_LABELS);
+  const hasPrice = v.price != null;
+
   return (
     <Link
       href={vehicleStockPath(v.slug)}
@@ -54,15 +56,10 @@ export function VehicleCard({
           {body ? <span>{body}</span> : null}
           {transmission ? <span>{transmission}</span> : null}
         </div>
-        <div className={`vcard-price${v.price == null ? " vcard-price--inquire" : ""}`}>
-          {v.price != null ? (
-            <>
-              <Price amount={v.price} />
-              <small>Plus shipping</small>
-            </>
-          ) : (
-            <span className="vcard-inquire-btn">Inquire</span>
-          )}
+        {/* Same footer stack always: primary row + subline. Inquire button replaces price only. */}
+        <div className={`vcard-price${hasPrice ? "" : " vcard-price--inquire"}`}>
+          {hasPrice ? <Price amount={v.price} /> : <span className="vcard-inquire-btn">Inquire</span>}
+          <small>{hasPrice ? "Plus shipping" : "\u00A0"}</small>
         </div>
       </div>
     </Link>

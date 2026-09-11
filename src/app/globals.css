@@ -1044,11 +1044,11 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 26px;
+  align-items: stretch;
 }
 .stock-grid .vcard,
 .vehicle-grid .vcard {
-  content-visibility: auto;
-  contain-intrinsic-size: 320px 420px;
+  min-height: 0;
 }
 .vcard {
   border-radius: 18px;
@@ -1134,38 +1134,50 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   color: var(--line);
 }
 .vcard-price {
+  --vcard-price-line: calc(22px * 1.2);
+  --vcard-price-sub: calc(12px * 1.2);
+  --vcard-price-gap: 4px;
   font-size: 22px;
   font-weight: 700;
   color: var(--gold);
   margin-top: auto;
   padding-top: 10px;
   border-top: 1px solid var(--line);
-  /* Match price + “Plus shipping” stack so Inquire cards share row height. */
-  min-height: 3.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 }
-.vcard-price small { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+.vcard-price > :first-child {
+  line-height: 1.2;
+  min-height: var(--vcard-price-line);
+}
+.vcard-price small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.2;
+  min-height: var(--vcard-price-sub);
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: var(--vcard-price-gap);
+}
 .vcard-price--inquire {
   color: inherit;
   font-size: inherit;
   font-weight: inherit;
-  justify-content: center;
 }
 .vcard-inquire-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: stretch;
   box-sizing: border-box;
-  min-height: 2.75rem;
-  padding: 12px 22px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: var(--vcard-price-line);
+  padding: 0 16px;
   border-radius: 8px;
   border: 1px solid var(--ink);
   background: var(--ink);
   color: #fff;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -1586,6 +1598,7 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
 .stock-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px;
+  align-items: stretch;
 }
 .stock-grid .vcard-media {
   aspect-ratio: 3 / 2;
