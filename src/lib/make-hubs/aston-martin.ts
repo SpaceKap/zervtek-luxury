@@ -6,10 +6,10 @@ import { lookupModelGuide, type MakeModelGuide } from "@/lib/make-hubs/types";
 export const ASTON_MARTIN_HUB = {
   make: "Aston Martin",
   slug: "aston-martin",
-  title: "Best Aston Martin to Buy and Import from Japan",
+  title: "Best Aston Martin to Buy & Import from Japan",
   description:
     "The best Aston Martin to buy and import from Japan — DB5, V8 Vantage, Vanquish, DB9, V12 Vantage, DBS, Rapide, One-77, Valkyrie and DB12. Browse stock or ask ZervTek to source and export.",
-  h1: "Best Aston Martin to Buy",
+  h1: "Best Aston Martin to Buy & Import",
   intro:
     "Aston Martin has always understood that a grand tourer can be more than fast transport. The best cars from Gaydon and Newport Pagnell carry a sense of occasion into every part of the drive. Japan is a useful place to search — classics, modern grand tourers and unusual specifications appear in dealer stock and auctions.",
   lead: [
