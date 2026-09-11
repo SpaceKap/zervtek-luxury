@@ -1092,18 +1092,25 @@ header.navbar .mobile-menu a[href*="whatsapp.com"]:hover {
   border: 1px solid var(--line);
 }
 .vcard-badge.sold { background: var(--crimson); border-color: transparent; color: #fff; }
-.vcard-year {
+.vcard-steer {
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 1;
   padding: 5px 10px;
-  border-radius: 999px;
+  border-radius: 18px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.06em;
-  background: rgba(20, 18, 15, 0.72);
+  line-height: 1.2;
   color: #fff;
-  backdrop-filter: blur(8px);
+  border: 1px solid transparent;
+}
+.vcard-steer.lhd {
+  background: var(--crimson);
+}
+.vcard-steer.rhd {
+  background: #1f7a3a;
 }
 .vcard-body {
   padding: 20px 20px 22px;

@@ -36,6 +36,13 @@ export function VehicleCard({
         {v.status === "RESERVED" && (
           <span className="vcard-badge">Reserved</span>
         )}
+        {v.steering === "LHD" || v.steering === "RHD" ? (
+          <span
+            className={`vcard-steer ${v.steering === "LHD" ? "lhd" : "rhd"}`}
+          >
+            {v.steering}
+          </span>
+        ) : null}
         <img
           src={img}
           alt={`${v.year} ${v.make} ${v.model}${v.variant ? " " + v.variant : ""} for sale`}
@@ -52,6 +59,7 @@ export function VehicleCard({
           {v.variant ? ` ${v.variant}` : ""}
         </div>
         <div className="vcard-meta">
+          <span>{v.year}</span>
           <span>{formatKm(v.mileage)}</span>
           {body ? <span>{body}</span> : null}
           {transmission ? <span>{transmission}</span> : null}
