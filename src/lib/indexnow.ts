@@ -19,11 +19,15 @@ export function indexNowKeyFileName(): string | null {
   return key ? `${key}.txt` : null;
 }
 
-/** Hosted key file (see /indexnow/{key}.txt). */
+/**
+ * Key file at site root (IndexNow option 1).
+ * A key under /indexnow/ only authorizes URLs under /indexnow/ — that caused 422s.
+ */
 export function indexNowKeyLocation(): string | null {
   const key = getIndexNowKey();
   if (!key) return null;
-  return `${SITE.url}/indexnow/${key}.txt`;
+  const base = SITE.url.replace(/\/$/, "");
+  return `${base}/${key}.txt`;
 }
 
 function indexNowHost(): string | null {
@@ -43,6 +47,7 @@ export type IndexNowSubmitResult = {
   ok: boolean;
   status: number;
   submitted: number;
+  detail?: string;
 };
 
 export async function submitIndexNowUrls(urls: string[]): Promise<IndexNowSubmitResult> {
@@ -53,23 +58,43 @@ export async function submitIndexNowUrls(urls: string[]): Promise<IndexNowSubmit
     return { configured: false, ok: false, status: 0, submitted: 0 };
   }
 
-  const unique = [...new Set(urls.map((u) => u.trim()).filter(Boolean))];
+  const base = SITE.url.replace(/\/$/, "");
+  const unique = [
+    ...new Set(
+      urls
+        .map((u) => u.trim())
+        .filter((u) => {
+          try {
+            return new URL(u).hostname === host;
+          } catch {
+            return false;
+          }
+        }),
+    ),
+  ];
   if (unique.length === 0) {
     return { configured: true, ok: true, status: 200, submitted: 0 };
   }
 
-  const urlList = unique.slice(0, 10_000);
+  // Prefer root URLs without trailing slash except for homepage.
+  const urlList = unique
+    .map((u) => (u === `${base}/` ? u : u.replace(/\/$/, "")))
+    .slice(0, 10_000);
+
   const res = await fetch(INDEXNOW_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify({ host, key, keyLocation, urlList }),
   });
 
+  const detail = res.ok ? undefined : (await res.text().catch(() => "")).slice(0, 300);
+
   return {
     configured: true,
-    ok: res.ok,
+    ok: res.ok || res.status === 202,
     status: res.status,
     submitted: urlList.length,
+    detail: detail || undefined,
   };
 }
 

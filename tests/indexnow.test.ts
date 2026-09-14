@@ -18,7 +18,9 @@ describe("getIndexNowKey", () => {
     process.env.INDEXNOW_KEY = "a1b2c3d4e5f67890";
     expect(getIndexNowKey()).toBe("a1b2c3d4e5f67890");
     expect(indexNowKeyFileName()).toBe("a1b2c3d4e5f67890.txt");
-    expect(indexNowKeyLocation()).toContain("/indexnow/a1b2c3d4e5f67890.txt");
+    expect(indexNowKeyLocation()).toBe(
+      "https://performance.zervtek.com/a1b2c3d4e5f67890.txt",
+    );
   });
 
   it("rejects short or invalid keys", () => {
@@ -36,7 +38,7 @@ describe("submitIndexNowUrls", () => {
     process.env.INDEXNOW_KEY = "a1b2c3d4e5f67890";
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: true, status: 200 }),
+      vi.fn().mockResolvedValue({ ok: true, status: 200, text: async () => "" }),
     );
   });
 
@@ -59,7 +61,9 @@ describe("submitIndexNowUrls", () => {
     const payload = JSON.parse(String(init?.body));
     expect(payload.host).toBe("performance.zervtek.com");
     expect(payload.key).toBe("a1b2c3d4e5f67890");
-    expect(payload.keyLocation).toContain("/indexnow/a1b2c3d4e5f67890.txt");
+    expect(payload.keyLocation).toBe(
+      "https://performance.zervtek.com/a1b2c3d4e5f67890.txt",
+    );
     expect(payload.urlList).toEqual(["https://performance.zervtek.com/stock"]);
   });
 });

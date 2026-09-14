@@ -15,6 +15,8 @@ export const config = {
     "/api/vehicles/:path*",
     "/api/upload",
     "/api/admin/:path*",
+    // IndexNow option-1 key at site root: /{key}.txt
+    "/:keyFile.txt",
   ],
 };
 
@@ -53,6 +55,18 @@ function isPublicAdminPath(pathname: string): boolean {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Root *.txt — IndexNow ownership file (never run admin auth on these).
+  if (/^\/[^/]+\.txt$/.test(pathname)) {
+    const match = pathname.match(/^\/([a-zA-Z0-9-]{8,128})\.txt$/);
+    const key = process.env.INDEXNOW_KEY?.trim();
+    if (match && key && match[1] === key) {
+      const url = req.nextUrl.clone();
+      url.pathname = `/indexnow/${key}.txt`;
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
 
   if (isPublicAdminPath(pathname)) {
     return NextResponse.next();

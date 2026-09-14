@@ -51,8 +51,8 @@ Host/systemd Caddy instead: use `reverse_proxy 127.0.0.1:3010` (compose publishe
 
 1. Generate a key: `openssl rand -hex 16`
 2. Add to `.env`: `INDEXNOW_KEY=your_key_here`
-3. After deploy, verify the key file loads:
-   `curl -sS "https://performance.zervtek.com/indexnow/YOUR_KEY.txt"`
+3. After deploy, verify the key file loads at the **site root** (required):
+   `curl -sS "https://performance.zervtek.com/YOUR_KEY.txt"`
    (body must equal the key)
 4. In [Bing Webmaster Tools](https://www.bing.com/webmasters), confirm URLs under **IndexNow** after deploy (each deploy pings all sitemap URLs).
 

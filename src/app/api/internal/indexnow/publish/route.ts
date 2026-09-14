@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       status: result.status,
       submitted: result.submitted,
       keyLocation: indexNowKeyLocation(),
+      detail: result.detail,
     });
   } catch (err) {
     await auditHermes({

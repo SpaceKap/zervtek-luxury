@@ -30,17 +30,33 @@ require_auth_secrets() {
 
 require_auth_secrets
 
+# IndexNow option 1: host {key}.txt at site root (required for whole-site URL submits).
+write_indexnow_key() {
+  key="${INDEXNOW_KEY:-}"
+  case "$key" in
+    ""|*[!a-zA-Z0-9-]*) return 0 ;;
+  esac
+  if [ "${#key}" -lt 8 ] || [ "${#key}" -gt 128 ]; then
+    return 0
+  fi
+  printf '%s' "$key" > "/app/public/${key}.txt"
+  chown nextjs:nodejs "/app/public/${key}.txt" 2>/dev/null || true
+  echo "[luxury] IndexNow key file: /${key}.txt"
+}
+
 # Bind mounts overwrite image ownership — fix so nextjs (uid 1001) can write.
 if [ "$(id -u)" = "0" ]; then
   mkdir -p "$UPLOAD_ROOT" "$ADMIN_UPLOADS"
   chown -R nextjs:nodejs "$UPLOAD_ROOT" "$ADMIN_UPLOADS" || true
   chmod -R u+rwX "$UPLOAD_ROOT" "$ADMIN_UPLOADS" || true
+  write_indexnow_key
   echo "[luxury] Running Prisma migrations…"
   su-exec nextjs npx prisma migrate deploy
   echo "[luxury] Starting Next.js…"
   exec su-exec nextjs "$@"
 fi
 
+write_indexnow_key
 echo "[luxury] Running Prisma migrations…"
 npx prisma migrate deploy
 echo "[luxury] Starting Next.js…"
