@@ -13,6 +13,7 @@ import {
   canHermesDelete,
   canHermesPatch,
 } from "@/lib/hermes-vehicle-mutations";
+import { scheduleIndexNowForVehicle, scheduleIndexNowUrls, vehicleIndexNowUrl } from "@/lib/indexnow";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { recordSlugRedirect } from "@/lib/vehicles";
 
@@ -154,6 +155,8 @@ export async function PATCH(
       detail: Object.keys(patch.data).join(","),
     });
 
+    scheduleIndexNowForVehicle(updated);
+
     return NextResponse.json({
       success: true,
       vehicle: serializeHermesVehicle(updated),
@@ -191,6 +194,7 @@ export async function DELETE(
   }
 
   try {
+    scheduleIndexNowUrls([vehicleIndexNowUrl(existing.slug)]);
     await deleteVehicleById(vehicleId);
     await auditHermes({
       action: "vehicle.delete.ok",

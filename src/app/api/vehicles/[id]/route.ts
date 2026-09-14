@@ -13,6 +13,7 @@ import {
   normalizeEnumValue,
 } from "@/lib/vehicle-constants";
 import { syncVehicleMediaOrder, purgeVehicleImagesNotInUrls } from "@/lib/vehicle-images";
+import { scheduleIndexNowForVehicle, scheduleIndexNowUrls, vehicleIndexNowUrl } from "@/lib/indexnow";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { parseFeatureList } from "@/lib/features";
 import { recordSlugRedirect } from "@/lib/vehicles";
@@ -207,6 +208,7 @@ export async function PATCH(
         await recordSlugRedirect(previousSlug, nextSlug);
       }
     }
+    scheduleIndexNowForVehicle(updated);
     return NextResponse.json({ vehicle: updated });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to update";
@@ -223,6 +225,8 @@ export async function DELETE(
   }
   const { id } = await params;
   try {
+    const existing = await prisma.vehicle.findUnique({ where: { id }, select: { slug: true } });
+    if (existing?.slug) scheduleIndexNowUrls([vehicleIndexNowUrl(existing.slug)]);
     await deleteVehicleById(id);
     return NextResponse.json({ ok: true });
   } catch {

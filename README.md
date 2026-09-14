@@ -60,6 +60,7 @@ Visit `http://localhost:3000`. Admin panel: `http://localhost:3000/admin` (log i
 | `ADMIN_PASSWORD` | Single-admin login password |
 | `SESSION_SECRET` | Secret used to sign the admin session cookie (`openssl rand -hex 32`) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL (used for SEO / schema / sitemap) |
+| `INDEXNOW_KEY` | [IndexNow](https://www.indexnow.org/) key for Bing/Yandex URL submission (`openssl rand -hex 16`) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number (digits only, incl. country code) |
 | `NEXT_PUBLIC_WHATSAPP_MESSAGE` | Default WhatsApp prefill message |
 

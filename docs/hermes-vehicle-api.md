@@ -14,6 +14,7 @@ Internal integration for automated vehicle intake. **Do not use n8n.** Hermes ca
 | `VEHICLE_MAX_IMAGE_SIZE_MB` | Max bytes per image (default `15`) |
 | `DATABASE_URL` | Postgres |
 | `NEXT_PUBLIC_SITE_URL` | Used in `reviewUrl` responses |
+| `INDEXNOW_KEY` | Optional — notifies Bing/Yandex on listing changes; bulk ping: `POST /api/internal/indexnow/publish` |
 
 Also used by Hermes auth: enquiry notify retry at `POST /api/internal/inquiries/notify-retry` (cron every few minutes).
 

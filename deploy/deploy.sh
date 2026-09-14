@@ -102,6 +102,15 @@ remote "set -euo pipefail
     docker compose exec -T app npm run db:seed || true
   fi
 
+  if grep -E '^INDEXNOW_KEY=.{8,}' .env >/dev/null 2>&1; then
+    TOKEN=\$(grep '^HERMES_VEHICLE_API_TOKEN=' .env | head -1 | cut -d= -f2- | tr -d '\"')
+    if [ -n \"\$TOKEN\" ]; then
+      echo 'Pinging IndexNow (sitemap URLs)…'
+      curl -fsS -X POST -H \"Authorization: Bearer \$TOKEN\" http://127.0.0.1:3010/api/internal/indexnow/publish \\
+        || echo 'IndexNow publish failed (non-fatal)'
+    fi
+  fi
+
   # Caddy: Docker container wins (this VPS). Host CLI exists but has no admin API.
   if docker ps --format '{{.Names}}' | grep -qx caddy; then
     echo 'Reloading Docker Caddy…'

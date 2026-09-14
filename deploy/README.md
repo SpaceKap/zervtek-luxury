@@ -47,6 +47,24 @@ docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 
 Host/systemd Caddy instead: use `reverse_proxy 127.0.0.1:3010` (compose publishes that port on localhost).
 
+## IndexNow (Bing / Yandex)
+
+1. Generate a key: `openssl rand -hex 16`
+2. Add to `.env`: `INDEXNOW_KEY=your_key_here`
+3. After deploy, verify the key file loads:
+   `curl -sS "https://performance.zervtek.com/indexnow/YOUR_KEY.txt"`
+   (body must equal the key)
+4. In [Bing Webmaster Tools](https://www.bing.com/webmasters), confirm URLs under **IndexNow** after deploy (each deploy pings all sitemap URLs).
+
+Manual ping:
+
+```bash
+curl -X POST -H "Authorization: Bearer $HERMES_VEHICLE_API_TOKEN" \
+  https://performance.zervtek.com/api/internal/indexnow/publish
+```
+
+Listing publish/update/delete also notifies IndexNow when `INDEXNOW_KEY` is set.
+
 ## Updates
 
 ```bash
