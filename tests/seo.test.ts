@@ -32,6 +32,14 @@ const sampleVehicle = {
 } as const;
 
 describe("seo schema", () => {
+  it("omits offers for inquire (no list price) listings", () => {
+    const schema = productSchema({ ...sampleVehicle, price: null } as never);
+    expect(schema).not.toHaveProperty("offers");
+    const list = productListJsonLd([{ ...sampleVehicle, price: null } as never]);
+    const item = list.itemListElement[0].item as Record<string, unknown>;
+    expect(item).not.toHaveProperty("offers");
+  });
+
   it("uses human-readable vehicle enums", () => {
     const schema = productSchema(sampleVehicle as never);
     expect(schema.bodyType).toBe("Coupe");

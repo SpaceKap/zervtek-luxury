@@ -161,23 +161,10 @@ function offerAvailability(status: string): string {
   return "https://schema.org/InStock";
 }
 
+/** Priced listings only — Google Product snippets require `offers.price` (no POA / inquire). */
 function vehicleOffers(v: ProductVehicle | PublicVehicle, url: string) {
   const price = v.price;
-  if (price == null) {
-    return {
-      "@type": "Offer" as const,
-      url,
-      availability: offerAvailability(v.status),
-      itemCondition: "https://schema.org/UsedCondition",
-      description: "Inquire for price. Shipping to your destination port is quoted separately.",
-      seller: {
-        "@type": "AutoDealer",
-        "@id": `${SITE.url}/#organization`,
-        name: SITE.name,
-        url: SITE.url,
-      },
-    };
-  }
+  if (price == null) return undefined;
   return {
     "@type": "Offer" as const,
     url,
@@ -220,6 +207,7 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
   const transmission = schemaTransmission(v.transmission);
   const configuration = vehicleConfiguration(v);
   const drivetrain = v.drivetrain ? DRIVETRAIN_SCHEMA[v.drivetrain] : undefined;
+  const offers = vehicleOffers(v, url);
 
   return compactJsonLd({
     "@type": ["Product", "Car"] as const,
@@ -260,7 +248,7 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
       unitCode: "KMT",
     },
     itemCondition: "https://schema.org/UsedCondition",
-    offers: vehicleOffers(v, url),
+    ...(offers ? { offers } : {}),
   });
 }
 
@@ -353,6 +341,7 @@ function productListItemSchema(v: ProductVehicle | PublicVehicle) {
   const name = vehicleName(v);
   const url = `${SITE.url}${vehicleStockPath(v.slug)}`;
   const cover = v.images[0] ? absUrl(v.images[0]) : undefined;
+  const offers = vehicleOffers(v, url);
 
   return compactJsonLd({
     "@type": ["Product", "Car"] as const,
@@ -365,7 +354,7 @@ function productListItemSchema(v: ProductVehicle | PublicVehicle) {
     ...(firstRegistrationDate(v)
       ? { dateVehicleFirstRegistered: firstRegistrationDate(v) }
       : {}),
-    offers: vehicleOffers(v, url),
+    ...(offers ? { offers } : {}),
   });
 }
 
