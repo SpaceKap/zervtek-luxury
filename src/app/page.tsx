@@ -77,8 +77,8 @@ export default async function HomePage() {
                   fill
                   priority
                   fetchPriority="high"
-                  quality={70}
-                  sizes="(max-width: 1023px) 100vw, 520px"
+                  quality={65}
+                  sizes="(max-width: 640px) 400px, (max-width: 1023px) 520px, 520px"
                   style={{ objectFit: "cover" }}
                 />
               </figure>

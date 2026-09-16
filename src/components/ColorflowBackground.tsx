@@ -17,14 +17,15 @@ export function ColorflowBackground() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
+    // Mobile: CSS mesh only — Colorflow iframe pulls Three.js (~200KB+) and kills Speed Index / TBT.
+    if (window.matchMedia("(max-width: 720px)").matches) return;
 
     let cancelled = false;
     const enable = () => {
       if (!cancelled) setReady(true);
     };
 
-    const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    const idleTimeoutMs = isMobile ? 5000 : 2500;
+    const idleTimeoutMs = 2500;
 
     const w = window as IdleWindow;
     if (typeof w.requestIdleCallback === "function") {
@@ -35,7 +36,7 @@ export function ColorflowBackground() {
       };
     }
 
-    const t = window.setTimeout(enable, isMobile ? 3500 : 1200);
+    const t = window.setTimeout(enable, 1200);
     return () => {
       cancelled = true;
       window.clearTimeout(t);

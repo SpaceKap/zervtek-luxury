@@ -69,9 +69,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://colorflow-embed.b-cdn.net" />
         {/* Theme-aware favicon (browser uses prefers-color-scheme). */}
         <link rel="icon" href="/favicon-light.png" />
         <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
