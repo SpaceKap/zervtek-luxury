@@ -49,6 +49,7 @@ export function GlobeLive({
   const phiOffsetRef = useRef(0);
   const thetaOffsetRef = useRef(0);
   const isPausedRef = useRef(false);
+  const onScreenRef = useRef(true);
 
   const handlePointerDown = useCallback((e: React.PointerEvent) => {
     pointerInteracting.current = { x: e.clientX, y: e.clientY };
@@ -88,10 +89,12 @@ export function GlobeLive({
     const root = rootRef.current;
     const canvas = canvasRef.current;
     if (!root || !canvas) return;
+    const layoutRoot = root;
 
     let globe: ReturnType<typeof createGlobe> | null = null;
     let animationId = 0;
     let phi = 0;
+    let visibilityObserver: IntersectionObserver | null = null;
     const tagEls = Array.from(
       root.querySelectorAll<HTMLElement>(".globe-port-tag"),
     );
@@ -214,7 +217,7 @@ export function GlobeLive({
         theta: 0.15,
         dark: 0,
         diffuse: 1.4,
-        mapSamples: 14000,
+        mapSamples: 10000,
         mapBrightness: 8,
         baseColor: [0.92, 0.91, 0.88],
         markerColor: [0.72, 0.55, 0.08],
@@ -235,6 +238,10 @@ export function GlobeLive({
       placeOnOuterCircle(tagEls.filter((el) => el.classList.contains("is-on")));
 
       function animate() {
+        if (!onScreenRef.current) {
+          animationId = 0;
+          return;
+        }
         if (!isPausedRef.current) phi += speed;
         globe!.update({
           phi: phi + phiOffsetRef.current + dragOffset.current.phi,
@@ -243,7 +250,26 @@ export function GlobeLive({
         syncFades();
         animationId = requestAnimationFrame(animate);
       }
-      animationId = requestAnimationFrame(animate);
+
+      function startAnimation() {
+        if (animationId) return;
+        animationId = requestAnimationFrame(animate);
+      }
+
+      if (typeof IntersectionObserver !== "undefined") {
+        onScreenRef.current = false;
+        visibilityObserver = new IntersectionObserver(
+          ([entry]) => {
+            onScreenRef.current = entry?.isIntersecting ?? false;
+            if (onScreenRef.current) startAnimation();
+          },
+          { threshold: 0.08 },
+        );
+        visibilityObserver.observe(layoutRoot);
+      } else {
+        onScreenRef.current = true;
+        startAnimation();
+      }
       setTimeout(() => {
         if (canvas) canvas.style.opacity = "1";
       });
@@ -275,6 +301,7 @@ export function GlobeLive({
     }
 
     return () => {
+      visibilityObserver?.disconnect();
       resize.disconnect();
       if (animationId) cancelAnimationFrame(animationId);
       if (globe) globe.destroy();

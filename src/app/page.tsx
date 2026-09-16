@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getHomepageFeaturedGrid } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
-import { InquiryForm } from "@/components/InquiryForm";
+import { InquiryFormLazy } from "@/components/home/InquiryFormLazy";
 import { JsonLd } from "@/components/JsonLd";
 import { HashScroll } from "@/components/HashScroll";
 import { HeroWhatsAppMessage } from "@/components/HeroWhatsAppMessage";
@@ -192,7 +192,7 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="glass inquire-form-panel">
-              <InquiryForm compact formLocation="homepage" />
+              <InquiryFormLazy compact formLocation="homepage" />
             </div>
           </div>
         </section>
