@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 import { allocateUniqueVehicleSlug } from "@/lib/vehicle-slug";
+import { revalidateHomeFeatured } from "@/lib/revalidate-home";
 import {
   BODY_TYPE_VALUES,
   DRIVETRAINS,
@@ -178,6 +179,7 @@ export async function POST(req: NextRequest) {
       where: { id: created.id },
       data: { slug },
     });
+    revalidateHomeFeatured();
     return NextResponse.json({ vehicle: updated }, { status: 201 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to create vehicle";

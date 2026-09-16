@@ -17,6 +17,7 @@ import { scheduleIndexNowForVehicle, scheduleIndexNowUrls, vehicleIndexNowUrl } 
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { parseFeatureList } from "@/lib/features";
 import { recordSlugRedirect } from "@/lib/vehicles";
+import { revalidateHomeFeatured } from "@/lib/revalidate-home";
 
 function toInt(v: unknown): number | null | undefined {
   if (v === undefined) return undefined;
@@ -209,6 +210,7 @@ export async function PATCH(
       }
     }
     scheduleIndexNowForVehicle(updated);
+    revalidateHomeFeatured();
     return NextResponse.json({ vehicle: updated });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to update";
@@ -228,6 +230,7 @@ export async function DELETE(
     const existing = await prisma.vehicle.findUnique({ where: { id }, select: { slug: true } });
     if (existing?.slug) scheduleIndexNowUrls([vehicleIndexNowUrl(existing.slug)]);
     await deleteVehicleById(id);
+    revalidateHomeFeatured();
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });

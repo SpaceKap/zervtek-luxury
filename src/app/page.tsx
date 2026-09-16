@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getFeaturedVehicles } from "@/lib/vehicles";
+import { getHomepageFeaturedGrid } from "@/lib/vehicles";
 import { VehicleCard } from "@/components/VehicleCard";
 import { InquiryForm } from "@/components/InquiryForm";
 import { JsonLd } from "@/components/JsonLd";
@@ -12,8 +12,8 @@ import { COMPANY_PROFILE, SITE } from "@/lib/site";
 
 export const revalidate = 60;
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=75";
+/** Same-origin hero — faster LCP than remote Unsplash via `/_next/image`. */
+const HERO_IMAGE = "/images/hero-home.jpg";
 
 const STEPS = [
   {
@@ -44,7 +44,7 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const featured = await getFeaturedVehicles(6);
+  const featured = await getHomepageFeaturedGrid(6);
 
   return (
       <main>
@@ -180,37 +180,20 @@ export default async function HomePage() {
 
         {/* Inquiry */}
         <section className="section container" id="inquire">
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 48,
-              alignItems: "start",
-            }}
-            className="inquire-grid"
-          >
-            <div>
+          <div className="inquire-grid">
+            <div className="inquire-copy">
               <span className="eyebrow">Enquire</span>
-              <h2
-                className="heading"
-                style={{
-                  fontSize: "clamp(24px,3vw,34px)",
-                  margin: "10px 0 18px",
-                }}
-              >
-                Find your next vehicle
-              </h2>
-              <p className="muted" style={{ lineHeight: 1.7, maxWidth: 460 }}>
+              <h2 className="heading inquire-title">Find your next vehicle</h2>
+              <p className="muted inquire-lead">
                 Tell us what you&apos;re looking for and our team will source
                 the perfect car for you. Every enquiry is handled personally,
                 with no call centres and no pressure.
               </p>
             </div>
-            <div className="glass" style={{ padding: 28, borderRadius: 16 }}>
+            <div className="glass inquire-form-panel">
               <InquiryForm compact formLocation="homepage" />
             </div>
           </div>
-          <style>{`@media (max-width: 820px){ .inquire-grid{ grid-template-columns: 1fr !important; } }`}</style>
         </section>
       </main>
   );

@@ -17,24 +17,25 @@ export function ColorflowBackground() {
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
-    // Skip heavy decorative iframe on narrow phones.
-    if (window.matchMedia("(max-width: 720px)").matches) return;
 
     let cancelled = false;
     const enable = () => {
       if (!cancelled) setReady(true);
     };
 
+    const isMobile = window.matchMedia("(max-width: 720px)").matches;
+    const idleTimeoutMs = isMobile ? 5000 : 2500;
+
     const w = window as IdleWindow;
     if (typeof w.requestIdleCallback === "function") {
-      const id = w.requestIdleCallback(enable, { timeout: 2500 });
+      const id = w.requestIdleCallback(enable, { timeout: idleTimeoutMs });
       return () => {
         cancelled = true;
         w.cancelIdleCallback?.(id);
       };
     }
 
-    const t = window.setTimeout(enable, 1200);
+    const t = window.setTimeout(enable, isMobile ? 3500 : 1200);
     return () => {
       cancelled = true;
       window.clearTimeout(t);

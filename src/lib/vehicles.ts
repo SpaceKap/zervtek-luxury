@@ -148,36 +148,52 @@ export async function searchVehicles(
   }
 }
 
-/** Homepage featured grid — daily sample without loading every available row. */
-export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicleCard[]> {
-  return getFeaturedVehiclesCached(limit);
+async function loadFeaturedVehicles(limit: number): Promise<PublicVehicleCard[]> {
+  const ids = await prisma.vehicle.findMany({
+    where: { status: { in: [...ACTIVE_LISTING_STATUSES] } },
+    select: { id: true },
+    orderBy: { id: "asc" },
+  });
+  const picked = pickDailyItems(ids, limit);
+  if (picked.length === 0) return [];
+  const rows = await prisma.vehicle.findMany({
+    where: { id: { in: picked.map((p) => p.id) } },
+  });
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return picked
+    .map((p) => byId.get(p.id))
+    .filter((v): v is Vehicle => Boolean(v))
+    .map(toPublicVehicleCard);
 }
 
 const getFeaturedVehiclesCached = unstable_cache(
   async (limit: number) => {
     try {
-      const ids = await prisma.vehicle.findMany({
-        where: { status: "AVAILABLE" },
-        select: { id: true },
-        orderBy: { id: "asc" },
-      });
-      const picked = pickDailyItems(ids, limit);
-      if (picked.length === 0) return [];
-      const rows = await prisma.vehicle.findMany({
-        where: { id: { in: picked.map((p) => p.id) } },
-      });
-      const byId = new Map(rows.map((r) => [r.id, r]));
-      return picked
-        .map((p) => byId.get(p.id))
-        .filter((v): v is Vehicle => Boolean(v))
-        .map(toPublicVehicleCard);
-    } catch {
-      return [];
+      return await loadFeaturedVehicles(limit);
+    } catch (err) {
+      rethrowDb("getFeaturedVehicles", err);
     }
   },
   ["featured-vehicles"],
-  { revalidate: 60 },
+  { revalidate: 60, tags: ["featured-vehicles"] },
 );
+
+/** Homepage featured grid — daily sample without loading every available row. */
+export async function getFeaturedVehicles(limit = 4): Promise<PublicVehicleCard[]> {
+  return getFeaturedVehiclesCached(limit);
+}
+
+/** Featured grid with fallback to newest stock when cache/rotation is empty. */
+export async function getHomepageFeaturedGrid(limit = 6): Promise<PublicVehicleCard[]> {
+  try {
+    const featured = await getFeaturedVehicles(limit);
+    if (featured.length > 0) return featured;
+    const { items } = await searchVehicles({ sort: "newest" }, 1, limit);
+    return items;
+  } catch (err) {
+    rethrowDb("getHomepageFeaturedGrid", err);
+  }
+}
 
 /** Public detail — null when not publicly listable. */
 export async function getVehicleBySlug(slug: string): Promise<PublicVehicle | null> {

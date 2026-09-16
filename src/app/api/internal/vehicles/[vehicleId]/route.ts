@@ -14,6 +14,7 @@ import {
   canHermesPatch,
 } from "@/lib/hermes-vehicle-mutations";
 import { scheduleIndexNowForVehicle, scheduleIndexNowUrls, vehicleIndexNowUrl } from "@/lib/indexnow";
+import { revalidateHomeFeatured } from "@/lib/revalidate-home";
 import { deleteVehicleById } from "@/lib/vehicle-delete";
 import { recordSlugRedirect } from "@/lib/vehicles";
 
@@ -156,6 +157,7 @@ export async function PATCH(
     });
 
     scheduleIndexNowForVehicle(updated);
+    revalidateHomeFeatured();
 
     return NextResponse.json({
       success: true,
@@ -196,6 +198,7 @@ export async function DELETE(
   try {
     scheduleIndexNowUrls([vehicleIndexNowUrl(existing.slug)]);
     await deleteVehicleById(vehicleId);
+    revalidateHomeFeatured();
     await auditHermes({
       action: "vehicle.delete.ok",
       ip,
