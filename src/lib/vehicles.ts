@@ -171,7 +171,9 @@ const getFeaturedVehiclesCached = unstable_cache(
     try {
       return await loadFeaturedVehicles(limit);
     } catch (err) {
-      rethrowDb("getFeaturedVehicles", err);
+      // Docker `next build` has no Postgres; empty grid beats a failed deploy.
+      console.error("[getFeaturedVehicles]", err);
+      return [];
     }
   },
   ["featured-vehicles"],
@@ -191,7 +193,8 @@ export async function getHomepageFeaturedGrid(limit = 6): Promise<PublicVehicleC
     const { items } = await searchVehicles({ sort: "newest" }, 1, limit);
     return items;
   } catch (err) {
-    rethrowDb("getHomepageFeaturedGrid", err);
+    console.error("[getHomepageFeaturedGrid]", err);
+    return [];
   }
 }
 

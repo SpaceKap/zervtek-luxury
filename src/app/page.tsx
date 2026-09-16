@@ -10,7 +10,8 @@ import { HomePortsGlobeLazy } from "@/components/home/HomePortsGlobeLazy";
 import { productListJsonLd } from "@/lib/seo";
 import { COMPANY_PROFILE, SITE } from "@/lib/site";
 
-export const revalidate = 60;
+/** Stock-backed featured grid — skip build-time prerender (no DB in Docker build). */
+export const dynamic = "force-dynamic";
 
 /** Same-origin hero — faster LCP than remote Unsplash via `/_next/image`. */
 const HERO_IMAGE = "/images/hero-home.jpg";
