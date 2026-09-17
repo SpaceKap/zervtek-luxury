@@ -137,6 +137,7 @@ export async function collectIndexNowSitemapUrls(): Promise<string[]> {
   urls.push(
     `${SITE.url}/stock/ferrari`,
     `${SITE.url}/stock/aston-martin`,
+    `${SITE.url}/stock/bentley`,
     `${SITE.url}/stock/lamborghini`,
     `${SITE.url}/stock/mclaren`,
     `${SITE.url}/about`,

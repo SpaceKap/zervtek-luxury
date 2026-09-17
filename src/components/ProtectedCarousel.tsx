@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { vehicleGridImageUrl } from "@/lib/vehicle-media-url";
+import { vehicleThumbImageUrl } from "@/lib/vehicle-media-url";
 
 type Props = {
   images: string[];
@@ -171,7 +171,7 @@ export function ProtectedCarousel({ images, alt }: Props) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={vehicleGridImageUrl(src)}
+                src={vehicleThumbImageUrl(src)}
                 alt=""
                 loading="lazy"
                 decoding="async"

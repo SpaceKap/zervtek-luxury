@@ -20,7 +20,7 @@ import {
 import { digitsOnly, formatDigitsWithCommas, formatJPY, formatKm } from "@/lib/format";
 import { joinFeatures } from "@/lib/features";
 import { vehicleStockPath } from "@/lib/slug";
-import { vehicleGridImageUrl } from "@/lib/vehicle-media-url";
+import { vehicleThumbImageUrl } from "@/lib/vehicle-media-url";
 import { INQUIRE_CARD_LABEL } from "@/components/Price";
 import {
   buildVehicleMetaDescription,
@@ -1329,7 +1329,7 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
         {list.map((v) => {
           const colors = statusColor(v.status);
           const cover = v.images?.[0]
-            ? vehicleGridImageUrl(v.images[0])
+            ? vehicleThumbImageUrl(v.images[0])
             : "/placeholder.svg";
           return (
             <div
