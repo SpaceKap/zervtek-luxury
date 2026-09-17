@@ -6,10 +6,10 @@ import { lookupModelGuide, type MakeModelGuide } from "@/lib/make-hubs/types";
 export const FERRARI_HUB = {
   make: "Ferrari",
   slug: "ferrari",
-  title: "Best Ferraris to Buy and Import from Japan",
+  title: "Best Ferraris to Buy & Import from Japan",
   description:
     "The best Ferrari to buy and import from Japan — 308, 328, F355, 360 Modena, 458 Italia, Testarossa, 512 TR and F12 Berlinetta. Browse stock or ask ZervTek to source and export.",
-  h1: "Best Ferraris to Buy and Import",
+  h1: "Best Ferraris to Buy & Import",
   intro:
     "Ferrari has never been particularly interested in making one perfect car. It makes different kinds of fast cars, then gives each one a shape, a soundtrack and a slightly unreasonable sense of occasion. Japan is a useful place to search — classic and modern Ferraris appear in dealer stock and auctions across a wide range of specifications.",
   lead: [
@@ -185,7 +185,7 @@ export const FERRARI_HUB = {
   ],
   closing: {
     title: "Find your Ferrari from Japan",
-    body: "Tell us the model, spec, and destination — we'll search Japan for you.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

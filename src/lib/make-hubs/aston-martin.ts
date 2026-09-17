@@ -224,7 +224,7 @@ export const ASTON_MARTIN_HUB = {
   ],
   closing: {
     title: "Find your Aston Martin from Japan",
-    body: "Tell us the model, spec, and destination — we'll search Japan for you.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

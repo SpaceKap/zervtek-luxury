@@ -9,7 +9,7 @@ export const BENTLEY_HUB = {
   title: "Best Bentley to Buy & Import from Japan",
   description:
     "The best Bentley to buy and import from Japan — Turbo R, Arnage, Continental GT, Flying Spur, Mulsanne and Bentayga. Browse stock or ask ZervTek to source and export.",
-  h1: "Best Bentley to Buy",
+  h1: "Best Bentley to Buy & Import",
   intro:
     "A Bentley should make a long journey feel shorter, not turn every journey into a performance test. Choose between traditional saloons, Continental grand tourers, the Mulsanne, Flying Spur or Bentayga — Japan is a useful place to search.",
   lead: [
@@ -238,7 +238,7 @@ export const BENTLEY_HUB = {
   ],
   closing: {
     title: "Find your Bentley from Japan",
-    body: "Tell ZervTek which Bentley interests you, your preferred engine, steering position, exterior and interior colors, mileage range and destination. Whether you want the traditional character of an Arnage, the balance of a Continental GT V8, the refinement of a Mulsanne or the versatility of a Bentayga, the aim is the same: find the individual car that delivers the Bentley experience you actually want.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

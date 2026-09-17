@@ -6,10 +6,10 @@ import { lookupModelGuide, type MakeModelGuide } from "@/lib/make-hubs/types";
 export const PORSCHE_HUB = {
   make: "Porsche",
   slug: "porsche",
-  title: "Five Porsches Worth Searching for in Japan",
+  title: "Best Porsche to Buy & Import from Japan",
   description:
-    "A focused guide to four defining 911 generations and the 987 Cayman and Boxster, with practical inspection and sourcing advice from ZervTek.",
-  h1: "Five Porsches worth searching for in Japan",
+    "The best Porsche to buy and import from Japan — 993, 997, 991 and 992 911s plus the 987 Cayman and Boxster. Browse stock or ask ZervTek to source and export.",
+  h1: "Best Porsche to Buy & Import",
   intro:
     "The 911 has survived by changing carefully. A 993 does not feel like a 997, and a 997 does not feel like a 992 — Japan is a useful place to search across those generations and the mid-engine 987 twins.",
   lead: [
@@ -17,7 +17,7 @@ export const PORSCHE_HUB = {
     "Calling every one of these cars simply a 911 flattens the story. A 993 does not feel like a 997, and a 997 does not feel like a 992. Each generation has its own rhythm and its own idea of what a Porsche should be. This guide focuses on four that make that evolution clear, then steps away from the 911 for one mid-engine alternative that may be the more honest driver's car.",
   ],
   shortAnswer: {
-    title: "Which one belongs in your garage?",
+    title: "The short answer",
     paragraphs: [
       "Choose by temperament, not hierarchy. The 993 is the most intimate and historic. The 997 is the clearest bridge between old and new. The 991 has the breadth of a serious touring car without losing its ability to entertain. The 992 is the fullest expression of the modern 911. The 987 twins step outside the family script and remind you that balance can matter more than lineage.",
       "Then narrow the brief. Coupe or open roof. Manual or two-pedal transmission. Quiet Carrera or sharper derivative. Steering position, color, intended use and tolerance for age all matter. The right answer is personal, which is exactly why a shorter list is more useful than a catalogue.",
@@ -113,12 +113,13 @@ export const PORSCHE_HUB = {
     },
   ],
   howToChoose: {
-    title: "Condition is part of the character",
+    title: "How to choose your Porsche from Japan",
     paragraphs: [
+      "Start with temperament, not hierarchy. The 993 is the most intimate and historic. The 997 is the clearest bridge between old and new. The 991 has touring breadth without losing entertainment. The 992 is the fullest modern 911. The 987 Cayman and Boxster are often the more honest driver's cars when balance matters more than lineage.",
+      "Then narrow the brief. Coupe or open roof. Manual or two-pedal transmission. Quiet Carrera or sharper derivative. Steering position, color, intended use and tolerance for age all matter.",
       "A Porsche with a great specification can still be the wrong car. Confirm the chassis identity, manufacture details, engine, transmission and factory equipment. Read the service history as a timeline. Gaps, repeated faults and sudden bursts of work before sale all deserve questions.",
       "Inspect from cold, scan every control unit and drive the car long enough to reach operating temperature. Look underneath. Measure paint. Check tire dates and wear patterns. On performance variants, review over-rev data and signs of track use. The inspector should know the exact generation because each one hides its age in different places.",
-      "ZervTek works in Japan for buyers who want more than a forwarded sales sheet. We can refine the brief, compare suitable cars, visit the vehicle, take additional photographs and video, review the documents and coordinate the purchase and export process.",
-      "Once a car is chosen, ZervTek can arrange transport to the departure port and organize roll-on/roll-off or container shipping. Buyers should confirm their local import, inspection, registration and insurance requirements before purchase.",
+      "ZervTek can visit a Porsche in Japan in person, obtain additional photographs and videos, ask the dealer questions supplied by the customer, review available maintenance records and Japanese registration history, and coordinate purchase, export paperwork, inland transport and insured RoRo or container shipping. Confirm local import, inspection, registration and insurance requirements before purchase.",
     ],
   },
   faqs: [
@@ -141,7 +142,7 @@ export const PORSCHE_HUB = {
   ],
   closing: {
     title: "Find your Porsche from Japan",
-    body: "Tell us the generation, body style, transmission and destination — we'll search Japan for you.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

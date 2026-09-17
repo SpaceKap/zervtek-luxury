@@ -9,7 +9,7 @@ export const LOTUS_HUB = {
   title: "Best Lotus to Buy & Import from Japan",
   description:
     "The best Lotus cars to buy and import from Japan, from the Elan and Esprit to the Elise, Exige, Evora and Emira, with practical model comparisons and buying advice.",
-  h1: "Best Lotus to Buy",
+  h1: "Best Lotus to Buy & Import",
   intro:
     "A good Lotus makes you notice the road again — not because it overwhelms you with power, but because the steering, pedals and chassis give you something meaningful to do. Japan is a useful place to search from Elan and Esprit through Elise, Exige, Evora and Emira.",
   lead: [
@@ -243,7 +243,7 @@ export const LOTUS_HUB = {
   ],
   closing: {
     title: "Find your Lotus from Japan",
-    body: "Tell ZervTek which Lotus interests you, your preferred engine and transmission, steering position, color, mileage range and destination. Whether you want the simplicity of an Elise, the intensity of an Exige, the comfort of an Evora or the character of an Esprit, the aim is to find a car whose condition supports the experience you are buying it for.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

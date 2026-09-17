@@ -9,7 +9,7 @@ export const ROLLS_ROYCE_HUB = {
   title: "Best Rolls-Royce to Buy & Import from Japan",
   description:
     "The best Rolls-Royce cars to buy and import from Japan, from the Silver Shadow and Silver Spirit to the Ghost, Phantom, Wraith, Dawn and Cullinan, with model comparisons and buyer guidance.",
-  h1: "Best Rolls-Royce to Buy",
+  h1: "Best Rolls-Royce to Buy & Import",
   intro:
     "A Rolls-Royce is meant to make an ordinary journey feel like an unusual one. Choose between classic Shadows and Spirits, modern Ghost and Phantom saloons, Wraith, Dawn or Cullinan — Japan is a useful place to search.",
   lead: [
@@ -239,7 +239,7 @@ export const ROLLS_ROYCE_HUB = {
   ],
   closing: {
     title: "Find your Rolls-Royce from Japan",
-    body: "Tell ZervTek which Rolls-Royce interests you, your preferred model year, interior and exterior configuration, mileage range and destination. Whether you want the elegant proportions of a Silver Cloud, the usability of a Silver Spirit, the modern refinement of a Ghost or the imposing presence of a Phantom, the aim is to find a car whose character and condition match the experience you want.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 

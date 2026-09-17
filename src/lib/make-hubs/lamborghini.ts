@@ -228,7 +228,7 @@ export const LAMBORGHINI_HUB = {
   ],
   closing: {
     title: "Find your Lamborghini from Japan",
-    body: "Tell us the model, spec, and destination — we'll search Japan for you.",
+    body: "Tell us the model, spec, and destination. We'll search Japan for you.",
   },
 } as const;
 
