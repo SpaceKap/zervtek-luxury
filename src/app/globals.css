@@ -2912,6 +2912,31 @@ select.input optgroup {
   margin-bottom: 28px;
 }
 
+.admin-listings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.admin-listings-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 280px;
+  max-width: 440px;
+  margin-left: auto;
+}
+.admin-listings-search .input {
+  width: 100%;
+  min-width: 0;
+}
+.admin-listings-search-clear {
+  flex-shrink: 0;
+  padding: 8px 12px;
+}
+
 .admin-listing-row {
   padding: 12px 16px;
   border-radius: 0;

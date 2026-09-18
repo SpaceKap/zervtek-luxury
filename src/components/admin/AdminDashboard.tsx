@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import type { Vehicle } from "@prisma/client";
 import { MAKES, MAKE_MODELS, EXTERIOR_COLORS, INTERIOR_COLORS, PREFECTURES } from "@/lib/site";
 import {
@@ -22,6 +22,7 @@ import { joinFeatures } from "@/lib/features";
 import { vehicleStockPath } from "@/lib/slug";
 import { vehicleThumbImageUrl } from "@/lib/vehicle-media-url";
 import { INQUIRE_CARD_LABEL } from "@/components/Price";
+import { filterVehiclesBySearch } from "@/lib/admin-listing-search";
 import {
   buildVehicleMetaDescription,
   buildVehicleMetaTitle,
@@ -205,6 +206,9 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autosaveMsg, setAutosaveMsg] = useState<string | null>(null);
   const [list, setList] = useState<Vehicle[]>([]);
+  const [listQuery, setListQuery] = useState("");
+  const deferredListQuery = useDeferredValue(listQuery);
+  const filteredList = filterVehiclesBySearch(list, deferredListQuery);
   const formSectionRef = useRef<HTMLFormElement>(null);
   const actionBarRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1322,11 +1326,36 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
       </form>
 
       {/* Existing */}
-      <h2 className="heading" style={{ fontSize: 24 }}>
-        Listings ({list.length})
-      </h2>
+      <div className="admin-listings-head">
+        <h2 className="heading" style={{ fontSize: 24, margin: 0 }}>
+          Listings ({filteredList.length}
+          {listQuery.trim() ? ` of ${list.length}` : ""})
+        </h2>
+        <div className="admin-listings-search">
+          <input
+            id="admin-listings-search"
+            className="input"
+            type="search"
+            value={listQuery}
+            onChange={(e) => setListQuery(e.target.value)}
+            placeholder="Search make, model, description, tags…"
+            aria-label="Search listings"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          {listQuery ? (
+            <button
+              type="button"
+              className="btn btn-outline admin-listings-search-clear"
+              onClick={() => setListQuery("")}
+            >
+              Clear
+            </button>
+          ) : null}
+        </div>
+      </div>
       <div className="stack" style={{ gap: 10, marginTop: 16 }}>
-        {list.map((v) => {
+        {filteredList.map((v) => {
           const colors = statusColor(v.status);
           const cover = v.images?.[0]
             ? vehicleThumbImageUrl(v.images[0])
@@ -1396,6 +1425,9 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
           );
         })}
         {list.length === 0 ? <p className="muted">No vehicles yet.</p> : null}
+        {list.length > 0 && filteredList.length === 0 ? (
+          <p className="muted">No listings match “{listQuery.trim()}”.</p>
+        ) : null}
       </div>
     </main>
   );
