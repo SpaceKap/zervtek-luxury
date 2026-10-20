@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SsgoiProvider } from "./ssgoi-provider";
 import { ColorflowBackground } from "@/components/ColorflowBackground";
 import { CurrencyProvider } from "@/components/CurrencyProvider";
+import { GoogleTagManager } from "@/components/GoogleTagManager";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE } from "@/lib/site";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
@@ -75,17 +75,6 @@ export default async function RootLayout({
         <link rel="icon" href="/favicon-dark.png" media="(prefers-color-scheme: dark)" />
       </head>
       <body style={{ fontFamily: "var(--font-sans), system-ui, sans-serif" }}>
-        {GTM_ID ? (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager"
-            />
-          </noscript>
-        ) : null}
         <ColorflowBackground />
         <CurrencyProvider fx={fx}>
           <div className="app-shell">
@@ -96,15 +85,7 @@ export default async function RootLayout({
         </CurrencyProvider>
         <JsonLd data={organizationJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
-        {GTM_ID ? (
-          <Script id="gtm-base" strategy="lazyOnload">
-            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','${GTM_ID}');`}
-          </Script>
-        ) : null}
+        {GTM_ID ? <GoogleTagManager gtmId={GTM_ID} /> : null}
       </body>
     </html>
   );

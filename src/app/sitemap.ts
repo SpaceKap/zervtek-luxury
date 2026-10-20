@@ -40,6 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE.url}/stock/mclaren`, changeFrequency: "weekly", priority: 0.85 },
     { url: `${SITE.url}/stock/porsche`, changeFrequency: "weekly", priority: 0.85 },
     { url: `${SITE.url}/stock/rolls-royce`, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE.url}/stock/mercedes-amg`, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE.url}/stock/mercedes-benz`, changeFrequency: "weekly", priority: 0.85 },
     { url: `${SITE.url}/about`, changeFrequency: "monthly", priority: 0.6 },
   ];
 

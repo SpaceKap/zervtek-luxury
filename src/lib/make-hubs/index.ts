@@ -4,6 +4,8 @@ import { getFerrariModelGuide } from "@/lib/make-hubs/ferrari";
 import { getLamborghiniModelGuide } from "@/lib/make-hubs/lamborghini";
 import { getLotusModelGuide } from "@/lib/make-hubs/lotus";
 import { getMcLarenModelGuide } from "@/lib/make-hubs/mclaren";
+import { getMercedesAmgModelGuide } from "@/lib/make-hubs/mercedes-amg";
+import { getMercedesBenzModelGuide } from "@/lib/make-hubs/mercedes-benz";
 import { getPorscheModelGuide } from "@/lib/make-hubs/porsche";
 import { getRollsRoyceModelGuide } from "@/lib/make-hubs/rolls-royce";
 import type { MakeModelGuide } from "@/lib/make-hubs/types";
@@ -16,6 +18,8 @@ export function getMakeModelGuide(make: string, model: string): MakeModelGuide |
   if (make === "Lamborghini") return getLamborghiniModelGuide(model);
   if (make === "Lotus") return getLotusModelGuide(model);
   if (make === "McLaren") return getMcLarenModelGuide(model);
+  if (make === "Mercedes-AMG") return getMercedesAmgModelGuide(model);
+  if (make === "Mercedes-Benz") return getMercedesBenzModelGuide(model);
   if (make === "Porsche") return getPorscheModelGuide(model);
   if (make === "Rolls-Royce") return getRollsRoyceModelGuide(model);
   return null;

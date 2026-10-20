@@ -143,6 +143,8 @@ export async function collectIndexNowSitemapUrls(): Promise<string[]> {
     `${SITE.url}/stock/mclaren`,
     `${SITE.url}/stock/porsche`,
     `${SITE.url}/stock/rolls-royce`,
+    `${SITE.url}/stock/mercedes-amg`,
+    `${SITE.url}/stock/mercedes-benz`,
     `${SITE.url}/about`,
   );
 
