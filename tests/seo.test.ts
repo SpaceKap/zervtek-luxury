@@ -3,6 +3,7 @@ import {
   blogArticleJsonLd,
   compactJsonLd,
   organizationJsonLd,
+  productJsonLd,
   productListJsonLd,
   productSchema,
   websiteJsonLd,
@@ -32,12 +33,16 @@ const sampleVehicle = {
 } as const;
 
 describe("seo schema", () => {
-  it("omits offers for inquire (no list price) listings", () => {
+  it("skips Product schema for inquire (no list price) listings", () => {
     const schema = productSchema({ ...sampleVehicle, price: null } as never);
     expect(schema).not.toHaveProperty("offers");
-    const list = productListJsonLd([{ ...sampleVehicle, price: null } as never]);
-    const item = list.itemListElement[0].item as Record<string, unknown>;
-    expect(item).not.toHaveProperty("offers");
+    expect(productJsonLd({ ...sampleVehicle, price: null } as never)).toBeNull();
+    const list = productListJsonLd([
+      sampleVehicle as never,
+      { ...sampleVehicle, id: "poa1", price: null } as never,
+    ]);
+    expect(list.numberOfItems).toBe(1);
+    expect(list.itemListElement[0].item).toHaveProperty("offers.price", "20000000");
   });
 
   it("uses human-readable vehicle enums", () => {

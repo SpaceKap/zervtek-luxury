@@ -1,5 +1,6 @@
 import type { Vehicle } from "@prisma/client";
 import type { PublicVehicle, PublicVehicleCard } from "./vehicle-public";
+import { descriptionToPlainText } from "./description-markdown";
 import { formatJPY, formatKm } from "./format";
 import { SITE } from "./site";
 import { vehicleStockPath } from "./slug";
@@ -125,7 +126,7 @@ export function buildVehicleMetaTitle(v: VehicleSeoInput): string {
 
 /** Meta description from SEO description, with a compact fallback. */
 export function buildVehicleMetaDescription(v: VehicleSeoInput): string {
-  const fromDesc = String(v.description ?? "").trim().replace(/\s+/g, " ");
+  const fromDesc = descriptionToPlainText(v.description);
   if (fromDesc) {
     if (fromDesc.length <= 160) return fromDesc;
     const cut = fromDesc.slice(0, 157).replace(/\s+\S*$/, "");
@@ -213,7 +214,7 @@ export function productSchema(v: ProductVehicle | PublicVehicle) {
     "@type": ["Product", "Car"] as const,
     "@id": `${url}#product`,
     name,
-    description: v.description,
+    description: descriptionToPlainText(v.description) || undefined,
     image: images.length > 0 ? images : undefined,
     url,
     sku: v.id,
@@ -323,8 +324,12 @@ export function faqJsonLd(faqs: { q: string; a: string }[]) {
   };
 }
 
-/** Product schema for a single vehicle detail page. */
+/**
+ * Product schema for a single vehicle detail page.
+ * Null for inquire-only listings: Google requires offers (with price) on Product.
+ */
 export function productJsonLd(v: ProductVehicle | PublicVehicle) {
+  if (v.price == null) return null;
   return compactJsonLd({
     "@context": "https://schema.org",
     ...productSchema(v),
@@ -358,9 +363,9 @@ function productListItemSchema(v: ProductVehicle | PublicVehicle) {
   });
 }
 
-/** ItemList of Product schemas for stock / featured grids (excludes sold listings). */
+/** ItemList of Product schemas for stock / featured grids (excludes sold and inquire-only listings). */
 export function productListJsonLd(vehicles: Array<ProductVehicle | PublicVehicle | PublicVehicleCard>) {
-  const listed = vehicles.filter((v) => v.status !== "SOLD");
+  const listed = vehicles.filter((v) => v.status !== "SOLD" && v.price != null);
   return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "ItemList",

@@ -15,6 +15,7 @@ import { DetailQuickActions } from "@/components/DetailQuickActions";
 import { InquiryForm } from "@/components/InquiryForm";
 import { ViewItemTracker } from "@/components/ViewItemTracker";
 import { JsonLd } from "@/components/JsonLd";
+import { RichDescription } from "@/components/RichDescription";
 import {
   breadcrumbJsonLd,
   productJsonLd,
@@ -296,9 +297,11 @@ async function renderVehicleDetail(path: string[]) {
     { name: gradeLabel, url: abs },
   ];
 
+  const productLd = productJsonLd(v);
+
   return (
     <main className="container" style={{ paddingBlock: 40 }}>
-      <JsonLd data={productJsonLd(v)} />
+      {productLd ? <JsonLd data={productLd} /> : null}
       <JsonLd data={breadcrumbJsonLd(jsonLdCrumbs)} />
       <ViewItemTracker
         vehicle={{
@@ -413,9 +416,7 @@ async function renderVehicleDetail(path: string[]) {
         <h2 className="heading" style={{ fontSize: 26, marginBottom: 16 }}>
           About this {v.make} {v.model}
         </h2>
-        <p style={{ lineHeight: 1.85, whiteSpace: "pre-line", maxWidth: 820 }} className="muted">
-          {v.description}
-        </p>
+        <RichDescription source={v.description} className="muted" />
       </section>
 
       {v.features.length > 0 ? (

@@ -23,6 +23,7 @@ import { vehicleStockPath } from "@/lib/slug";
 import { vehicleThumbImageUrl } from "@/lib/vehicle-media-url";
 import { INQUIRE_CARD_LABEL } from "@/components/Price";
 import { filterVehiclesBySearch } from "@/lib/admin-listing-search";
+import { DescriptionEditor } from "@/components/admin/DescriptionEditor";
 import {
   buildVehicleMetaDescription,
   buildVehicleMetaTitle,
@@ -941,13 +942,11 @@ export function AdminDashboard({ initialVehicleId }: { initialVehicleId?: string
         </h3>
         <div className="field">
           <label>Description * (used for SEO; be descriptive)</label>
-          <textarea
-            className="textarea"
+          <DescriptionEditor
             value={form.description}
-            onChange={(e) => set("description", e.target.value)}
+            onChange={(next) => set("description", next)}
             required
             placeholder="Describe condition, history, options, driving character..."
-            style={{ minHeight: 140 }}
           />
           {fieldError("description")}
         </div>

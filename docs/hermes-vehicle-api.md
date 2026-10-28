@@ -96,6 +96,26 @@ Always starts as `NEEDS_REVIEW`. Fee breakdown fields are rejected; use `totalPr
 
 Re-uploading the same Carsensor/dealer listing is blocked when `sourceListingId` already exists (returns `duplicate: true` with the existing `vehicleId`).
 
+#### Description formatting (Markdown)
+
+`description` is rendered as Markdown on the listing page (meta description and JSON-LD use a stripped plain-text version). Send it as one JSON string with `\n` line breaks.
+
+| Write | Renders as |
+|---|---|
+| `## Section title` (own line) | Section heading |
+| `**bold**` | Bold |
+| `*italic*` | Italic |
+| `- item` (one per line) | Bullet list |
+| `1. item` | Numbered list |
+| `[text](https://…)` | Link (http/https only) |
+| Blank line | New paragraph |
+
+Use `## ` only at the start of a line for section titles; use `**…**` for bold inside a sentence. Raw HTML is shown as text, not rendered.
+
+```json
+"description": "A 2023 Jaguar F-Pace SVR in black with 8,000 km.\n\n## Vehicle specification\n\n- First registration: 2023\n- Mileage: 8,000 km\n\n## Why this car is worth considering\n\nThe **supercharged V8** is the point of this car."
+```
+
 ### List vehicles
 
 ```bash
